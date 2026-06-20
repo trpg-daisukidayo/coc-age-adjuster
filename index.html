@@ -302,7 +302,7 @@ textarea:focus { outline: none; border-color: var(--accent); }
 
   <!-- ヘッダー -->
   <div class="hdr">
-    <div class="hdr-deco">― 調査者記録簿 ―</div>
+    <div class="hdr-deco">― 探索者記録簿 ―</div>
     <h1>年齢補正ツール</h1>
     <div class="hdr-sub">新クトゥルフ神話TRPG 第7版対応</div>
   </div>
@@ -343,7 +343,7 @@ textarea:focus { outline: none; border-color: var(--accent); }
       <div id="charName" class="hidden" style="font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.65rem;"></div>
 
       <div class="age-block">
-        <div class="age-label">調査者の年齢</div>
+        <div class="age-label">探索者の年齢</div>
         <div class="age-row">
           <input type="number" class="age-input" id="ageInp" min="1" max="99" value="21" oninput="onAgeChange()">
           <span class="age-badge" id="ageBadge">20〜39歳</span>
@@ -380,8 +380,11 @@ textarea:focus { outline: none; border-color: var(--accent); }
       </div>
     </div>
     <div id="rollLogWrap" class="hidden" style="position:relative;margin-top:.8rem;">
-      <div id="rollLog" class="log" style="margin-top:0;padding-right:5rem;"></div>
-      <button onclick="copyLog()" style="position:absolute;top:.4rem;right:.4rem;background:transparent;border:1px solid var(--border);color:var(--ink-light);padding:.2rem .6rem;font-family:inherit;font-size:.68rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'" id="copyLogBtn">📋 コピー</button>
+      <div id="rollLog" class="log" style="margin-top:0;padding-right:8rem;"></div>
+      <div style="position:absolute;top:.4rem;right:.4rem;display:flex;gap:.3rem;">
+        <button onclick="refreshLog()" style="background:transparent;border:1px solid var(--border);color:var(--ink-light);padding:.2rem .6rem;font-family:inherit;font-size:.68rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'" id="refreshLogBtn">↺ 更新</button>
+        <button onclick="copyLog()" style="background:transparent;border:1px solid var(--border);color:var(--ink-light);padding:.2rem .6rem;font-family:inherit;font-size:.68rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'" id="copyLogBtn">📋 コピー</button>
+      </div>
     </div>
     <hr class="divider">
   </div>
@@ -498,7 +501,7 @@ function loadChar(){
 
   /* 名前表示 */
   const nd = document.getElementById('charName');
-  nd.textContent = '調査者：' + charName;
+  nd.textContent = '探索者：' + charName;
   nd.classList.remove('hidden');
 
   /* 年齢セット */
@@ -518,6 +521,7 @@ function loadChar(){
   document.getElementById('diceColEdu').style.display = '';
   document.getElementById('diceColLuc').style.display = '';
   document.getElementById('diceColPen').style.display = '';
+  logData.length=0;
   document.getElementById('rollLog').innerHTML = '';
   document.getElementById('rollLogWrap').classList.add('hidden');
 }
@@ -601,6 +605,7 @@ function startCorrection(){
   document.getElementById('diceColEdu').style.display = '';
   document.getElementById('diceColLuc').style.display = '';
   document.getElementById('diceColPen').style.display = '';
+  logData.length=0;
   document.getElementById('rollLog').innerHTML = '';
   document.getElementById('rollLogWrap').classList.add('hidden');
   runFlow(g);
@@ -614,6 +619,7 @@ function redoRoll(){
   document.getElementById('diceColEdu').style.display = '';
   document.getElementById('diceColLuc').style.display = '';
   document.getElementById('diceColPen').style.display = '';
+  logData.length=0;
   document.getElementById('rollLog').innerHTML = '';
   document.getElementById('rollLogWrap').classList.add('hidden');
   work = Object.assign({}, orig);
@@ -624,10 +630,26 @@ function redoRoll(){
 const r100 = ()=>Math.floor(Math.random()*100)+1;
 const r10  = ()=>Math.floor(Math.random()*10)+1;
 
-function addLog(msg, cls=''){
+const logData = []; // {msg, cls, key} の配列
+
+function addLog(msg, cls='', key=''){
+  // key があれば同じキーのエントリを上書き、なければ追加
+  if(key){
+    const idx = logData.findIndex(e=>e.key===key);
+    if(idx>=0){ logData[idx]={msg,cls,key}; }
+    else { logData.push({msg,cls,key}); }
+  } else {
+    logData.push({msg,cls,key});
+  }
+  renderLog();
+}
+
+function renderLog(){
   const log = document.getElementById('rollLog');
   document.getElementById('rollLogWrap').classList.remove('hidden');
-  log.innerHTML += `<div${cls?' class="'+cls+'"':''}>${msg}</div>`;
+  log.innerHTML = logData.map(e=>
+    `<div${e.cls?' class="'+e.cls+'"':''}>${e.msg}</div>`
+  ).join('');
   log.scrollTop = log.scrollHeight;
 }
 
@@ -639,6 +661,13 @@ function copyLog(){
     btn.textContent='✓ コピー済み';
     setTimeout(()=>btn.textContent='📋 コピー', 2000);
   });
+}
+
+function refreshLog(){
+  renderLog();
+  const btn=document.getElementById('refreshLogBtn');
+  btn.textContent='✓ 更新';
+  setTimeout(()=>btn.textContent='↺ 更新', 1200);
 }
 
 async function animDice(el, val, faces=100){
@@ -891,9 +920,16 @@ function applyStrSiz(){
       work['STR']=s0-dec.STR;
       work['SIZ']=sz0-dec.SIZ;
 
+      // adjSecが表示中なら即時更新
+      if(!document.getElementById('adjSec').classList.contains('hidden')){
+        renderAdjTable(); updatePreviewAfter(); renderFinal();
+      }
+
+      // ログをリアルタイム更新（keyで上書き）
+      addLog(`STR:${s0}→${work['STR']}　SIZ:${sz0}→${work['SIZ']}（STR+SIZ合計-${TOTAL}）`,'li','ss_stat');
+
       if(left===0 && !resolved){
         resolved=true;
-        addLog(`STR:${s0}→${work['STR']}　SIZ:${sz0}→${work['SIZ']}（STR+SIZ合計-${TOTAL}）`,'li');
         resolve();
       }
     }
@@ -1016,6 +1052,14 @@ function applyPenalty(total,appPen){
       work['CON']=c0-dec.CON;
       work['DEX']=d0-dec.DEX;
 
+      // adjSecが表示中なら即時更新
+      if(!document.getElementById('adjSec').classList.contains('hidden')){
+        renderAdjTable(); updatePreviewAfter(); renderFinal();
+      }
+
+      // ログをリアルタイム更新（keyで上書き）
+      addLog(`STR:${s0}→${work['STR']}　CON:${c0}→${work['CON']}　DEX:${d0}→${work['DEX']}`,'li','pen_stat');
+
       // 配分が完了したら自動でresolve（1回だけ）
       if(left===0 && !resolved){ resolved=true; resolve(); }
 
@@ -1036,7 +1080,7 @@ function applyPenalty(total,appPen){
       // ログは配分完了時のみ（毎回は流さない）
       if(left===0 && resolved && addLog._penLogged!==resolved){
         addLog._penLogged=resolved;
-        addLog(`STR:${s0}→${work['STR']}　CON:${c0}→${work['CON']}　DEX:${d0}→${work['DEX']}`,'li');
+        addLog(`STR:${s0}→${work['STR']}　CON:${c0}→${work['CON']}　DEX:${d0}→${work['DEX']}`,'li','pen_stat');
       }
     }
     refresh();
@@ -1075,7 +1119,7 @@ async function runFlow(g){
 /* ===== 調整テーブル（いあきゃら形式） ===== */
 function showAdj(){
   document.getElementById('adjSec').classList.remove('hidden');
-  renderAdjTable(true);
+  renderAdjTable();
   updatePreviewAfter();
   renderFinal();
 }
