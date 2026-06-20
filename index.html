@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CoC7 年齢補正ツール</title>
+<style>
+:root {
+  --parchment: #f5f0e8;
+  --parchment-dark: #e8dfc8;
+  --ink: #2c1a0e;
+  --ink-mid: #5a3820;
+  --ink-light: #8a6040;
+  --accent: #8b2020;
+  --gold: #b8860b;
+  --gold-light: #d4a820;
+  --green: #2a6020;
+  --border: #9a7050;
+  --dice-face: #f0e8d0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1a0f08;
+  font-family: 'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.page {
+  background: var(--parchment);
+  background-image:
+    radial-gradient(ellipse at 18% 25%, rgba(160,120,60,.13) 0%, transparent 50%),
+    radial-gradient(ellipse at 82% 75%, rgba(100,60,20,.10) 0%, transparent 50%);
+  max-width: 900px;
+  width: 100%;
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 0 50px rgba(0,0,0,.65), inset 0 0 80px rgba(180,140,80,.07);
+  padding: 2.5rem 3rem;
+  position: relative;
+}
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(154,112,80,.3);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* ── ヘッダー ── */
+.hdr { text-align: center; margin-bottom: 2.2rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--border); }
+.hdr-deco { color: var(--accent); font-size: .9rem; letter-spacing: .55em; opacity: .65; margin-bottom: .4rem; }
+.hdr h1 { font-size: 1.85rem; color: var(--ink); font-weight: 700; letter-spacing: .12em; }
+.hdr-sub { font-size: .8rem; color: var(--ink-light); letter-spacing: .18em; margin-top: .3rem; }
+
+/* ── セクション見出し ── */
+.sh {
+  font-size: .72rem; letter-spacing: .35em; color: var(--accent);
+  margin-bottom: .75rem; display: flex; align-items: center; gap: .7rem;
+}
+.sh::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border), transparent); }
+
+/* ── 2カラムレイアウト ── */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; margin-bottom: 2rem; }
+.col { }
+
+/* ── ファイルドロップ ── */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 4px;
+  padding: 1.6rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background: rgba(255,255,255,.22);
+  margin-bottom: .75rem;
+}
+.drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: rgba(139,32,32,.04); }
+.drop-zone.ok { border-style: solid; border-color: var(--gold); }
+.drop-zone input { display: none; }
+.drop-icon { font-size: 1.7rem; opacity: .45; margin-bottom: .3rem; }
+.drop-main { font-size: .85rem; color: var(--ink-mid); }
+.drop-sub  { font-size: .72rem; color: var(--ink-light); margin-top: .15rem; }
+
+.or-line { text-align: center; font-size: .72rem; color: var(--ink-light); margin: .55rem 0; position: relative; }
+.or-line::before, .or-line::after {
+  content: ''; position: absolute; top: 50%; height: 1px; background: var(--border); width: 38%;
+}
+.or-line::before { left: 0; } .or-line::after { right: 0; }
+
+textarea {
+  width: 100%; min-height: 108px;
+  background: rgba(255,255,255,.38); border: 1px solid var(--border);
+  border-radius: 3px; padding: .75rem;
+  font-family: inherit; font-size: .76rem; color: var(--ink); resize: vertical; line-height: 1.55;
+}
+textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ── 年齢入力 ── */
+.age-block { margin-bottom: .9rem; }
+.age-label { font-size: .78rem; color: var(--ink-mid); margin-bottom: .4rem; }
+.age-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+.age-input {
+  width: 70px; background: rgba(255,255,255,.5); border: 1px solid var(--border);
+  border-radius: 3px; padding: .38rem .5rem; font-family: inherit;
+  font-size: 1.05rem; color: var(--ink); text-align: center;
+}
+.age-input:focus { outline: none; border-color: var(--accent); }
+.age-badge {
+  font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
+  border: 1px solid var(--border); border-radius: 20px; padding: .16rem .7rem;
+}
+.rule-box {
+  font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: 3px; padding: .5rem .75rem; line-height: 1.65; margin-top: .65rem;
+}
+
+/* ── ボタン ── */
+.btn-primary {
+  background: var(--accent); color: #f5f0e8; border: none;
+  padding: .58rem 1.4rem; font-family: inherit; font-size: .86rem;
+  letter-spacing: .1em; border-radius: 3px; cursor: pointer; transition: background .18s;
+  margin-top: .75rem;
+}
+.btn-primary:hover { background: #c04040; }
+.btn-primary:disabled { opacity: .38; cursor: default; }
+.btn-gold {
+  background: var(--gold); color: #1a0f08; border: none;
+  padding: .58rem 1.4rem; font-family: inherit; font-size: .86rem;
+  letter-spacing: .1em; border-radius: 3px; cursor: pointer; font-weight: 700; transition: background .18s;
+}
+.btn-gold:hover { background: var(--gold-light); }
+.btn-ghost {
+  background: var(--ink-mid); color: #f5f0e8; border: none;
+  padding: .55rem 1.1rem; font-family: inherit; font-size: .84rem;
+  border-radius: 3px; cursor: pointer; transition: background .18s;
+}
+.btn-ghost:hover { background: var(--ink); }
+.btn-sm {
+  background: transparent; border: 1px solid var(--border); color: var(--ink-mid);
+  padding: .35rem .9rem; font-family: inherit; font-size: .75rem;
+  border-radius: 3px; cursor: pointer; transition: border-color .18s, color .18s;
+}
+.btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+
+.btn-row { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-top: .6rem; }
+
+.err { color: var(--accent); font-size: .76rem; margin-top: .35rem; }
+
+/* ── 能力値グリッド ── */
+.stat-grid {
+  display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .9rem;
+}
+.stat-card {
+  background: rgba(255,255,255,.42); border: 1px solid var(--border);
+  border-radius: 3px; padding: .28rem .45rem;
+  display: flex; align-items: center; gap: .4rem; min-width: 0;
+}
+.stat-card.changed { background: rgba(184,134,11,.12); border-color: var(--gold); }
+.stat-card.dimmed  { opacity: .55; }
+.sc-name { font-size: .65rem; color: var(--ink-light); white-space: nowrap; }
+.sc-base { display: none; }
+.sc-val  { font-size: .95rem; font-weight: 700; color: var(--ink); line-height: 1; }
+.sc-diff { font-size: .68rem; }
+.neg { color: var(--accent); font-weight: 700; }
+.pos { color: var(--green); font-weight: 700; }
+
+/* ── ダイスエリア ── */
+.dice-area {
+  background: rgba(26,15,8,.055); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1.2rem; margin-bottom: 1.2rem;
+}
+.dice-step-label {
+  font-size: .78rem; color: var(--accent); font-weight: 700;
+  letter-spacing: .1em; margin-bottom: .75rem;
+}
+.dice-row { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
+.dice {
+  width: 48px; height: 48px; background: var(--dice-face);
+  border: 2px solid var(--ink-mid); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; font-weight: 900; color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink-mid);
+}
+@keyframes dr {
+  0%{transform:rotate(0deg) scale(1);}20%{transform:rotate(-15deg) scale(1.1);}
+  40%{transform:rotate(20deg) scale(.95);}60%{transform:rotate(-10deg) scale(1.05);}
+  80%{transform:rotate(5deg) scale(.98);}100%{transform:rotate(0deg) scale(1);}
+}
+.dice.rolling { animation: dr .5s ease-out; }
+.dice-label { font-size: .74rem; color: var(--ink-light); }
+.dice-result { font-size: .82rem; color: var(--ink-mid); line-height: 1.6; }
+.roll-btn {
+  background: rgba(184,134,11,.13); border: 1px solid var(--gold); color: var(--gold);
+  padding: .45rem 1rem; font-family: inherit; font-size: .8rem;
+  border-radius: 3px; cursor: pointer; letter-spacing: .1em; transition: background .18s;
+}
+.roll-btn:hover { background: rgba(184,134,11,.26); }
+.roll-btn:disabled { opacity: .38; cursor: default; }
+
+/* ── 配分UI ── */
+.pen-row { display: flex; gap: .9rem; flex-wrap: wrap; align-items: flex-end; margin-bottom: .55rem; }
+.pen-cell { text-align: center; }
+.pen-lbl { font-size: .68rem; color: var(--ink-light); margin-bottom: 2px; }
+.pen-inp {
+  width: 54px; background: rgba(255,255,255,.6); border: 1px solid rgba(154,112,80,.5);
+  border-radius: 2px; padding: 2px 4px; font-family: inherit;
+  font-size: .95rem; font-weight: 700; color: var(--ink); text-align: center;
+}
+.pen-inp:focus { outline: none; border-color: var(--accent); }
+
+/* ── ログ ── */
+.log {
+  background: rgba(26,15,8,.045); border: 1px solid rgba(154,112,80,.35);
+  border-radius: 3px; padding: .65rem .8rem; font-size: .72rem; color: var(--ink-mid);
+  line-height: 1.8; max-height: 140px; overflow-y: auto; margin-top: .8rem;
+}
+.lg { color: var(--green); font-weight: 700; }
+.li { color: var(--accent); font-weight: 700; }
+
+/* ── いあきゃら形式 調整テーブル ── */
+.ia-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-bottom: .5rem; table-layout: fixed; }
+.ia-table th {
+  background: var(--parchment-dark); border: 1px solid var(--border);
+  padding: .35rem .2rem; text-align: center; font-weight: 700;
+  color: var(--ink-mid); font-size: .72rem; letter-spacing: .04em;
+}
+.ia-table th.row-head { width: 3.8em; text-align: left; padding-left: .5rem; }
+.ia-table td {
+  border: 1px solid rgba(154,112,80,.38); padding: .3rem .2rem;
+  text-align: center; color: var(--ink); font-size: .88rem;
+}
+.ia-table td.row-head {
+  background: var(--parchment-dark); font-size: .72rem; font-weight: 700;
+  color: var(--ink-mid); text-align: left; padding-left: .5rem;
+}
+.ia-table tr:nth-child(even) td:not(.row-head) { background: rgba(255,255,255,.2); }
+.ia-table td.changed { background: rgba(184,134,11,.15); color: var(--ink); font-weight: 700; }
+.ia-table td.neg-val { background: rgba(139,32,32,.1); color: var(--accent); font-weight: 700; }
+.ia-table td.pos-val { background: rgba(42,96,32,.1); color: var(--green); font-weight: 700; }
+/* 現在値行：インライン編集 */
+.ia-edit {
+  width: 100%; background: transparent; border: none;
+  font-family: inherit; font-size: .88rem; font-weight: 700;
+  color: var(--ink); text-align: center; cursor: text;
+  padding: 0;
+}
+.ia-edit:focus { outline: 1px solid var(--accent); border-radius: 2px; background: rgba(255,255,255,.7); }
+
+/* ── 最終シート ── */
+.final-sheet {
+  background: rgba(255,255,255,.3); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1.3rem;
+}
+.fs-name { font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+.fs-meta { font-size: .72rem; color: var(--ink-light); letter-spacing: .1em; margin-bottom: .9rem; margin-top: .1rem; }
+.fs-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: .38rem; margin-bottom: .75rem; }
+.fs-stat {
+  text-align: center; background: var(--parchment); border: 1px solid var(--border);
+  border-radius: 3px; padding: .45rem .2rem;
+}
+.fs-stat-name { font-size: .58rem; letter-spacing: .06em; color: var(--ink-light); }
+.fs-stat-val  { font-size: 1.3rem; font-weight: 900; color: var(--ink); line-height: 1; }
+.fs-stat-half { font-size: .6rem; color: var(--ink-mid); }
+.chips { display: flex; gap: .38rem; flex-wrap: wrap; }
+.chip {
+  font-size: .72rem; background: var(--parchment-dark);
+  border: 1px solid var(--border); border-radius: 2px; padding: .14rem .5rem; color: var(--ink-mid);
+}
+.chip strong { color: var(--ink); }
+
+/* ── ダイス2カラム ── */
+.dice-cols {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem; margin-bottom: .5rem;
+}
+.dice-col { min-width: 0; }
+.dice-col-head {
+  font-size: .72rem; letter-spacing: .2em; color: var(--ink-light);
+  margin-bottom: .5rem;
+}
+.dice-cols:has(.dice-col:only-child) { grid-template-columns: 1fr; }
+@media(max-width:700px){ .dice-cols { grid-template-columns: 1fr; } }
+
+/* ── 区切り線 ── */
+.divider { border: none; border-top: 1px solid rgba(154,112,80,.4); margin: 1.8rem 0; }
+
+.hidden { display: none !important; }
+
+@media(max-width: 640px) {
+  .page { padding: 1.4rem 1.1rem; }
+  .cols { grid-template-columns: 1fr; gap: 1.2rem; }
+  .stat-grid, .fs-grid { grid-template-columns: repeat(4,1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="hdr">
+    <div class="hdr-deco">― 調査者記録簿 ―</div>
+    <h1>年齢補正ツール</h1>
+    <div class="hdr-sub">新クトゥルフ神話TRPG 第7版対応</div>
+  </div>
+
+  <!-- テキスト出力の説明 -->
+  <div style="background:rgba(184,134,11,.08);border:1px solid rgba(184,134,11,.3);border-left:3px solid var(--gold);border-radius:3px;padding:.7rem 1rem;margin-bottom:1.8rem;font-size:.8rem;color:var(--ink-mid);line-height:1.9;">
+    <div style="font-weight:700;color:var(--ink);margin-bottom:.3rem;">📋 いあきゃらからのデータ出力方法</div>
+    キャラクターページの <strong>「キャラ出力」</strong> をクリック
+    　→　<strong>「ファイルに出力」</strong> タブを選択
+    　→　<strong>「テキスト出力」</strong> をクリックしてダウンロード
+  </div>
+
+  <!-- ① 入力エリア（左右2カラム） -->
+  <div class="cols">
+    <!-- 左：ファイル読み込み -->
+    <div class="col">
+      <div class="sh">キャラクターデータ</div>
+
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fi').click()">
+        <input type="file" id="fi" accept=".txt,text/plain">
+        <div class="drop-icon">📄</div>
+        <div class="drop-main" id="dropMain">ファイルをドロップ / クリックして選択</div>
+        <div class="drop-sub" id="dropSub">いあきゃら .txt 出力ファイル</div>
+      </div>
+
+      <div class="or-line">または 直接貼り付け</div>
+
+      <textarea id="rawText" placeholder="いあきゃらのテキスト出力をここに貼り付け（貼り付けると自動で読み込まれます）" oninput="autoLoad()"></textarea>
+      <div id="parseErr" class="err hidden"></div>
+
+
+    </div>
+
+    <!-- 右：年齢設定 -->
+    <div class="col">
+      <div class="sh">年齢と補正ルール</div>
+
+      <div id="charName" class="hidden" style="font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:.65rem;"></div>
+
+      <div class="age-block">
+        <div class="age-label">調査者の年齢</div>
+        <div class="age-row">
+          <input type="number" class="age-input" id="ageInp" min="1" max="99" value="21" oninput="onAgeChange()">
+          <span class="age-badge" id="ageBadge">20〜39歳</span>
+        </div>
+        <div class="rule-box" id="ruleBox"></div>
+      </div>
+
+      <button class="btn-gold" id="startBtn" onclick="startCorrection()" disabled>▶ 年齢補正を開始する</button>
+    </div>
+  </div>
+
+  <!-- ② 補正前の能力値プレビュー -->
+  <div id="previewSec" class="hidden">
+    <div style="font-size:.7rem;letter-spacing:.2em;color:var(--ink-light);margin-bottom:.4rem;">補正前の能力値</div>
+    <div class="stat-grid" id="previewGrid"></div>
+    <hr class="divider">
+  </div>
+
+  <!-- ③ ダイスロールエリア -->
+  <div id="diceSec" class="hidden">
+    <div class="sh">年齢補正ロール</div>
+    <div class="dice-cols">
+      <div class="dice-col" id="diceColEdu">
+        <div class="dice-col-head">EDU 上達チェック</div>
+        <div class="dice-area"><div id="diceEdu"></div></div>
+      </div>
+      <div class="dice-col" id="diceColLuc">
+        <div class="dice-col-head">幸運</div>
+        <div class="dice-area"><div id="diceLuc"></div></div>
+      </div>
+      <div class="dice-col" id="diceColPen">
+        <div class="dice-col-head">身体能力の減少</div>
+        <div class="dice-area"><div id="dicePen"></div></div>
+      </div>
+    </div>
+    <div id="rollLogWrap" class="hidden" style="position:relative;margin-top:.8rem;">
+      <div id="rollLog" class="log" style="margin-top:0;padding-right:5rem;"></div>
+      <button onclick="copyLog()" style="position:absolute;top:.4rem;right:.4rem;background:transparent;border:1px solid var(--border);color:var(--ink-light);padding:.2rem .6rem;font-family:inherit;font-size:.68rem;border-radius:2px;cursor:pointer;transition:border-color .15s,color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--ink-light)'" id="copyLogBtn">📋 コピー</button>
+    </div>
+    <hr class="divider">
+  </div>
+
+  <!-- ④ 補正結果 -->
+  <div id="adjSec" class="hidden">
+    <div class="sh">補正後ステータス</div>
+    <div id="adjTable"></div>
+    <div id="finalSheet"></div>
+    <div class="btn-row" style="margin-top:.9rem;">
+      <button class="btn-sm" onclick="copyText()">📋 テキストをコピー</button>
+      <button class="btn-ghost" onclick="redoRoll()">↺ ロールをやり直す</button>
+      <button class="btn-ghost" onclick="resetAll()">新しいキャラクターを読み込む</button>
+    </div>
+    <hr class="divider">
+  </div>
+
+</div><!-- /page -->
+
+<script>
+const KEYS   = ['STR','CON','POW','DEX','APP','SIZ','INT','EDU'];
+const JP     = {STR:'筋力',CON:'体力',POW:'意志力',DEX:'敏捷',APP:'外見',SIZ:'体格',INT:'知性',EDU:'教育',LUC:'幸運'};
+const GROUPS = {
+  '15-19':{label:'15〜19歳', rule:'STRとSIZの合計から5点減少、EDUから5点減少。\n幸運は2回ロールして大きい方を採用。'},
+  '20-39':{label:'20〜39歳', rule:'EDUの上達チェックを1回行なう。'},
+  '40-49':{label:'40〜49歳', rule:'EDUの上達チェックを2回行ない、STR・CON・DEXから合計5点減少。APPを5点減少。'},
+  '50-59':{label:'50〜59歳', rule:'EDUの上達チェックを3回行ない、STR・CON・DEXから合計10点減少。APPを10点減少。'},
+  '60-69':{label:'60〜69歳', rule:'EDUの上達チェックを4回行ない、STR・CON・DEXから合計20点減少。APPを15点減少。'},
+  '70-79':{label:'70〜79歳', rule:'EDUの上達チェックを4回行ない、STR・CON・DEXから合計40点減少。APPを20点減少。'},
+  '80-89':{label:'80〜89歳', rule:'EDUの上達チェックを4回行ない、STR・CON・DEXから合計80点減少。APPを25点減少。'},
+};
+const EDU_CHK  = {'20-39':1,'40-49':2,'50-59':3,'60-69':4,'70-79':4,'80-89':4};
+const STAT_PEN = {'40-49':5,'50-59':10,'60-69':20,'70-79':40,'80-89':80};
+const APP_PEN  = {'40-49':5,'50-59':10,'60-69':15,'70-79':20,'80-89':25};
+
+let orig = {};    // 補正前（能力値列）
+let work = {};    // 作業中
+let charName = '';
+let charAge  = 21;
+
+/* ===== ファイル読み込み ===== */
+const dz = document.getElementById('dropZone');
+const fi = document.getElementById('fi');
+dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('over');});
+dz.addEventListener('dragleave', ()=>dz.classList.remove('over'));
+dz.addEventListener('drop', e=>{
+  e.preventDefault(); dz.classList.remove('over');
+  const f = e.dataTransfer.files[0]; if(f) readFile(f);
+});
+fi.addEventListener('change', e=>{ const f=e.target.files[0]; if(f) readFile(f); });
+
+function readFile(f){
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('rawText').value = ev.target.result;
+    document.getElementById('dropMain').textContent = '✓ ' + f.name;
+    document.getElementById('dropSub').textContent  = 'ファイルを読み込みました';
+    dz.classList.add('ok');
+    loadChar();
+  };
+  r.readAsText(f, 'UTF-8');
+}
+
+let autoTimer = null;
+function autoLoad(){
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(()=>{ if(document.getElementById('rawText').value.trim()) loadChar(); }, 600);
+}
+
+/* ===== パース ===== */
+function loadChar(){
+  const text = document.getElementById('rawText').value;
+  const err  = document.getElementById('parseErr');
+  err.classList.add('hidden');
+  const res  = {name:'不明', age:0, stats:{}, luck:0};
+
+  /* 名前 */
+  const nm = text.match(/名前[：:　\s]+([^\n\r\/]+)/);
+  if(nm) res.name = nm[1].replace(/\s*[\(（][^)）]*[\)）]/g,'').trim();
+
+  /* 年齢 */
+  const am = text.match(/年齢[：:\s]+(\d+)/);
+  if(am) res.age = parseInt(am[1]);
+
+  /* いあきゃら【能力値】ブロック → 「能力値」列（3列目）を取得 */
+  const blk = text.match(/【能力値】([\s\S]*?)(?:【|$)/);
+  if(blk){
+    for(const line of blk[1].split('\n')){
+      const m = line.match(/^(STR|CON|POW|DEX|APP|SIZ|INT|EDU)\s+(\d+)\s+(\d+)/i);
+      if(m) res.stats[m[1].toUpperCase()] = parseInt(m[3]);
+      const lm = line.match(/^幸運\s+(\d+)\s+(\d+)/);
+      if(lm) res.luck = parseInt(lm[2]);
+    }
+  }
+  /* フォールバック */
+  if(Object.keys(res.stats).length < 4){
+    for(const k of KEYS){
+      const m = text.match(new RegExp(k+'[：:　\\s]+(\\d+)','i'));
+      if(m) res.stats[k] = parseInt(m[1]);
+    }
+    const lm = text.match(/(?:幸運|LUC)[：:　\s]+(\d+)/i);
+    if(lm) res.luck = parseInt(lm[1]);
+  }
+  if(Object.keys(res.stats).length < 4){
+    err.textContent = '能力値を4つ以上取得できませんでした。いあきゃらのテキスト出力ファイルをご確認ください。';
+    err.classList.remove('hidden');
+    return;
+  }
+
+  charName = res.name;
+  charAge  = res.age || 21;
+  orig     = Object.assign({}, res.stats);
+  if(res.luck) orig['LUC'] = res.luck;
+
+  /* 名前表示 */
+  const nd = document.getElementById('charName');
+  nd.textContent = '調査者：' + charName;
+  nd.classList.remove('hidden');
+
+  /* 年齢セット */
+  document.getElementById('ageInp').value = charAge;
+  onAgeChange();
+  document.getElementById('startBtn').disabled = false;
+
+  /* プレビュー */
+  renderPreview();
+  document.getElementById('previewSec').classList.remove('hidden');
+
+  /* 下のセクションをリセット */
+  ['diceSec','adjSec'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+  document.getElementById('diceEdu').innerHTML = '';
+  document.getElementById('diceLuc').innerHTML = '';
+  document.getElementById('dicePen').innerHTML = '';
+  document.getElementById('diceColEdu').style.display = '';
+  document.getElementById('diceColLuc').style.display = '';
+  document.getElementById('diceColPen').style.display = '';
+  document.getElementById('rollLog').innerHTML = '';
+  document.getElementById('rollLogWrap').classList.add('hidden');
+}
+
+function loadSample(){
+  document.getElementById('rawText').value =
+`いあきゃらテキスト 7版 v2.0.1
+【基本情報】
+名前:  橘 繁菜 (たちばな はんな)
+職業: 大工
+年齢: 21 / 性別: 女
+
+【能力値】
+        現在値  能力値  増加分  一時的
+STR         80      80       0       0
+CON         60      60       0       0
+POW         65      65       0       0
+DEX         60      60       0       0
+APP         55      55       0       0
+SIZ         65      65       0       0
+INT         45      45       0       0
+EDU         68      60       8       0
+HP          12      12       0       0
+MP          13      13       0       0
+SAN         69      65       4       0
+幸運        30      55     -25       0`;
+  dz.classList.remove('ok');
+  document.getElementById('dropMain').textContent = 'ファイルをドロップ / クリックして選択';
+  document.getElementById('dropSub').textContent  = 'いあきゃら .txt 出力ファイル';
+  loadChar();
+}
+
+/* ===== 年齢変更 ===== */
+function getGroup(age){
+  if(age<15||age>89) return null;
+  const bins=[19,39,49,59,69,79,89];
+  const keys=['15-19','20-39','40-49','50-59','60-69','70-79','80-89'];
+  return keys[bins.findIndex(b=>age<=b)];
+}
+function onAgeChange(){
+  charAge = parseInt(document.getElementById('ageInp').value)||0;
+  const g = getGroup(charAge);
+  const badge = document.getElementById('ageBadge');
+  const rule  = document.getElementById('ruleBox');
+  if(g){
+    badge.textContent  = GROUPS[g].label;
+    rule.innerHTML     = '<strong>【補正内容】</strong><br>' + GROUPS[g].rule.replace(/\n/g,'<br>');
+    document.getElementById('startBtn').disabled = Object.keys(orig).length < 4;
+  } else {
+    badge.textContent  = '範囲外';
+    rule.innerHTML     = '<span style="color:var(--accent)">年齢は15〜89歳の範囲で補正が適用されます。</span>';
+    document.getElementById('startBtn').disabled = true;
+  }
+}
+
+/* ===== プレビュー ===== */
+function renderPreview(){
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = '';
+  const keys = [...KEYS, 'LUC'];
+  for(const k of keys){
+    if(orig[k]==null) continue;
+    grid.innerHTML += `<div class="stat-card">
+      <div class="sc-name">${k}</div>
+      <div class="sc-val">${orig[k]}</div>
+      <div class="sc-base">${JP[k]||''}</div>
+    </div>`;
+  }
+}
+
+/* ===== 補正開始 ===== */
+function startCorrection(){
+  const g = getGroup(charAge);
+  if(!g) return;
+  work = Object.assign({}, orig);
+  document.getElementById('diceSec').classList.remove('hidden');
+  document.getElementById('adjSec').classList.add('hidden');
+  document.getElementById('diceEdu').innerHTML = '';
+  document.getElementById('diceLuc').innerHTML = '';
+  document.getElementById('dicePen').innerHTML = '';
+  document.getElementById('diceColEdu').style.display = '';
+  document.getElementById('diceColLuc').style.display = '';
+  document.getElementById('diceColPen').style.display = '';
+  document.getElementById('rollLog').innerHTML = '';
+  document.getElementById('rollLogWrap').classList.add('hidden');
+  runFlow(g);
+}
+
+function redoRoll(){
+  document.getElementById('adjSec').classList.add('hidden');
+  document.getElementById('diceEdu').innerHTML = '';
+  document.getElementById('diceLuc').innerHTML = '';
+  document.getElementById('dicePen').innerHTML = '';
+  document.getElementById('diceColEdu').style.display = '';
+  document.getElementById('diceColLuc').style.display = '';
+  document.getElementById('diceColPen').style.display = '';
+  document.getElementById('rollLog').innerHTML = '';
+  document.getElementById('rollLogWrap').classList.add('hidden');
+  work = Object.assign({}, orig);
+  runFlow(getGroup(charAge));
+}
+
+/* ===== ダイスユーティリティ ===== */
+const r100 = ()=>Math.floor(Math.random()*100)+1;
+const r10  = ()=>Math.floor(Math.random()*10)+1;
+
+function addLog(msg, cls=''){
+  const log = document.getElementById('rollLog');
+  document.getElementById('rollLogWrap').classList.remove('hidden');
+  log.innerHTML += `<div${cls?' class="'+cls+'"':''}>${msg}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function copyLog(){
+  const lines = [...document.getElementById('rollLog').querySelectorAll('div')]
+    .map(el=>el.textContent).join('\n');
+  navigator.clipboard.writeText(lines).then(()=>{
+    const btn=document.getElementById('copyLogBtn');
+    btn.textContent='✓ コピー済み';
+    setTimeout(()=>btn.textContent='📋 コピー', 2000);
+  });
+}
+
+async function animDice(el, val, faces=100){
+  el.classList.add('rolling');
+  await new Promise(res=>{
+    let n=0;
+    const t=setInterval(()=>{
+      el.textContent=Math.floor(Math.random()*faces)+1;
+      if(++n>=8){clearInterval(t);el.textContent=val;el.classList.remove('rolling');res();}
+    },65);
+  });
+}
+
+function waitBtn(label, fn, targetId='diceEdu'){
+  return new Promise(resolve=>{
+    const wrap = document.createElement('div');
+    wrap.style.marginBottom='.95rem';
+    wrap.innerHTML=`<div class="dice-step-label">${label}</div>`;
+    const btn=document.createElement('button');
+    btn.className='roll-btn';btn.textContent='🎲 サイコロを振る';
+    btn.onclick=async()=>{btn.disabled=true;await fn(wrap);resolve();};
+    wrap.appendChild(btn);
+    document.getElementById(targetId).appendChild(wrap);
+  });
+}
+
+/* ===== EDU上達チェック（複数回まとめて1ボタン） ===== */
+async function rollEDUAll(count){
+  return new Promise(resolve=>{
+    const wrap=document.createElement('div');
+    wrap.style.marginBottom='.95rem';
+    wrap.innerHTML=`<div class="dice-step-label">EDU 上達チェック　${count}回（ボタンを押すと順番にサイコロが振られます）</div>`;
+    const btn=document.createElement('button');
+    btn.className='roll-btn';
+    btn.textContent=`🎲 ${count}回まとめて振る`;
+    btn.onclick=async()=>{
+      btn.disabled=true;
+      for(let idx=1;idx<=count;idx++){
+        await rollOneEDU(idx, count, wrap);
+        if(idx<count) await new Promise(r=>setTimeout(r,260));
+      }
+      resolve();
+    };
+    wrap.appendChild(btn);
+    document.getElementById('diceEdu').appendChild(wrap);
+  });
+}
+
+async function rollOneEDU(idx, total, wrap){
+  const base=work['EDU'];
+  const block=document.createElement('div');
+  block.style.cssText='border-top:1px solid rgba(154,112,80,.3);padding-top:.6rem;margin-top:.6rem;';
+  block.innerHTML=`<div style="font-size:.72rem;color:var(--ink-light);margin-bottom:.4rem;">${idx}回目　現在 EDU：${base}</div>`;
+  wrap.appendChild(block);
+
+  const dice=document.createElement('div');dice.className='dice';dice.textContent='?';
+  const row=document.createElement('div');row.className='dice-row';row.appendChild(dice);block.appendChild(row);
+  const roll=r100();
+  await animDice(dice,roll);
+
+  const res=document.createElement('div');res.className='dice-result';
+  if(roll>base){
+    const gain=r10();const newEDU=Math.min(99,base+gain);const act=newEDU-base;
+    work['EDU']=newEDU;
+    res.innerHTML=`<span style="color:var(--gold);font-weight:700;">成功！</span> ${roll} ＞ ${base} → 1D10…`;
+    block.appendChild(res);
+    await new Promise(r=>setTimeout(r,300));
+    const gd=document.createElement('div');gd.className='dice';gd.style.cssText='width:38px;height:38px;font-size:.95rem;';gd.textContent='?';
+    const gr=document.createElement('div');gr.className='dice-row';
+    gr.innerHTML='<span class="dice-label">1D10：</span>';gr.appendChild(gd);block.appendChild(gr);
+    await animDice(gd,gain,10);
+    const fin=document.createElement('div');fin.className='dice-result';
+    fin.innerHTML=`EDU <span style="color:var(--gold);font-weight:700;">+${act}</span>（${base}→<strong>${newEDU}</strong>）`;
+    block.appendChild(fin);
+    addLog(`EDU上達${idx}回目：${roll}＞${base} → 成功 +${act}（EDU:${newEDU}）`,'lg');
+  } else {
+    res.innerHTML=`<span style="color:var(--ink-light);">失敗</span> ${roll}≤${base} → 変化なし`;
+    block.appendChild(res);
+    addLog(`EDU上達${idx}回目：${roll}≤${base} → 失敗`);
+  }
+}
+
+/* ===== 幸運 3D6×5　1回ロール・現在値より大きければ採用 ===== */
+const r6 = ()=>Math.floor(Math.random()*6)+1;
+
+async function rollLuck3D6(){
+  const curLuc = work['LUC'] ?? 0;
+  return waitBtn(`幸運　3D6 × 5`, async wrap=>{
+    const row=document.createElement('div');row.className='dice-row';
+    const dice=[];
+    for(let i=0;i<3;i++){
+      const d=document.createElement('div');d.className='dice';
+      d.style.cssText='width:42px;height:42px;font-size:1.1rem;';
+      d.textContent='?';
+      const lbl=document.createElement('span');lbl.className='dice-label';
+      lbl.textContent=`D${i+1}`;
+      row.appendChild(lbl);row.appendChild(d);
+      dice.push(d);
+    }
+    wrap.appendChild(row);
+
+    const vals=[];
+    for(let i=0;i<3;i++){
+      const v=r6(); vals.push(v);
+      await animDice(dice[i],v,6);
+      if(i<2) await new Promise(r=>setTimeout(r,200));
+    }
+    const sum=vals[0]+vals[1]+vals[2];
+    const rolled=sum*5;
+
+    const res=document.createElement('div');res.className='dice-result';
+    if(rolled > curLuc){
+      work['LUC']=rolled;
+      orig['LUC']=rolled; // 差分0にして増加分列を空欄に
+      res.innerHTML=`${vals[0]}＋${vals[1]}＋${vals[2]}＝${sum}　×5＝<span style="color:var(--gold);font-weight:700;font-size:1.05rem;">${rolled}</span>　＞ <strong>${curLuc}（1回目のロール）</strong>　<span style="color:var(--green);font-weight:700;">→ 採用！</span>（幸運 ${curLuc} → ${rolled}）`;
+      addLog(`幸運3D6×5：${vals.join('+')}=${sum}×5=${rolled} ＞ ${curLuc}（1回目のロール） → 採用`,'lg');
+    } else {
+      res.innerHTML=`${vals[0]}＋${vals[1]}＋${vals[2]}＝${sum}　×5＝<span style="font-weight:700;">${rolled}</span>　≤ <strong>${curLuc}（1回目のロール）</strong>　<span style="color:var(--ink-light);">→ 不採用（幸運は ${curLuc} のまま）</span>`;
+      addLog(`幸運3D6×5：${vals.join('+')}=${sum}×5=${rolled} ≤ ${curLuc}（1回目のロール） → 不採用`);
+    }
+    wrap.appendChild(res);
+  }, 'diceLuc');
+}
+
+/* ===== 15〜19歳：STR/SIZ 配分UI（合計5点、各最低1点） ===== */
+function applyStrSiz(){
+  return new Promise(resolve=>{
+    const s0=work['STR']||50, sz0=work['SIZ']||50;
+    // 初期配分：均等（各最低1点保証）
+    const initDec={STR:3, SIZ:2};
+    const dec={STR:initDec.STR, SIZ:initDec.SIZ};
+    const TOTAL=5, MIN_DEC=1; // どちらも最低1点減
+
+    if(!document.getElementById('pen-style')){
+      // pen-style はapplyPenaltyで挿入されるが、こちらが先に来る場合に備えて挿入
+      const st=document.createElement('style');st.id='pen-style';
+      st.textContent=`
+        .pen-track{position:relative;height:22px;margin-bottom:.35rem;}
+        .pen-bar-bg{position:absolute;top:50%;left:0;right:0;height:8px;transform:translateY(-50%);border-radius:4px;background:rgba(154,112,80,.2);pointer-events:none;}
+        .pen-bar-keep{position:absolute;top:50%;left:0;height:8px;transform:translateY(-50%);border-radius:4px 0 0 4px;background:rgba(42,96,32,.5);pointer-events:none;transition:width .12s;}
+        .pen-bar-dec{position:absolute;top:50%;height:8px;transform:translateY(-50%);border-radius:0 4px 4px 0;background:rgba(139,32,32,.55);pointer-events:none;transition:left .12s,width .12s;}
+        .pen-slider{position:absolute;inset:0;width:100%;height:100%;-webkit-appearance:none;appearance:none;background:transparent;outline:none;cursor:pointer;margin:0;}
+        .pen-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--parchment);border:2px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;transition:border-color .15s,transform .1s;}
+        .pen-slider::-webkit-slider-thumb:hover{border-color:var(--accent);transform:scale(1.18);}
+        .pen-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--parchment);border:2px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;}
+        .pen-pm{width:28px;height:28px;border:1px solid var(--border);border-radius:3px;background:rgba(255,255,255,.5);color:var(--ink-mid);font-size:1rem;line-height:1;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;flex-shrink:0;}
+        .pen-pm:hover:not(:disabled){background:var(--parchment-dark);border-color:var(--accent);color:var(--accent);}
+        .pen-pm:disabled{opacity:.3;cursor:default;}
+      `;
+      document.head.appendChild(st);
+    }
+
+    const wrap=document.createElement('div');wrap.style.marginBottom='.95rem';
+    wrap.innerHTML=`<div class="dice-step-label">STR・SIZ の減少　合計 ${TOTAL} 点を配分（各最低 ${MIN_DEC} 点）</div>`;
+    document.getElementById('dicePen').appendChild(wrap);
+
+    const topRow=document.createElement('div');
+    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;';
+    const remainEl=document.createElement('div');remainEl.style.cssText='font-size:.82rem;';
+    const resetBtn=document.createElement('button');resetBtn.className='btn-sm';
+    resetBtn.textContent='↺ リセット';
+    resetBtn.onclick=()=>{dec.STR=initDec.STR;dec.SIZ=initDec.SIZ;refresh();};
+    topRow.appendChild(remainEl);topRow.appendChild(resetBtn);
+    wrap.appendChild(topRow);
+
+    const refs={};
+    let resolved=false;
+
+    for(const k of ['STR','SIZ']){
+      const bv=(k==='STR'?s0:sz0);
+      const block=document.createElement('div');block.style.cssText='margin-bottom:.9rem;';
+
+      const labelRow=document.createElement('div');
+      labelRow.style.cssText='display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem;';
+      const lbl=document.createElement('span');
+      lbl.style.cssText='font-size:.8rem;color:var(--ink-mid);font-weight:700;';
+      lbl.textContent=`${k}（${JP[k]}）`;
+      const valLbl=document.createElement('span');valLbl.id='ss_pv_'+k;
+      valLbl.style.cssText='font-size:.9rem;font-weight:700;color:var(--ink);';
+      labelRow.appendChild(lbl);labelRow.appendChild(valLbl);
+      block.appendChild(labelRow);
+
+      const track=document.createElement('div');track.className='pen-track';
+      const barBg=document.createElement('div');barBg.className='pen-bar-bg';
+      const barKeep=document.createElement('div');barKeep.className='pen-bar-keep';barKeep.id='ss_bk_'+k;
+      const barDec=document.createElement('div');barDec.className='pen-bar-dec';barDec.id='ss_bd_'+k;
+      const slider=document.createElement('input');
+      slider.type='range';slider.className='pen-slider';
+      slider.min=MIN_DEC;slider.max=TOTAL-MIN_DEC;slider.step=1;slider.value=dec[k];slider.id='ss_ps_'+k;
+      slider.addEventListener('input',()=>{
+        dec[k]=parseInt(slider.value);
+        // 相手側を残りに自動調整
+        const other=k==='STR'?'SIZ':'STR';
+        dec[other]=TOTAL-dec[k];
+        refresh();
+      });
+      track.appendChild(barBg);track.appendChild(barKeep);track.appendChild(barDec);track.appendChild(slider);
+      block.appendChild(track);
+
+      const ctrlRow=document.createElement('div');
+      ctrlRow.style.cssText='display:flex;align-items:center;gap:.5rem;margin-top:.3rem;';
+      const btnM=document.createElement('button');btnM.className='pen-pm';btnM.textContent='－';btnM.id='ss_bm_'+k;
+      btnM.onclick=()=>{
+        if(dec[k]>MIN_DEC){
+          dec[k]--;
+          const other=k==='STR'?'SIZ':'STR';
+          dec[other]=TOTAL-dec[k];
+          refresh();
+        }
+      };
+      const decLbl=document.createElement('span');decLbl.id='ss_pd_'+k;
+      decLbl.style.cssText='font-size:.8rem;min-width:72px;text-align:center;';
+      const btnP=document.createElement('button');btnP.className='pen-pm';btnP.textContent='＋';btnP.id='ss_bp_'+k;
+      btnP.onclick=()=>{
+        if(dec[k]<TOTAL-MIN_DEC){
+          dec[k]++;
+          const other=k==='STR'?'SIZ':'STR';
+          dec[other]=TOTAL-dec[k];
+          refresh();
+        }
+      };
+      ctrlRow.appendChild(btnM);ctrlRow.appendChild(decLbl);ctrlRow.appendChild(btnP);
+      block.appendChild(ctrlRow);
+
+      refs[k]={bv,valLbl,barKeep,barDec,slider,decLbl,btnM,btnP};
+      wrap.appendChild(block);
+    }
+
+    function refresh(){
+      const used=dec.STR+dec.SIZ;
+      const left=TOTAL-used;
+      if(left===0) remainEl.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ 配分完了</span>`;
+      else         remainEl.innerHTML=`残り <strong style="color:var(--accent)">${left}</strong> 点`;
+
+      for(const k of ['STR','SIZ']){
+        const r=refs[k];
+        const keepPct=(r.bv-dec[k])/r.bv*100;
+        const decPct=dec[k]/r.bv*100;
+        r.barKeep.style.width=keepPct+'%';
+        r.barDec.style.left=keepPct+'%';r.barDec.style.width=decPct+'%';
+        r.valLbl.textContent=`${r.bv}  →  ${r.bv-dec[k]}`;
+        r.decLbl.textContent=`－${dec[k]} 点減少`;
+        r.decLbl.style.color='var(--accent)';
+        r.slider.value=dec[k];
+        r.btnM.disabled=(dec[k]<=MIN_DEC);
+        r.btnP.disabled=(dec[k]>=TOTAL-MIN_DEC);
+      }
+
+      // work にリアルタイム反映
+      work['STR']=s0-dec.STR;
+      work['SIZ']=sz0-dec.SIZ;
+
+      if(left===0 && !resolved){
+        resolved=true;
+        addLog(`STR:${s0}→${work['STR']}　SIZ:${sz0}→${work['SIZ']}（STR+SIZ合計-${TOTAL}）`,'li');
+        resolve();
+      }
+    }
+    refresh();
+  });
+}
+
+/* ===== 身体ペナルティ配分UI ===== */
+function applyPenalty(total,appPen){
+  return new Promise(resolve=>{
+    const s0=work['STR']||50,c0=work['CON']||50,d0=work['DEX']||50;
+    const base={STR:s0,CON:c0,DEX:d0};
+    const pp=Math.floor(total/3);let rem=total-pp*3;
+    const initDec={STR:pp+(rem-->0?1:0),CON:pp+(rem-->0?1:0),DEX:pp};
+    const dec={STR:initDec.STR,CON:initDec.CON,DEX:initDec.DEX};
+    let resolved=false;
+
+    // スタイル（スライダーつまみ）をhead内に1回だけ注入
+    if(!document.getElementById('pen-style')){
+      const st=document.createElement('style');st.id='pen-style';
+      st.textContent=`
+        .pen-track{position:relative;height:22px;margin-bottom:.35rem;}
+        .pen-bar-bg{position:absolute;top:50%;left:0;right:0;height:8px;transform:translateY(-50%);border-radius:4px;background:rgba(154,112,80,.2);pointer-events:none;}
+        .pen-bar-keep{position:absolute;top:50%;left:0;height:8px;transform:translateY(-50%);border-radius:4px 0 0 4px;background:rgba(42,96,32,.5);pointer-events:none;transition:width .12s;}
+        .pen-bar-dec{position:absolute;top:50%;height:8px;transform:translateY(-50%);border-radius:0 4px 4px 0;background:rgba(139,32,32,.55);pointer-events:none;transition:left .12s,width .12s;}
+        .pen-slider{position:absolute;inset:0;width:100%;height:100%;-webkit-appearance:none;appearance:none;background:transparent;outline:none;cursor:pointer;margin:0;}
+        .pen-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--parchment);border:2px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;transition:border-color .15s,transform .1s;}
+        .pen-slider::-webkit-slider-thumb:hover{border-color:var(--accent);transform:scale(1.18);}
+        .pen-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--parchment);border:2px solid var(--border);box-shadow:0 1px 5px rgba(0,0,0,.3);cursor:pointer;}
+        .pen-pm{width:28px;height:28px;border:1px solid var(--border);border-radius:3px;background:rgba(255,255,255,.5);color:var(--ink-mid);font-size:1rem;line-height:1;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;flex-shrink:0;}
+        .pen-pm:hover:not(:disabled){background:var(--parchment-dark);border-color:var(--accent);color:var(--accent);}
+        .pen-pm:disabled{opacity:.3;cursor:default;}
+      `;
+      document.head.appendChild(st);
+    }
+
+    const wrap=document.createElement('div');wrap.style.marginBottom='.95rem';
+    wrap.innerHTML=`<div class="dice-step-label">身体能力の減少　合計 ${total} 点を STR・CON・DEX に配分してください</div>`;
+    if(appPen>0){
+      const n=document.createElement('div');n.className='dice-result';n.style.marginBottom='.5rem';
+      n.innerHTML=`APP は自動で <span style="color:var(--accent);font-weight:700;">-${appPen}</span>（${work['APP']}→${Math.max(1,work['APP']-appPen)}）`;
+      wrap.appendChild(n);
+    }
+    document.getElementById('dicePen').appendChild(wrap);
+
+    // 残りポイント表示 + リセットボタン行
+    const topRow=document.createElement('div');
+    topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem;';
+    const remainEl=document.createElement('div');remainEl.style.cssText='font-size:.82rem;';
+    const resetBtn=document.createElement('button');resetBtn.className='btn-sm';
+    resetBtn.textContent='↺ リセット';
+    resetBtn.onclick=()=>{dec.STR=initDec.STR;dec.CON=initDec.CON;dec.DEX=initDec.DEX;refresh();};
+    topRow.appendChild(remainEl);topRow.appendChild(resetBtn);
+    wrap.appendChild(topRow);
+
+    // 各ステータスのUI
+    const refs={};
+    for(const k of ['STR','CON','DEX']){
+      const bv=base[k];
+      const block=document.createElement('div');
+      block.style.cssText='margin-bottom:.9rem;';
+
+      /* ── ラベル行 ── */
+      const labelRow=document.createElement('div');
+      labelRow.style.cssText='display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem;';
+      const lbl=document.createElement('span');
+      lbl.style.cssText='font-size:.8rem;color:var(--ink-mid);font-weight:700;';
+      lbl.textContent=`${k}（${JP[k]}）`;
+      const valLbl=document.createElement('span');valLbl.id='pv_'+k;
+      valLbl.style.cssText='font-size:.9rem;font-weight:700;color:var(--ink);';
+      labelRow.appendChild(lbl);labelRow.appendChild(valLbl);
+      block.appendChild(labelRow);
+
+      /* ── バー＋スライダー重ね（pen-track） ── */
+      const track=document.createElement('div');track.className='pen-track';
+      const barBg=document.createElement('div');barBg.className='pen-bar-bg';
+      const barKeep=document.createElement('div');barKeep.id='bk_'+k;barKeep.className='pen-bar-keep';
+      const barDec=document.createElement('div');barDec.id='bd_'+k;barDec.className='pen-bar-dec';
+      const slider=document.createElement('input');
+      slider.type='range';slider.className='pen-slider';
+      slider.min=0;slider.max=bv-1;slider.step=1;slider.value=dec[k];slider.id='ps_'+k;
+      slider.addEventListener('input',()=>{dec[k]=parseInt(slider.value);refresh();});
+      track.appendChild(barBg);track.appendChild(barKeep);track.appendChild(barDec);track.appendChild(slider);
+      block.appendChild(track);
+
+      /* ── ±ボタン + 減少量表示 ── */
+      const ctrlRow=document.createElement('div');
+      ctrlRow.style.cssText='display:flex;align-items:center;gap:.5rem;margin-top:.3rem;';
+      const btnM=document.createElement('button');btnM.className='pen-pm';btnM.textContent='－';btnM.id='bm_'+k;
+      btnM.onclick=()=>{if(dec[k]>0){dec[k]--;refresh();}};
+      const decLbl=document.createElement('span');decLbl.id='pd_'+k;
+      decLbl.style.cssText='font-size:.8rem;min-width:72px;text-align:center;';
+      const btnP=document.createElement('button');btnP.className='pen-pm';btnP.textContent='＋';btnP.id='bp_'+k;
+      btnP.onclick=()=>{if(dec[k]<bv-1){dec[k]++;refresh();}};
+      ctrlRow.appendChild(btnM);ctrlRow.appendChild(decLbl);ctrlRow.appendChild(btnP);
+      block.appendChild(ctrlRow);
+
+      refs[k]={bv,valLbl,barKeep,barDec,slider,decLbl,btnM,btnP};
+      wrap.appendChild(block);
+    }
+
+    // APPを即時反映（確定ボタンなし）
+    if(appPen>0){
+      const pa=work['APP']||50;
+      work['APP']=Math.max(1,pa-appPen);
+      addLog(`APP:${pa}→${work['APP']}（-${appPen}）`,'li');
+    }
+
+    function refresh(){
+      const used=dec.STR+dec.CON+dec.DEX;
+      const left=total-used;
+
+      // 残りポイント表示
+      if(left>0)      remainEl.innerHTML=`残り <strong style="color:var(--accent);font-size:1rem;">${left}</strong> 点を配分してください`;
+      else if(left<0) remainEl.innerHTML=`<span style="color:var(--accent);">${-left} 点多く配分されています</span>`;
+      else            remainEl.innerHTML=`<span style="color:var(--green);font-weight:700;">✓ 配分完了</span>`;
+
+      // work にリアルタイム反映
+      work['STR']=s0-dec.STR;
+      work['CON']=c0-dec.CON;
+      work['DEX']=d0-dec.DEX;
+
+      // 配分が完了したら自動でresolve（1回だけ）
+      if(left===0 && !resolved){ resolved=true; resolve(); }
+
+      for(const k of ['STR','CON','DEX']){
+        const r=refs[k];
+        const keepPct=(r.bv-dec[k])/r.bv*100;
+        const decPct=dec[k]/r.bv*100;
+        r.barKeep.style.width=keepPct+'%';
+        r.barDec.style.left=keepPct+'%';r.barDec.style.width=decPct+'%';
+        r.valLbl.textContent=`${r.bv}  →  ${r.bv-dec[k]}`;
+        r.decLbl.textContent=dec[k]>0?`－${dec[k]} 点減少`:'変化なし';
+        r.decLbl.style.color=dec[k]>0?'var(--accent)':'var(--ink-light)';
+        r.slider.value=dec[k];
+        r.btnM.disabled=(dec[k]<=0);
+        r.btnP.disabled=(dec[k]>=r.bv-1);
+      }
+
+      // ログは配分完了時のみ（毎回は流さない）
+      if(left===0 && resolved && addLog._penLogged!==resolved){
+        addLog._penLogged=resolved;
+        addLog(`STR:${s0}→${work['STR']}　CON:${c0}→${work['CON']}　DEX:${d0}→${work['DEX']}`,'li');
+      }
+    }
+    refresh();
+  });
+}
+
+/* ===== メインフロー ===== */
+async function runFlow(g){
+  addLog(`■ 年齢による修正（${GROUPS[g].label}）`);
+  if(g==='15-19'){
+    const e0=work['EDU'];
+    work['EDU']=Math.max(1,e0-5);
+    // EDU固定減少を左カラムに表示
+    const infoEdu=document.createElement('div');infoEdu.style.marginBottom='.9rem';
+    infoEdu.innerHTML=`<div class="dice-step-label">EDU 固定減少</div>
+      <div class="dice-result">EDU：${e0} → <strong>${work['EDU']}</strong>（-5）</div>`;
+    document.getElementById('diceEdu').appendChild(infoEdu);
+    addLog(`EDU:${e0}→${work['EDU']}（-5）`,'li');
+    // STR/SIZ配分UIと幸運3D6×5を並行
+    await Promise.all([applyStrSiz(), rollLuck3D6()]);
+  } else {
+    const ec=EDU_CHK[g]||0,sp=STAT_PEN[g]||0,ap=APP_PEN[g]||0;
+    // カラム表示制御：内容がない側は非表示
+    document.getElementById('diceColLuc').style.display='none';
+    if(ec===0) document.getElementById('diceColEdu').style.display='none';
+    if(sp===0) document.getElementById('diceColPen').style.display='none';
+    const tasks=[];
+    if(ec>0) tasks.push(rollEDUAll(ec));
+    if(sp>0) tasks.push(applyPenalty(sp,ap));
+    await Promise.all(tasks);
+  }
+  await new Promise(r=>setTimeout(r,320));
+  showAdj();
+}
+
+/* ===== 調整テーブル（いあきゃら形式） ===== */
+function showAdj(){
+  document.getElementById('adjSec').classList.remove('hidden');
+  renderAdjTable(true);
+  updatePreviewAfter();
+  renderFinal();
+}
+
+function renderAdjTable(locked=false){
+  const keys = KEYS.filter(k=>orig[k]!=null);
+  if(orig['LUC']!=null) keys.push('LUC');
+
+  let html = `<table class="ia-table">`;
+
+  // ヘッダー
+  html += `<tr><th class="row-head"></th>`;
+  for(const k of keys) html += `<th>${k}</th>`;
+  html += `</tr>`;
+
+  // 能力値行（補正前）
+  html += `<tr><td class="row-head">能力値</td>`;
+  for(const k of keys) html += `<td>${orig[k]??'—'}</td>`;
+  html += `</tr>`;
+
+  // 増加分行
+  html += `<tr><td class="row-head">増加分</td>`;
+  for(const k of keys){
+    const o=orig[k]??0, a=work[k]??o, d=a-o;
+    const cls=d>0?'pos-val':d<0?'neg-val':'';
+    const txt=d===0?'':d>0?`+${d}`:`${d}`;
+    html += `<td class="${cls}">${txt}</td>`;
+  }
+  html += `</tr>`;
+
+  // 現在値行（確定前=input編集可、確定後=テキスト）
+  html += `<tr><td class="row-head">現在値</td>`;
+  for(const k of keys){
+    const a=work[k]??orig[k]??'—';
+    const d=(orig[k]!=null)?a-orig[k]:0;
+    const cellCls=d>0?'pos-val':d<0?'neg-val':'';
+    if(locked){
+      html+=`<td class="${cellCls}" style="font-weight:700">${a}</td>`;
+    } else {
+      html+=`<td class="${cellCls}"><input class="ia-edit" type="number" min="1" max="99" value="${a}" id="ia_${k}" oninput="updAdj('${k}',this.value)"></td>`;
+    }
+  }
+  html += `</tr>`;
+
+  // フッター
+  html += `<tr><th class="row-head"></th>`;
+  for(const k of keys) html += `<th>${k}</th>`;
+  html += `</tr>`;
+
+  html += `</table>`;
+  document.getElementById('adjTable').innerHTML = html;
+}
+
+function updAdj(k,v){
+  work[k]=parseInt(v)||1;
+  // 増加分セルと現在値セルの色クラスをリアルタイム更新
+  const keys = KEYS.filter(k=>orig[k]!=null);
+  if(orig['LUC']!=null) keys.push('LUC');
+  // 全再描画（テーブル小さいので問題なし）
+  renderAdjTable();
+  updatePreviewAfter();
+  // フォーカス維持
+  const el=document.getElementById('ia_'+k);
+  if(el){el.focus();const len=el.value.length;el.setSelectionRange(len,len);}
+}
+
+function updatePreviewAfter(){
+  const grid=document.getElementById('previewGrid');
+  if(!grid)return;
+  grid.innerHTML='';
+  for(const k of [...KEYS,'LUC']){
+    if(orig[k]==null)continue;
+    const o=orig[k],a=work[k]??o,d=a-o;
+    const changed=d!==0;
+    const dh=d===0?'':`<div class="sc-diff ${d>0?'pos':'neg'}">${d>0?'+':''}${d}</div>`;
+    grid.innerHTML+=`<div class="stat-card${changed?' changed':''}">
+      <div class="sc-name">${k}</div>
+      <div class="sc-val">${a}</div>
+      <div class="sc-base">${JP[k]||''}</div>
+      ${dh}
+    </div>`;
+  }
+}
+
+/* ===== 最終シート ===== */
+
+function calcDB(){
+  const t=(work['STR']||50)+(work['SIZ']||50);
+  if(t<=64)  return{db:'-2',bld:-2};
+  if(t<=84)  return{db:'-1',bld:-1};
+  if(t<=124) return{db:'0',bld:0};
+  if(t<=164) return{db:'+1D4',bld:1};
+  if(t<=204) return{db:'+1D6',bld:2};
+  return{db:'+2D6',bld:3};
+}
+
+function renderFinal(){
+  const hp=Math.floor(((work['CON']||50)+(work['SIZ']||50))/10);
+  const mp=Math.floor((work['POW']||50)/5);
+  const san=work['POW']||50;
+  const luck=work['LUC']??'—';
+  const db=calcDB();
+  document.getElementById('finalSheet').innerHTML=`
+    <div class="chips" style="margin-bottom:.5rem;">
+      <div class="chip">幸運 <strong>${luck}</strong></div>
+      <div class="chip">HP <strong>${hp}</strong></div>
+      <div class="chip">MP <strong>${mp}</strong></div>
+      <div class="chip">SAN <strong>${san}</strong></div>
+      <div class="chip">DB <strong>${db.db}</strong></div>
+      <div class="chip">ビルド <strong>${db.bld}</strong></div>
+    </div>`;
+}
+
+function copyText(){
+  const lines=['■ '+charName+'（年齢：'+charAge+'歳）年齢補正後'];
+  for(const k of KEYS) lines.push(k+'：'+(work[k]??'—'));
+  if(work['LUC']!=null) lines.push('幸運：'+work['LUC']);
+  const hp=Math.floor(((work['CON']||50)+(work['SIZ']||50))/10);
+  const mp=Math.floor((work['POW']||50)/5);
+  lines.push('HP：'+hp+'　MP：'+mp+'　SAN：'+(work['POW']||50));
+  const db=calcDB();
+  lines.push('DB：'+db.db+'　ビルド：'+db.bld);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const b=event.target,o=b.textContent;b.textContent='✓ コピーしました';setTimeout(()=>b.textContent=o,2000);
+  });
+}
+
+function resetAll(){
+  orig={};work={};charName='';charAge=21;
+  document.getElementById('rawText').value='';
+  document.getElementById('charName').classList.add('hidden');
+  document.getElementById('parseErr').classList.add('hidden');
+  document.getElementById('previewSec').classList.add('hidden');
+  document.getElementById('diceSec').classList.add('hidden');
+  document.getElementById('adjSec').classList.add('hidden');
+  document.getElementById('startBtn').disabled=true;
+  dz.classList.remove('ok');
+  document.getElementById('dropMain').textContent='ファイルをドロップ / クリックして選択';
+  document.getElementById('dropSub').textContent='いあきゃら .txt 出力ファイル';
+}
+
+/* 初期表示 */
+onAgeChange();
+</script>
+</body>
+</html>
