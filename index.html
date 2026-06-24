@@ -56,6 +56,42 @@ body {
 .hdr h1 { font-size: 1.85rem; color: var(--ink); font-weight: 700; letter-spacing: .12em; }
 .hdr-sub { font-size: .8rem; color: var(--ink-light); letter-spacing: .18em; margin-top: .3rem; }
 
+/* ── セーブ/ロード ── */
+.hdr-save-row { display: flex; justify-content: center; gap: .5rem; margin-top: .75rem; flex-wrap: wrap; }
+.btn-save { background: rgba(184,134,11,.15); border: 1px solid var(--gold); color: var(--gold);
+  padding: .32rem .9rem; font-family: inherit; font-size: .78rem; border-radius: 3px;
+  cursor: pointer; transition: background .18s; }
+.btn-save:hover { background: rgba(184,134,11,.28); }
+.sl-modal { position: fixed; inset: 0; z-index: 1100; display: flex; align-items: center; justify-content: center; }
+.sl-modal.hidden { display: none; }
+.sl-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.55); }
+.sl-panel {
+  position: relative; background: var(--parchment); border: 2px solid var(--border);
+  border-radius: 6px; padding: 1.4rem 1.6rem; width: min(420px, 92vw);
+  box-shadow: 0 8px 40px rgba(0,0,0,.5); z-index: 1;
+}
+.sl-title { font-size: 1rem; font-weight: 700; color: var(--ink); letter-spacing: .08em; margin-bottom: 1rem; }
+.sl-slots { display: flex; flex-direction: column; gap: .5rem; margin-bottom: 1rem; }
+.sl-slot {
+  display: flex; align-items: center; gap: .6rem;
+  background: rgba(255,255,255,.4); border: 1px solid var(--border);
+  border-radius: 4px; padding: .5rem .75rem; cursor: pointer; transition: border-color .18s;
+}
+.sl-slot:hover { border-color: var(--gold); }
+.sl-slot.selected { border-color: var(--accent); background: rgba(139,32,32,.06); }
+.sl-slot-num { font-size: .72rem; color: var(--ink-light); width: 1.6em; flex-shrink: 0; }
+.sl-slot-info { flex: 1; min-width: 0; }
+.sl-slot-name { font-size: .88rem; color: var(--ink); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sl-slot-meta { font-size: .7rem; color: var(--ink-light); margin-top: .1rem; }
+.sl-slot-empty { font-size: .82rem; color: var(--ink-light); opacity: .55; }
+.sl-slot-del { background: none; border: none; color: var(--ink-light); cursor: pointer; font-size: .85rem; padding: .1rem .3rem; border-radius: 3px; }
+.sl-slot-del:hover { color: var(--accent); background: rgba(139,32,32,.08); }
+.sl-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+.sl-mode-tabs { display: flex; gap: .3rem; margin-bottom: .9rem; }
+.sl-mode-tab { flex: 1; padding: .4rem; font-family: inherit; font-size: .82rem; border: 1px solid var(--border);
+  background: transparent; color: var(--ink-mid); border-radius: 3px; cursor: pointer; transition: all .18s; }
+.sl-mode-tab.active { background: var(--ink); color: var(--parchment); border-color: var(--ink); }
+
 /* ── セクション見出し ── */
 .sh {
   font-size: .72rem; letter-spacing: .35em; color: var(--accent);
@@ -520,6 +556,13 @@ textarea:focus { outline: none; border-color: var(--accent); }
 @media(max-width:640px){
   .occ-grid { grid-template-columns: 1fr 1fr; }
   .tab-btn { font-size: .78rem; padding: .55rem .5rem; }
+  /* スマホ：職業選択モーダルの絞り込みエリアを圧縮してカード表示域を拡大 */
+  .sj-occ-panel { max-height: 96vh; margin-top: 2vh; }
+  .sj-occ-controls { padding: .3rem .55rem; }
+  .supl-box { padding: .3rem .55rem; margin-bottom: .3rem; }
+  .supl-box-label { margin-bottom: .2rem; }
+  .supl-checks { gap: .3rem; }
+  .supl-check { font-size: .72rem; }
 }
 
 /* ══ 技能ポイント配分UI ══ */
@@ -1056,6 +1099,8 @@ textarea:focus { outline: none; border-color: var(--accent); }
 .alloc-added-val { color: var(--green); font-weight: 700; }
 .alloc-over-val  { color: var(--accent); font-weight: 700; }
 .alloc-cur-val   { color: var(--ink-light); font-size: .78rem; }
+.alloc-base-val  { color: var(--ink-light); font-size: .78rem; opacity: .7; }
+.alloc-cur-inp   { width: 3rem; font-size: .78rem; text-align: center; border: 1px solid var(--border); border-radius: 3px; padding: .1rem .2rem; background: var(--parchment); color: var(--ink); }
 .alloc-empty     { color: rgba(154,112,80,.4); font-size: .75rem; }
 
 /* ── any_art テキスト入力 ── */
@@ -1316,6 +1361,100 @@ textarea:focus { outline: none; border-color: var(--accent); }
 @media(max-width: 700px){
   .alloc-two-col { grid-template-columns: 1fr; }
 }
+
+/* ══ ステータス作成エリア ══ */
+.stat-create-basic {
+  margin-bottom: .9rem;
+}
+.stat-basic-row {
+  display: flex; gap: .6rem; flex-wrap: wrap;
+}
+.stat-basic-field {
+  display: flex; flex-direction: column; gap: .2rem; flex: 1; min-width: 120px;
+}
+.stat-basic-field--sm { flex: 0 0 80px; min-width: 70px; }
+.stat-basic-label {
+  font-size: .68rem; color: var(--ink-light); font-weight: 700; letter-spacing: .08em;
+}
+.stat-basic-input {
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: .38rem .55rem; font-size: .88rem; font-family: inherit;
+  background: rgba(255,255,255,.55); color: var(--ink);
+  transition: border-color .15s;
+}
+.stat-basic-input:focus { outline: none; border-color: var(--gold); }
+
+/* 能力値テーブル */
+.stat-table-wrap { margin-bottom: .8rem; }
+.stat-grid-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .45rem;
+}
+.stat-grid-title {
+  font-size: .72rem; font-weight: 700; color: var(--ink-light); letter-spacing: .1em;
+}
+.stat-table-scroll { overflow-x: auto; }
+.stat-table {
+  width: 100%; border-collapse: collapse;
+  font-size: .82rem;
+}
+.stat-table th {
+  background: var(--parchment-dark); border: 1px solid var(--border);
+  padding: .3rem .4rem; text-align: center;
+  font-size: .72rem; color: var(--ink-mid); font-weight: 700;
+  letter-spacing: .05em; white-space: nowrap;
+}
+.stat-table td {
+  border: 1px solid var(--border);
+  padding: .2rem .3rem; text-align: center;
+  vertical-align: middle;
+}
+.stat-table tr.row-label td {
+  background: var(--parchment-dark);
+  font-size: .68rem; color: var(--ink-mid); font-weight: 700;
+}
+.stat-table tr.row-base td { background: rgba(255,255,255,.38); }
+.stat-table tr.row-add  td { background: rgba(184,134,11,.05); }
+.stat-table tr.row-cur  td { background: rgba(255,255,255,.55); font-weight: 700; }
+.stat-cell-input {
+  width: 100%; text-align: center;
+  border: none; background: transparent;
+  font-size: .95rem; font-weight: 700;
+  color: var(--ink); font-family: inherit;
+  padding: .1rem 0; min-width: 44px;
+}
+.stat-cell-input:focus { outline: none; color: var(--accent); }
+
+/* 二次ステータス */
+.secondary-stats {
+  margin-bottom: .8rem;
+}
+.secondary-chips {
+  display: flex; flex-wrap: wrap; gap: .4rem;
+}
+.secondary-chip {
+  background: rgba(255,255,255,.45); border: 1px solid var(--border);
+  border-radius: 4px; padding: .25rem .65rem;
+  font-size: .78rem; color: var(--ink-mid);
+}
+.secondary-chip strong { color: var(--ink); font-size: .92rem; }
+
+/* いあきゃら折りたたみ */
+.iachara-fold {
+  border-top: 1px solid rgba(154,112,80,.2);
+  padding-top: .6rem; margin-top: .4rem;
+}
+.iachara-fold-label {
+  font-size: .75rem; color: var(--ink-light); cursor: pointer;
+  user-select: none; padding: .2rem 0;
+  display: flex; align-items: center; gap: .4rem;
+}
+.iachara-fold-label:hover { color: var(--ink-mid); }
+
+@media(max-width:640px){
+  .stat-table { font-size: .78rem; }
+  .stat-cell-input { font-size: .85rem; min-width: 36px; }
+}
 </style>
 <script>
 const OCC_DATA = {"アイドル、音楽タレント": {"point_formula": "APP×2+EDU×2", "skills_raw": "芸術／製作（歌唱）、芸術／製作（ダンス）、心理学、変装、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:歌唱"}, {"type": "fixed", "id": "art_craft:ダンス"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2020", "category": "メディア・表現・創作系"}, "アスリート－DEX系": {"point_formula": "DEX×2+EDU×2", "skills_raw": "近接戦闘（格闘）、芸術／製作（任意のスポーツ競技）、跳躍、投擲、登攀、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "競技系"}, "アスリート－STR系": {"point_formula": "STR×2+EDU×2", "skills_raw": "近接戦闘（格闘）、芸術／製作（任意のスポーツ競技）、跳躍、投擲、登攀、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "競技系"}, "アスリート－CON系": {"point_formula": "CON×2+EDU×2", "skills_raw": "近接戦闘（格闘）、芸術／製作（任意のスポーツ競技）、跳躍、投擲、登攀、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "競技系"}, "アナウンサー": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "芸術／製作（アナウンス）、心理学、図書館、母国語、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:アナウンス"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2020", "category": "メディア・表現・創作系"}, "アニマルセラピスト": {"point_formula": "POW×2+EDU×2", "skills_raw": "科学（動物学）、聞き耳、自然、心理学、精神分析、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:zoology"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2020", "category": "医療・保健・福祉系"}, "海女・海士": {"point_formula": "CON×2+EDU×2", "skills_raw": "回避、聞き耳、サバイバル（海）、自然、水泳、跳躍、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "survival:海"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "物流・現場インフラ系"}, "eスポーツ・プレイヤー": {"point_formula": "DEX×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（ゲーム戦略）、心理学、手さばき、電気修理、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:ゲーム戦略"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 70], "source": "2020", "category": "競技系"}, "医師": {"point_formula": "EDU×4", "skills_raw": "医学、応急手当、科学（生物学）、科学（薬学）、ほかの言語（英語など）、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "2020", "category": "医療・保健・福祉系"}, "遺体衛生保全士": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（エンバーミング）、図書館、変装、法律、目星、精神分析、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:エンバーミング"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2026", "category": "医療・保健・福祉系"}, "一般船員": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "機械修理、自然、水泳、操縦（船舶）、電気修理、ほかの言語（英語）、目星、対人関係技能のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "pilot:船舶"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [9, 40], "source": "2026", "category": "交通系"}, "イラストレーター・マンガ家": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "芸術／製作（写真術）、芸術／製作（専門分野を選ぶ）、自然もしくは伝承（専門分野を選ぶ）、心理学、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "or", "options": [{"label": "自然", "id": "natural_world"}, {"label": "伝承（専門分野を選ぶ）", "id": "lore:任意"}], "label": "自然もしくは伝承（専門分野を選ぶ）"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "Webライター": {"point_formula": "EDU×4", "skills_raw": "聞き耳、心理学、図書館、母国語、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2026", "category": "メディア・表現・創作系"}, "占い師、スピリチュアリスト、霊媒師": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "オカルト、芸術／製作（演劇）、心理学、目星、対人関係技能から3つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "学術・言語系"}, "駅務員": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "応急手当、聞き耳、芸術／製作（アナウンス）、心理学、ナビゲート、目星、対人関係技能から2つ", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:アナウンス"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}], "credit": [20, 50], "source": "2026", "category": "交通系"}, "園芸家／造園家": {"point_formula": "CON×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "科学（植物学）、芸術／製作（園芸または造園）、自然、対人関係技能から1つ、任意のほかの2つの技能、以下から2つの技能：科学（薬学）、科学（気象学）、重機械操作、登攀", "skills_structured": [{"type": "fixed", "id": "science:botany"}, {"type": "or", "options": [{"label": "芸術／製作（園芸）", "id": "art_craft:園芸"}, {"label": "芸術／製作（造園）", "id": "art_craft:造園"}], "label": "芸術／製作（園芸または造園）"}, {"type": "fixed", "id": "natural_world"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "choose", "options": [{"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "科学（気象学）", "id": "science:meteorology"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "登攀", "id": "climb"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "科学（気象学）", "id": "science:meteorology"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "登攀", "id": "climb"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [20, 70], "source": "2020", "category": "農業従事者"}, "エンジニア": {"point_formula": "EDU×4", "skills_raw": "科学（工学）、科学（物理学）、機械修理、芸術／製作（製図）、重機械操作、電気修理、図書館、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:engineering"}, {"type": "fixed", "id": "science:physics"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:製図"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "library_use"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2020", "category": "金融・ビジネス・サービス系"}, "エンターテイナー": {"point_formula": "APP×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（専門分野を選ぶ）、変装、心理学、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "psychology"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "オカルティスト": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "オカルト、聞き耳、経理、心理学、伝承（専門分野を選ぶ）、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "lore:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 70], "source": "2020", "category": "学術・言語系"}, "介護事業従事者": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "医学、応急手当、聞き耳、心理学、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 40], "source": "2026", "category": "医療・保健・福祉系"}, "害獣・害虫駆除業者": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "隠密、科学（生物学）、科学（薬学）、機械修理、聞き耳、登攀、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [10, 50], "source": "2026", "category": "物流・現場インフラ系"}, "海上保安官": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "機械修理、サバイバル（洋上）、重機械操作、操縦（船舶）、登攀、ナビゲート、法律、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "survival:sea"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "pilot:船舶"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "law"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "法務・社会・調査系"}, "科学捜査研究員": {"point_formula": "DEX×2+EDU×2", "skills_raw": "医学、科学（法医学）、科学（薬学）、芸術／製作（写真術）、コンピューター、人類学、法律、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "science:forensics"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "anthropology"}, {"type": "fixed", "id": "law"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2020", "category": "学術・言語系"}, "鍵師": {"point_formula": "DEX×2+EDU×2", "skills_raw": "鍵開け、機械修理、聞き耳、手さばき、電気修理、電子工学、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "locksmith"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "金融・ビジネス・サービス系"}, "歌手": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇またはダンス）、芸術／製作（歌唱）、心理学、変装、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "or", "options": [{"label": "芸術／製作（演劇）", "id": "art_craft:演劇"}, {"label": "芸術／製作（ダンス）", "id": "art_craft:ダンス"}], "label": "芸術／製作（演劇またはダンス）"}, {"type": "fixed", "id": "art_craft:歌唱"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "家庭教師": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "聞き耳、心理学、図書館、母国語、対人関係技能から2つ、任意のほかの1つの技能、以下から1つの技能：科学（任意）、ほかの言語、歴史", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "choose", "options": [{"label": "科学（任意）", "id": "science:任意"}, {"label": "ほかの言語", "id": "other_language"}, {"label": "歴史", "id": "history"}], "label": "以下から選択", "groupLabel": "以下から1つ"}], "credit": [5, 30], "source": "2026", "category": "学術・言語系"}, "カメラマン": {"point_formula": "EDU×4", "skills_raw": "隠密、科学（化学）、芸術／製作（写真術）、心理学、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2020", "category": "メディア・表現・創作系"}, "看護師": {"point_formula": "EDU×4", "skills_raw": "医学、応急手当、科学（薬学）、聞き耳、心理学、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "医療・保健・福祉系"}, "監察医": {"point_formula": "EDU×4", "skills_raw": "医学、科学（法医学）、科学（薬学）、図書館、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "science:forensics"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 50], "source": "2026", "category": "医療・保健・福祉系"}, "気象予報士": {"point_formula": "EDU×4またはSIZ×2+EDU×2", "skills_raw": "科学（気象学）、芸術／製作（アナウンス）、自然、図書館、母国語、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:meteorology"}, {"type": "fixed", "id": "art_craft:アナウンス"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 60], "source": "2026", "category": "学術・言語系"}, "キャビンアテンダント": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "応急手当、聞き耳、心理学、ほかの言語、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2026", "category": "交通系"}, "ギャンブラー": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇）、心理学、手さばき、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 50], "source": "2020", "category": "金融・ビジネス・サービス系"}, "救急救命士": {"point_formula": "DEX×2+EDU×2", "skills_raw": "医学、応急手当、科学（化学）、鍵開け、機械修理、登攀、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "locksmith"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "医療・保健・福祉系"}, "教師": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "応急手当、聞き耳、心理学、図書館、母国語、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2020", "category": "学術・言語系"}, "教授": {"point_formula": "EDU×4", "skills_raw": "図書館、心理学、ほかの言語、母国語、研究または個人的な専門として任意のほかの4つの技能", "skills_structured": [{"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}], "credit": [20, 70], "source": "2020", "category": "学術・言語系"}, "金属化学工場エンジニア": {"point_formula": "EDU×4またはCON×2+EDU×2", "skills_raw": "科学（化学）、機械修理、コンピューター、電気修理、図書館、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "2026", "category": "専門職エンジニア"}, "クラッカー、ネット犯罪者": {"point_formula": "EDU×4", "skills_raw": "コンピューター、電気修理、電子工学、図書館、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 70], "source": "2020", "category": "犯罪者・アウトロー系"}, "経営コンサルタント": {"point_formula": "EDU×4", "skills_raw": "経理、コンピューター、心理学、図書館、法律、ほかの言語、対人関係技能から2つ", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}], "credit": [40, 80], "source": "2026", "category": "金融・ビジネス・サービス系"}, "警察官": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、近接戦闘（格闘）、射撃、心理学、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "法務・社会・調査系"}, "刑事": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇）または変装、近接戦闘（格闘）または射撃（拳銃）、心理学、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "or", "options": [{"label": "芸術／製作（演劇）", "id": "art_craft:演劇"}, {"label": "変装", "id": "disguise"}], "label": "芸術／製作（演劇）または変装"}, {"type": "or", "options": [{"label": "近接戦闘（格闘）", "id": "melee:brawl"}, {"label": "射撃（拳銃）", "id": "firearms:handgun"}], "label": "近接戦闘（格闘）または射撃（拳銃）"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2020", "category": "法務・社会・調査系"}, "警備員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、回避、聞き耳、近接戦闘（格闘）、ほかの言語、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "法務・社会・調査系"}, "ケースワーカー": {"point_formula": "DEX×2+EDU×2またはAPP×2+EDU×2", "skills_raw": "聞き耳、経理、心理学、法律、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "医療・保健・福祉系"}, "外科医、歯科医": {"point_formula": "DEX×2+EDU×2", "skills_raw": "医学、応急手当、科学（生物学）、科学（薬学）、手さばき、ほかの言語（英語など）、対人関係技能から1つの技能、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "2020", "category": "医療・保健・福祉系"}, "検察官": {"point_formula": "EDU×4", "skills_raw": "科学（法医学）、心理学、図書館、法律、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:forensics"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2026", "category": "法務・社会・調査系"}, "建築家": {"point_formula": "EDU×4", "skills_raw": "科学（数学）、芸術／製作（製図）、経理、コンピューターまたは図書館、心理学、説得、法律、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:mathematics"}, {"type": "fixed", "id": "art_craft:製図"}, {"type": "fixed", "id": "accounting"}, {"type": "or", "options": [{"label": "コンピューター", "id": "computer"}, {"label": "図書館", "id": "library_use"}], "label": "コンピューターまたは図書館"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "persuade"}, {"type": "fixed", "id": "law"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2020", "category": "専門職エンジニア"}, "建築エンジニア": {"point_formula": "EDU×4", "skills_raw": "科学（物理学または数学）、機械修理、コンピューター、電気修理、電子工学、図書館、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "or", "options": [{"label": "科学（物理学）", "id": "science:physics"}, {"label": "科学（数学）", "id": "science:mathematics"}], "label": "科学（物理学または数学）"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "2026", "category": "専門職エンジニア"}, "建築デザイナー": {"point_formula": "EDU×4", "skills_raw": "機械修理、芸術／製作（建築設計）、コンピューター、心理学、図書館、歴史、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:建築設計"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2026", "category": "専門職エンジニア"}, "航空管制官": {"point_formula": "EDU×4", "skills_raw": "科学（気象学）、自然、図書館、法律、ほかの言語（英語）、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:meteorology"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "2026", "category": "交通系"}, "耕作農家": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、機械修理、芸術／製作（農業）、自然、重機械操作、追跡、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:農業"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "track"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "農業従事者"}, "工匠": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "機械修理、芸術／製作（専門分野を2つ選ぶ）、経理、自然、伝承（専門分野を選ぶ）、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "lore:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "専門職エンジニア"}, "公選職": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "心理学、歴史、母国語、対人関係技能4つすべて、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2020", "category": "法務・社会・調査系"}, "ゴーストライター": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（執筆）、心理学、図書館、変装、母国語、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:執筆"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 40], "source": "2026", "category": "メディア・表現・創作系"}, "古物研究家": {"point_formula": "EDU×4", "skills_raw": "鑑定、芸術／製作（専門分野を選ぶ）、図書館、目星、歴史、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 70], "source": "2020", "category": "学術・言語系"}, "古物ディーラー": {"point_formula": "EDU×4", "skills_raw": "運転（自動車）、鑑定、経理、図書館、ナビゲート、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "navigate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2020", "category": "専門職エンジニア"}, "コメディアン": {"point_formula": "DEX×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（物語）、芸術／製作（演劇）、心理学、変装、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:物語"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2020", "category": "メディア・表現・創作系"}, "コメンテーター": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇）、心理学、図書館、母国語、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "2020", "category": "メディア・表現・創作系"}, "コンピューター技術者": {"point_formula": "EDU×4", "skills_raw": "科学（数学）、コンピューター、電気修理、電子工学、図書館、目星、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:mathematics"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 70], "source": "2020", "category": "専門職エンジニア"}, "サイバーセキュリティーエンジニア": {"point_formula": "EDU×4", "skills_raw": "科学（暗号学）、コンピューター、電気修理、電子工学、図書館、法律、ほかの言語（英語）、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:cryptography"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2026", "category": "金融・ビジネス・サービス系"}, "作家": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（文学）、心理学、図書館、母国語、ほかの言語、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:文学"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "サラリーマン": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "運転（自動車）、経理、隠密もしくは手さばき、聞き耳、心理学、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "accounting"}, {"type": "or", "options": [{"label": "隠密", "id": "stealth"}, {"label": "手さばき", "id": "sleight_of_hand"}], "label": "隠密もしくは手さばき"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "金融・ビジネス・サービス系"}, "山岳救助隊員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、サバイバル（山岳）、跳躍、追跡、登攀、ナビゲート、ほかの言語、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "survival:mountain"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "法務・社会・調査系"}, "自衛官－陸上自衛隊員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、隠密、回避、近接戦闘（格闘）、サバイバル、射撃もしくは砲、以下から2つの技能：機械修理、重機械操作、水泳、電気修理、登攀、爆破、ほかの言語", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "survival"}, {"type": "or", "options": [{"label": "射撃", "id": "firearms"}, {"label": "砲", "id": "artillery"}], "label": "射撃もしくは砲"}, {"type": "choose", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "水泳", "id": "swim"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "登攀", "id": "climb"}, {"label": "爆破", "id": "demolition"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "水泳", "id": "swim"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "登攀", "id": "climb"}, {"label": "爆破", "id": "demolition"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [9, 40], "source": "2020", "category": "法務・社会・調査系"}, "自衛官－海上自衛隊員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、サバイバル（洋上）、重機械操作、水泳、操縦（ボート）、ナビゲート、以下から2つの技能：機械修理、電気修理、近接戦闘、射撃もしくは砲", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "survival:sea"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "pilot:boat"}, {"type": "fixed", "id": "navigate"}, {"type": "choose", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms:任意"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms:任意"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [9, 40], "source": "2020", "category": "法務・社会・調査系"}, "自衛官－自衛隊パイロット（陸海空）": {"point_formula": "DEX×2+EDU×2", "skills_raw": "科学（天文学）、機械修理、重機械操作、操縦、電気修理、ナビゲート、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:astronomy"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "pilot"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "navigate"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [15, 50], "source": "2020", "category": "交通系"}, "自衛官－自衛隊幹部": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "経理、サバイバル、射撃、心理学、ナビゲート、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "survival"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "navigate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2020", "category": "法務・社会・調査系"}, "司書／学芸員": {"point_formula": "EDU×4", "skills_raw": "経理、図書館、ほかの言語、母国語、個人的な専門として任意のほかの4つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "学術・言語系"}, "施設園芸農家": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "科学（植物学）、機械修理、芸術／製作（農業）、自然、電気修理、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:botany"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:農業"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "農業従事者"}, "自宅警備員": {"point_formula": "EDU×4", "skills_raw": "隠密、聞き耳、コンピューター、電気修理、伝承（専門分野を選ぶ）、図書館、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "lore:任意"}, {"type": "fixed", "id": "library_use"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 80], "source": "2026", "category": "金融・ビジネス・サービス系"}, "執事／メイド": {"point_formula": "EDU×4", "skills_raw": "応急手当、聞き耳、芸術／製作（専門分野を2つ選ぶ）、心理学、目星、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "金融・ビジネス・サービス系"}, "シナリオライター": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（執筆）、心理学、図書館、母国語、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:執筆"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "メディア・表現・創作系"}, "ジャーナリスト": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（写真術）、心理学、母国語、歴史、図書館、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 60], "source": "2020", "category": "メディア・表現・創作系"}, "獣医師": {"point_formula": "EDU×4", "skills_raw": "医学、科学（動物学）、科学（薬学）、自然、図書館、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "science:zoology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2020", "category": "医療・保健・福祉系"}, "重機オペレーター": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、科学（地質学）、機械修理、重機械操作、電気修理、登攀、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "science:geology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "物流・現場インフラ系"}, "修復家": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "科学（化学）、鑑定、芸術／製作（修復）、図書館、歴史、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:修復"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "学術・言語系"}, "樹木医": {"point_formula": "EDU×4またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、科学（植物学）、機械修理、自然、登攀、図書館、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "science:botany"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2026", "category": "医療・保健・福祉系"}, "超心理学者": {"point_formula": "EDU×4", "skills_raw": "オカルト、芸術／製作（写真術）、心理学、人類学、図書館、歴史、ほかの言語、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "anthropology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 30], "source": "2020", "category": "学術・言語系"}, "商店主／店員": {"point_formula": "DEX×2+EDU×2またはAPP×2+EDU×2", "skills_raw": "機械修理、聞き耳、経理、心理学、電気修理、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "elec_repair"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2020", "category": "金融・ビジネス・サービス系"}, "消防士": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、回避、機械修理、重機械操作、投擲、跳躍、登攀、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2020", "category": "物流・現場インフラ系"}, "情報通信エンジニア": {"point_formula": "EDU×4", "skills_raw": "機械修理、コンピューター、電気修理、電子工学、図書館、ナビゲート、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "navigate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 60], "source": "2026", "category": "専門職エンジニア"}, "私立探偵": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "芸術／製作（写真術）、心理学、図書館、変装、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2020", "category": "法務・社会・調査系"}, "ストリート・パンク": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、近接戦闘（格闘）、芸術／製作（ダンス）、芸術／製作（ファッション）、変装、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:ダンス"}, {"type": "fixed", "id": "art_craft:ファッション"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [3, 20], "source": "2020", "category": "犯罪者・アウトロー系"}, "スポーツタレント": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "近接戦闘（格闘）、芸術／製作（演劇）、心理学、跳躍、登攀、変装、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2020", "category": "メディア・表現・創作系"}, "精神科医": {"point_formula": "EDU×4", "skills_raw": "医学、科学（薬学）、聞き耳、心理学、精神分析、ほかの言語（英語）、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "2020", "category": "医療・保健・福祉系"}, "清掃・廃棄物処理業": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、科学（化学）、機械修理、重機械操作、跳躍、電気修理、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2026", "category": "物流・現場インフラ系"}, "声優": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "聞き耳、変装、芸術／製作（声の演技）、心理学、母国語、ほかの言語、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "art_craft:声の演技"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 60], "source": "2020", "category": "メディア・表現・創作系"}, "船舶職員": {"point_formula": "EDU×4", "skills_raw": "心理学、水泳、操縦（船舶）、ほかの言語（英語）、対人関係技能から1つ、以下から3つの技能：科学（気象学）、重機械操作、電気修理、機械修理、ナビゲート、目星", "skills_structured": [{"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "pilot:船舶"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "choose", "options": [{"label": "科学（気象学）", "id": "science:meteorology"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "ナビゲート", "id": "navigate"}, {"label": "目星", "id": "spot_hidden"}], "label": "以下から選択", "groupLabel": "以下から3つ"}, {"type": "choose", "options": [{"label": "科学（気象学）", "id": "science:meteorology"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "ナビゲート", "id": "navigate"}, {"label": "目星", "id": "spot_hidden"}], "label": "以下から選択", "groupLabel": "以下から3つ"}, {"type": "choose", "options": [{"label": "科学（気象学）", "id": "science:meteorology"}, {"label": "重機械操作", "id": "heavy_machinery"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "ナビゲート", "id": "navigate"}, {"label": "目星", "id": "spot_hidden"}], "label": "以下から選択", "groupLabel": "以下から3つ"}], "credit": [9, 40], "source": "2026", "category": "交通系"}, "退職代行": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "聞いている、経理、心理学、説得、図書館、法律、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "persuade"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "金融・ビジネス・サービス系"}, "探検家（冒険家教授）": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "サバイバル、自然、射撃（ライフル／ショットガン）、ナビゲート、ほかの言語、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "survival"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "firearms:ライフル／ショットガン"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 70], "source": "2020", "category": "フィクションに近い職業"}, "ダンサー": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "隠密、回避、芸術／製作（ダンス）、心理学、跳躍、登攀、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "art_craft:ダンス"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2020", "category": "メディア・表現・創作系"}, "畜産・酪農家": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "科学（動物学）、機械修理、聞き耳、芸術／製作（畜産）、自然、重機械操作、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:zoology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:畜産"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "農業従事者"}, "通訳": {"point_formula": "EDU×4", "skills_raw": "聞き耳、心理学、図書館、ほかの言語、母国語、歴史、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "学術・言語系"}, "デイトレーダー": {"point_formula": "EDU×4またはCON×2+EDU×2", "skills_raw": "科学（数学）、経理、コンピューター、図書館、法律、ほかの言語、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:mathematics"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2026", "category": "金融・ビジネス・サービス系"}, "ディレッタント": {"point_formula": "APP×2+EDU×2", "skills_raw": "芸術／製作（任意の専門分野）、射撃（専門分野を選ぶ）、乗馬、ほかの言語、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "firearms:専門分野を選ぶ"}, {"type": "fixed", "id": "ride"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [50, 99], "source": "2020", "category": "金融・ビジネス・サービス系"}, "デザイナー": {"point_formula": "EDU×4またはPOW×2+EDU×2", "skills_raw": "芸術／製作（専門分野を選ぶ）、自然もしくは伝承（専門分野を選ぶ）、心理学、図書館、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:任意"}, {"type": "or", "options": [{"label": "自然", "id": "natural_world"}, {"label": "伝承（専門分野を選ぶ）", "id": "lore:任意"}], "label": "自然もしくは伝承（専門分野を選ぶ）"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "鉄道運転士": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "運転（鉄道車両）、機械修理、聞き耳、電気修理、ナビゲート、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 60], "source": "2026", "category": "交通系"}, "動画配信者": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "芸術／製作（動画）、コンピューター、心理学、図書館、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:動画"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2026", "category": "メディア・表現・創作系"}, "動物使い／飼育員": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "科学（動物学）、聞き耳、自然、乗馬もしくは動物使い、心理学、跳躍、追跡、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:zoology"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "natural_world"}, {"type": "or", "options": [{"label": "乗馬", "id": "ride"}, {"label": "動物使い", "id": "animal_handling"}], "label": "乗馬もしくは動物使い"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "track"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 40], "source": "2020", "category": "医療・保健・福祉系"}, "東洋医": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "医学、応急手当、心理学、図書館、歴史、対人関係技能から1つ、以下から2つの技能：オカルト、科学（薬学）、近接戦闘（格闘）、精神分析、ほかの言語", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "choose", "options": [{"label": "オカルト", "id": "occult"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "近接戦闘（格闘）", "id": "melee:brawl"}, {"label": "精神分析", "id": "psychoanalysis"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "オカルト", "id": "occult"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "近接戦闘（格闘）", "id": "melee:brawl"}, {"label": "精神分析", "id": "psychoanalysis"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [9, 60], "source": "2026", "category": "医療・保健・福祉系"}, "土木エンジニア": {"point_formula": "EDU×4またはSTR×2+EDU×2", "skills_raw": "科学（地質学）、機械修理、重機械操作、図書館、ナビゲート、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:geology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 60], "source": "2026", "category": "専門職エンジニア"}, "ドライバー": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "運転（自動車もしくはオートバイ）、機械修理、聞き耳、電気修理、ナビゲート、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2020", "category": "交通系"}, "トレーナー": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "医学、応急手当、科学（薬学）、目星、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "競技系"}, "ドローン操縦士": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "コンピューター、自然、操縦（ドローン）、電気修理、電子工学、ナビゲート、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "pilot:ドローン"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "物流・現場インフラ系"}, "入国審査官／税関職員": {"point_formula": "EDU×4", "skills_raw": "心理学、図書館、法律、ほかの言語（任意）、目星、対人関係技能から1つ、以下から2つの技能：科学（植物学）、科学（動物学）、科学（薬学）、鑑定、人類学", "skills_structured": [{"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "choose", "options": [{"label": "科学（植物学）", "id": "science:botany"}, {"label": "科学（動物学）", "id": "science:zoology"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "鑑定", "id": "appraisal"}, {"label": "人類学", "id": "anthropology"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "科学（植物学）", "id": "science:botany"}, {"label": "科学（動物学）", "id": "science:zoology"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "鑑定", "id": "appraisal"}, {"label": "人類学", "id": "anthropology"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [20, 60], "source": "2026", "category": "法務・社会・調査系"}, "人間山脈／ボディーガード": {"point_formula": "SIZ×2+EDU×2", "skills_raw": "応急手当、隠密、近接戦闘（格闘）、投擲、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2020", "category": "法務・社会・調査系"}, "ネットタレント": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "科学または芸術／製作から2つの専門分野を選ぶ、コンピューター、心理学、電気修理、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "or", "options": [{"label": "科学", "id": "science"}, {"label": "芸術／製作（任意）", "id": "art_craft:任意"}], "label": "科学または芸術／製作から2つの専門分野を選ぶ"}, {"type": "fixed", "id": "computer", "options": []}, {"type": "fixed", "id": "psychology", "options": []}, {"type": "fixed", "id": "elec_repair", "options": []}, {"type": "ip", "label": "対人関係技能", "options": []}, {"type": "any", "label": "任意の技能", "options": []}, {"type": "any", "label": "任意の技能", "options": []}], "credit": [5, 70], "source": "2026", "category": "メディア・表現・創作系"}, "農夫": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、機械修理、芸術／製作（農業）、自然、重機械操作、追跡、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:農業"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "track"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2020", "category": "農業従事者"}, "配送員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車またはオートバイ）、回避、聞き耳、追跡、ナビゲート、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "物流・現場インフラ系"}, "俳優": {"point_formula": "APP×2+EDU×2", "skills_raw": "芸術／製作（演劇）、心理学、変装、対人関係技能から2つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "パイロット": {"point_formula": "DEX×2+EDU×2", "skills_raw": "科学（天文学）、機械修理、重機械操作、操縦（専門分野を選ぶ）、電気修理、ナビゲート、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:astronomy"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "pilot:専門分野を選ぶ"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "navigate"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2020", "category": "交通系"}, "パパラッチ": {"point_formula": "DEX×2+EDU×2", "skills_raw": "運転（自動車またはオートバイ）、隠密、芸術／製作（写真術）、追跡、図書館、変装、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [5, 40], "source": "2026", "category": "メディア・表現・創作系"}, "犯罪者": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、心理学、目星、対人関係技能から1つ、以下から4つの技能：鍵開け、鑑定、機械修理、近接戦闘、射撃、手さばき、変装", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}], "credit": [3, 65], "source": "2020", "category": "犯罪者・アウトロー系"}, "盤上競技者": {"point_formula": "EDU×4", "skills_raw": "科学（数学）、芸術／製作（任意の盤上競技）、コンピューター、心理学、図書館、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:mathematics"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2026", "category": "競技系"}, "ビジネスマン": {"point_formula": "EDU×4", "skills_raw": "経理、心理学、法律、ほかの言語、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 80], "source": "2020", "category": "金融・ビジネス・サービス系"}, "ビデオ・ジャーナリスト": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "運転（自動車）、隠密、芸術／製作（写真術）、心理学、電気修理、ほかの言語、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 50], "source": "2026", "category": "メディア・表現・創作系"}, "評論家": {"point_formula": "EDU×4", "skills_raw": "鑑定、芸術／製作（任意）、心理学、図書館、母国語、歴史、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2026", "category": "学術・言語系"}, "ファッションデザイナー": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "芸術／製作（ファッション）、心理学、目星、対人関係技能から2つ、ほかの言語、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:ファッション"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "フォト・ジャーナリスト": {"point_formula": "EDU×4またはCON×2+EDU×2", "skills_raw": "科学（化学）、芸術／製作（写真術）、心理学、登攀、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 50], "source": "2020", "category": "メディア・表現・創作系"}, "プロデューサー": {"point_formula": "POW×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演出）、心理学、法律、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:演出"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "2020", "category": "メディア・表現・創作系"}, "プロモーター": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "経理、心理学、図書館、法律、ほかの言語（任意）、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "2026", "category": "メディア・表現・創作系"}, "プロレスラー": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "威圧、応急手当、回避、近接戦闘（格闘）、芸術／製作（プロレス）、跳躍、登攀、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "intimidate"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:プロレス"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 70], "source": "2026", "category": "競技系"}, "ヘアアーティスト": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "科学（薬学）、芸術／製作（ヘアメイク）、心理学、変装、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "art_craft:ヘアメイク"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 80], "source": "2020", "category": "メディア・表現・創作系"}, "法律家": {"point_formula": "EDU×4", "skills_raw": "経理、心理学、図書館、法律、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "2020", "category": "法務・社会・調査系"}, "暴力団員": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、隠密、近接戦闘（格闘）、射撃（拳銃）、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "firearms:handgun"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [3, 20], "source": "2020", "category": "犯罪者・アウトロー系"}, "保険調査員": {"point_formula": "EDU×4またはCON×2+EDU×2", "skills_raw": "運転（自動車）、経理、心理学、図書館、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "2026", "category": "法務・社会・調査系"}, "ホスト、ホステス": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "隠密、芸術（専門分野を選ぶ）、心理学、手さばき、変装、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 80], "source": "2020", "category": "金融・ビジネス・サービス系"}, "水先人": {"point_formula": "EDU×4", "skills_raw": "科学（気象学）、聞き耳、自然、操縦（船舶）、ナビゲート、ほかの言語（英語）、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "science:meteorology"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "pilot:船舶"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [20, 60], "source": "2026", "category": "交通系"}, "ミュージシャン": {"point_formula": "DEX×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（楽器演奏）、心理学、電気修理、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:楽器演奏"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "elec_repair"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 60], "source": "2020", "category": "メディア・表現・創作系"}, "民間軍事会社メンバー": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、回避、近接戦闘、射撃、水泳、登攀、ほかの言語、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2020", "category": "法務・社会・調査系"}, "民泊運営者": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "機械修理、経理、心理学、人類学、図書館、ほかの言語（任意）、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "anthropology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [10, 50], "source": "2026", "category": "金融・ビジネス・サービス系"}, "メカニック": {"point_formula": "DEX×2+EDU×2", "skills_raw": "運転（自動車）、機械修理、芸術／製作（専門分野を選ぶ）、重機械操作、電気修理、登攀、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "climb"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2020", "category": "専門職エンジニア"}, "メッセンジャー": {"point_formula": "DEX×2+EDU×2", "skills_raw": "運転（オートバイまたは自転車）、回避、聞き耳、追跡、ナビゲート、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "物流・現場インフラ系"}, "メンタルセラピスト": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（専門分野を2つ選ぶ）、心理学、精神分析、ほかの言語、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "any_art", "label": "芸術／製作（専門分野を選ぶ）", "id": "art_craft:任意"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "2020", "category": "医療・保健・福祉系"}, "モデル": {"point_formula": "APP×2+EDU×2", "skills_raw": "芸術／製作（ファッション）、芸術／製作（ポージング）、心理学、変装、目星、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:ファッション"}, {"type": "fixed", "id": "art_craft:ポージング"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 60], "source": "2020", "category": "メディア・表現・創作系"}, "薬剤師": {"point_formula": "EDU×4", "skills_raw": "応急手当、科学（化学）、科学（薬学）、経理、心理学、図書館、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 60], "source": "2026", "category": "医療・保健・福祉系"}, "闇医者": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "医学、応急手当、科学（薬学）、経理、法律、ほかの言語、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 70], "source": "2020", "category": "医療・保健・福祉系"}, "闇金融業者": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "威圧、心理学、法律、目星、対人関係技能から1つ、任意のほかの1つの技能、以下から2つの技能：運転（自動車）、近接戦闘（格闘）、経理、追跡", "skills_structured": [{"type": "fixed", "id": "intimidate"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "choose", "options": [{"label": "運転（自動車）", "id": "drive_auto"}, {"label": "近接戦闘（格闘）", "id": "melee:brawl"}, {"label": "経理", "id": "accounting"}, {"label": "追跡", "id": "track"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "運転（自動車）", "id": "drive_auto"}, {"label": "近接戦闘（格闘）", "id": "melee:brawl"}, {"label": "経理", "id": "accounting"}, {"label": "追跡", "id": "track"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [9, 50], "source": "2026", "category": "金融・ビジネス・サービス系"}, "養蜂家": {"point_formula": "EDU×4またはDEX×2+EDU×2", "skills_raw": "運転（自動車）、科学（動物学）、機械修理、聞き耳、芸術／製作（養蜂）、自然、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "science:zoology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:養蜂"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 60], "source": "2026", "category": "農業従事者"}, "理学療法士": {"point_formula": "EDU×4またはSTR×2+EDU×2", "skills_raw": "医学、応急手当、科学（生物学）、科学（薬学）、心理学、精神分析、対人関係技能から2つ", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}], "credit": [20, 50], "source": "2026", "category": "医療・保健・福祉系"}, "漁師": {"point_formula": "CON×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "科学（気象学）、機械修理、サバイバル（洋上）、自然、水泳、操縦（ボート）、射撃（ライフルまたはショットガン）、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:meteorology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "survival:sea"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "pilot:boat"}, {"type": "fixed", "id": "firearms:ライフルまたはショットガン"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2020", "category": "農業従事者"}, "猟師": {"point_formula": "CON×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "隠密、サバイバル（山岳）、自然、射撃（ライフル／ショットガン）、追跡、ナビゲート、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "survival:mountain"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "firearms:ライフル／ショットガン"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2020", "category": "農業従事者"}, "料理人": {"point_formula": "DEX×2+EDU×2", "skills_raw": "科学（化学）、近接戦闘（格闘）、芸術／製作（料理）、自然、手さばき、歴史（特に料理関係）、科学（植物学）、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:料理"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "science:botany"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 80], "source": "2020", "category": "金融・ビジネス・サービス系"}, "旅行ガイド": {"point_formula": "EDU×4", "skills_raw": "心理学、図書館、歴史、ほかの言語、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2020", "category": "金融・ビジネス・サービス系"}, "林業従事者": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "科学（植物学）、機械修理、近接戦闘（チェーンソー）、サバイバル（山岳）、自然、重機械操作、ナビゲート、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:botany"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "melee:chainsaw"}, {"type": "fixed", "id": "survival:mountain"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "navigate"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "2026", "category": "農業従事者"}, "レーサー": {"point_formula": "DEX×2+EDU×2", "skills_raw": "回避、自然、追跡、目星、対人関係技能から1つ、任意のほかの2つの技能、以下から1つの技能：運転（任意）、乗馬、操縦（任意）", "skills_structured": [{"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "choose", "options": [{"label": "運転（任意）", "id": "drive_auto"}, {"label": "乗馬", "id": "ride"}, {"label": "操縦（任意）", "id": "pilot:任意"}], "label": "以下から選択", "groupLabel": "以下から1つ"}], "credit": [10, 80], "source": "2026", "category": "競技系"}, "労働基準監督官": {"point_formula": "EDU×4", "skills_raw": "経理、心理学、説得、図書館、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "persuade"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "2026", "category": "法務・社会・調査系"}, "陰陽師": {"point_formula": "EDU×4", "skills_raw": "オカルト、科学（天文学）、精神分析、図書館、歴史、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "science:astronomy"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 70], "source": "2026", "category": "フィクションに近い職業"}, "怪盗": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "隠密、鍵開け、鑑定、心理学、手さばき、変装、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "locksmith"}, {"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [10, 70], "source": "2020", "category": "フィクションに近い職業"}, "殺し屋": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、聞き耳、心理学、登攀、目星、以下から3つの技能：医学、運転（自動車）、科学（薬学）、射撃（任意）、近接戦闘（任意）、電気修理", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "運転（自動車）", "id": "drive_auto"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "射撃（任意）", "id": "firearms:任意"}, {"label": "近接戦闘（任意）", "id": "melee:任意"}, {"label": "電気修理", "id": "elec_repair"}], "label": "以下から選択", "groupLabel": "以下から3つ"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "運転（自動車）", "id": "drive_auto"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "射撃（任意）", "id": "firearms:任意"}, {"label": "近接戦闘（任意）", "id": "melee:任意"}, {"label": "電気修理", "id": "elec_repair"}], "label": "以下から選択", "groupLabel": "以下から3つ"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "運転（自動車）", "id": "drive_auto"}, {"label": "科学（薬学）", "id": "science:pharmacy"}, {"label": "射撃（任意）", "id": "firearms:任意"}, {"label": "近接戦闘（任意）", "id": "melee:任意"}, {"label": "電気修理", "id": "elec_repair"}], "label": "以下から選択", "groupLabel": "以下から3つ"}], "credit": [5, 60], "source": "2026", "category": "フィクションに近い職業"}, "情報屋": {"point_formula": "EDU×4", "skills_raw": "言いくるめ、隠密、聞き耳、コンピューター、心理学、図書館、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "fast_talk"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [10, 50], "source": "2026", "category": "フィクションに近い職業"}, "賞金稼ぎ": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、聞き耳、近接戦闘（格闘）、心理学、追跡、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "フィクションに近い職業"}, "スパイ": {"point_formula": "EDU×4またはAPP×2+EDU×2", "skills_raw": "隠密、回避、図書館、近接戦闘（任意）、心理学、変装、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "melee:任意"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [20, 60], "source": "2026", "category": "フィクションに近い職業"}, "掃除屋": {"point_formula": "EDU×4またはCON×2+EDU×2", "skills_raw": "医学、運転（自動車）、隠密、科学（化学）、聞き耳、手さばき、目星、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "science:chemistry"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 50], "source": "2026", "category": "フィクションに近い職業"}, "運び屋": {"point_formula": "DEX×2+EDU×2", "skills_raw": "運転（自動車）、隠密、聞き耳、操縦（任意）、追跡、手さばき、ナビゲート、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "pilot:任意"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "navigate"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "フィクションに近い職業"}, "マッドサイエンティスト": {"point_formula": "EDU×4", "skills_raw": "科学（任意）、図書館、ほかの言語、目星、以下から4つの技能：医学、オカルト、科学（任意）、考古学、コンピューター、人類学、電気修理、電子工学、歴史", "skills_structured": [{"type": "fixed", "id": "science:任意"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "オカルト", "id": "occult"}, {"label": "科学（任意）", "id": "science:任意"}, {"label": "考古学", "id": "archaeology"}, {"label": "コンピューター", "id": "computer"}, {"label": "人類学", "id": "anthropology"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "電子工学", "id": "electronics"}, {"label": "歴史", "id": "history"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "オカルト", "id": "occult"}, {"label": "科学（任意）", "id": "science:任意"}, {"label": "考古学", "id": "archaeology"}, {"label": "コンピューター", "id": "computer"}, {"label": "人類学", "id": "anthropology"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "電子工学", "id": "electronics"}, {"label": "歴史", "id": "history"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "オカルト", "id": "occult"}, {"label": "科学（任意）", "id": "science:任意"}, {"label": "考古学", "id": "archaeology"}, {"label": "コンピューター", "id": "computer"}, {"label": "人類学", "id": "anthropology"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "電子工学", "id": "electronics"}, {"label": "歴史", "id": "history"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "医学", "id": "medicine"}, {"label": "オカルト", "id": "occult"}, {"label": "科学（任意）", "id": "science:任意"}, {"label": "考古学", "id": "archaeology"}, {"label": "コンピューター", "id": "computer"}, {"label": "人類学", "id": "anthropology"}, {"label": "電気修理", "id": "elec_repair"}, {"label": "電子工学", "id": "electronics"}, {"label": "歴史", "id": "history"}], "label": "以下から選択", "groupLabel": "以下から4つ"}], "credit": [5, 80], "source": "2026", "category": "フィクションに近い職業"}, "夜逃げ屋": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、隠密、鍵開け、聞き耳、心理学、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "locksmith"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "2026", "category": "フィクションに近い職業"}, "アスリート（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "近接戦闘（格闘）、乗馬、水泳、跳躍、投擲、登攀、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "ride"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 70], "source": "RB", "category": "海外・汎用職業"}, "医師（RB）": {"point_formula": "EDU×4", "skills_raw": "医学、応急手当、科学（生物学）、科学（薬学）、心理学、ほかの言語（ラテン語など）、研究または個人的な専門として任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "science:pharmacy"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "RB", "category": "海外・汎用職業"}, "エンジニア（RB）": {"point_formula": "EDU×4", "skills_raw": "科学（工学）、科学（物理学）、機械修理、芸術／製作（製図）、重機械操作、電気修理、図書館、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "science:engineering"}, {"type": "fixed", "id": "science:physics"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:製図"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "library_use"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "RB", "category": "海外・汎用職業"}, "エンターテイナー（RB）": {"point_formula": "APP×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇）、心理学、変装、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:演劇"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "disguise"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 70], "source": "RB", "category": "海外・汎用職業"}, "外交販売員": {"point_formula": "APP×2+EDU×2", "skills_raw": "運転（自動車）、隠密もしくは手さばき、聞き耳、経理、心理学、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "or", "options": [{"label": "隠密", "id": "stealth"}, {"label": "手さばき", "id": "sleight_of_hand"}], "label": "隠密もしくは手さばき"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 40], "source": "PG", "category": "海外・汎用職業"}, "科学者（RB）": {"point_formula": "EDU×4", "skills_raw": "任意の専門分野の科学を3つ、コンピューターもしくは図書館、目星、ほかの言語、母国語、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "science:任意"}, {"type": "fixed", "id": "science:任意"}, {"type": "fixed", "id": "science:任意"}, {"type": "or", "options": [{"label": "コンピューター", "id": "computer"}, {"label": "図書館", "id": "library_use"}], "label": "コンピューターもしくは図書館"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}], "credit": [9, 50], "source": "PG", "category": "海外・汎用職業"}, "学生・インターン": {"point_formula": "EDU×4", "skills_raw": "聞き耳、図書館、ほかの言語もしくは母国語、専攻分野として3つの技能、個人的な専門または時代に関連する任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "library_use"}, {"type": "or", "options": [{"label": "ほかの言語", "id": "other_language"}, {"label": "母国語", "id": "own_language"}], "label": "ほかの言語もしくは母国語"}, {"type": "any", "label": "任意の技能", "note": "専攻または時代に関連する"}, {"type": "any", "label": "任意の技能", "note": "専攻または時代に関連する"}, {"type": "any", "label": "任意の技能", "note": "専攻または時代に関連する"}, {"type": "any", "label": "任意の技能", "note": "専攻または時代に関連する"}, {"type": "any", "label": "任意の技能", "note": "専攻または時代に関連する"}], "credit": [5, 10], "source": "RB", "category": "海外・汎用職業"}, "活動家（RB）": {"point_formula": "APP×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "隠密、心理学、歴史、威圧、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "intimidate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 30], "source": "RB", "category": "海外・汎用職業"}, "カルト指導者": {"point_formula": "APP×2+EDU×2", "skills_raw": "オカルト、経理、心理学、目星、対人関係技能から2つ、個人的な専門に関連する任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 60], "source": "RB", "category": "海外・汎用職業"}, "教授（RB）": {"point_formula": "EDU×4", "skills_raw": "図書館、心理学、ほかの言語、母国語、研究または個人的な専門として任意のほかの4つの技能", "skills_structured": [{"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または研究として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または研究として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または研究として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または研究として"}], "credit": [20, 70], "source": "RB", "category": "海外・汎用職業"}, "警官（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、近接戦闘（格闘）、射撃、心理学、法律、目星、対人関係技能から1つ、個人的な専門とし運転（自動車）または乗馬のどちらか1つ", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "or", "options": [{"label": "運転（自動車）", "id": "drive_auto"}, {"label": "乗馬", "id": "ride"}], "label": "運転（自動車）または乗馬"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "刑事（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（演劇）または変装、射撃、心理学、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "or", "options": [{"label": "芸術／製作（演劇）", "id": "art_craft:演劇"}, {"label": "変装", "id": "disguise"}], "label": "芸術／製作（演劇）または変装"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 50], "source": "RB", "category": "海外・汎用職業"}, "芸術家（RB）": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "芸術／製作（任意の分野）、自然もしくは歴史、心理学、目星、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:任意"}, {"type": "or", "options": [{"label": "自然", "id": "natural_world"}, {"label": "歴史", "id": "history"}], "label": "自然もしくは歴史"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 50], "source": "RB", "category": "海外・汎用職業"}, "古物研究家（RB）": {"point_formula": "EDU×4", "skills_raw": "鑑定、芸術／製作（任意の分野）、図書館、目星、歴史、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 70], "source": "RB", "category": "海外・汎用職業"}, "作家（RB）": {"point_formula": "EDU×4", "skills_raw": "オカルトもしくは自然、芸術／製作（文学）、心理学、図書館、歴史、母国語、ほかの言語、任意のほかの1つの技能", "skills_structured": [{"type": "or", "options": [{"label": "オカルト", "id": "occult"}, {"label": "自然", "id": "natural_world"}], "label": "オカルトもしくは自然"}, {"type": "fixed", "id": "art_craft:文学"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "士官（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "跳躍、サバイバル（専門分野を選ぶ）、射撃（専門分野を選ぶ）、心理学、ナビゲート、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "survival:任意"}, {"type": "fixed", "id": "firearms:専門分野を選ぶ"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "navigate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "RB", "category": "海外・汎用職業"}, "司書（RB）": {"point_formula": "EDU×4", "skills_raw": "経理、図書館、ほかの言語、母国語、個人的な専門または記事を読む専門家としての任意のほかの4つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "other_language"}, {"type": "fixed", "id": "own_language"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門として"}], "credit": [9, 35], "source": "RB", "category": "海外・汎用職業"}, "ジャーナリスト（RB）": {"point_formula": "EDU×4", "skills_raw": "芸術／製作（写真術）、心理学、母国語、歴史、図書館、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "書籍商": {"point_formula": "EDU×4", "skills_raw": "運転（自動車）、鑑定、経理、歴史、図書館、対人関係技能から1つの技能、母国語、ほかの言語", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "library_use"}, {"type": "ip", "label": "対人関係技能"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "other_language"}], "credit": [20, 40], "source": "RB", "category": "海外・汎用職業"}, "私立探偵（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "芸術／製作（写真術）、心理学、図書館、変装、法律、目星、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "disguise"}, {"type": "fixed", "id": "law"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "心理学者／精神分析学者": {"point_formula": "EDU×4", "skills_raw": "聞き耳、経理、心理学、精神分析、説得、図書館、学術的もしくは個人的な専門または時代に関連する任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "fixed", "id": "persuade"}, {"type": "fixed", "id": "library_use"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または時代に関連する"}, {"type": "any", "label": "任意の技能", "note": "個人的な専門または時代に関連する"}], "credit": [10, 40], "source": "PG", "category": "海外・汎用職業"}, "スタントマン": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、回避、機械修理もしくは電気修理、近接戦闘、水泳、跳躍、登攀、以下から1つの技能：運転（自動車）、乗馬、ダイビング", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "dodge"}, {"type": "or", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "電気修理", "id": "elec_repair"}], "label": "機械修理もしくは電気修理"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "choose", "options": [{"label": "運転（自動車）", "id": "drive_auto"}, {"label": "乗馬", "id": "ride"}, {"label": "ダイビング", "id": "diving"}], "label": "以下から選択", "groupLabel": "以下から1つ"}], "credit": [10, 50], "source": "PG", "category": "海外・汎用職業"}, "聖職者": {"point_formula": "EDU×4", "skills_raw": "聞き耳、経理、心理学、図書館、歴史、精神分析、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "psychoanalysis"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "RB", "category": "海外・汎用職業"}, "ダイバー": {"point_formula": "DEX×2+EDU×2", "skills_raw": "応急手当、科学（生物学）、機械修理、水泳、操縦（ボート）、ダイビング、目星、個人的な専門または時代的な専門として任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "science:biology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "pilot:boat"}, {"type": "fixed", "id": "diving"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "PG", "category": "海外・汎用職業"}, "超心理学者（RB）": {"point_formula": "EDU×4", "skills_raw": "オカルト、芸術／製作（写真術）、心理学、人類学、図書館、歴史、ほかの言語、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "art_craft:写真術"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "anthropology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "history"}, {"type": "fixed", "id": "other_language"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "ディレッタント（RB）": {"point_formula": "APP×2+EDU×2", "skills_raw": "芸術／製作（任意の専門分野）、射撃（専門分野）、乗馬、ほかの言語、対人関係技能から1つ、任意のほかの3つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "firearms:専門分野"}, {"type": "fixed", "id": "ride"}, {"type": "fixed", "id": "other_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [50, 99], "source": "RB", "category": "海外・汎用職業"}, "伝道者": {"point_formula": "EDU×4", "skills_raw": "医学、応急手当、機械修理、芸術／製作（任意）、自然、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "medicine"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "natural_world"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 30], "source": "RB", "category": "海外・汎用職業"}, "登山家": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、聞き耳、サバイバル（山岳あるいは適切なもの）、跳躍、追跡、登攀、ナビゲート、ほかの言語", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "survival:任意"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "other_language"}], "credit": [30, 60], "source": "RB", "category": "海外・汎用職業"}, "トライブ・メンバー（RB)": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "オカルト、聞き耳、近接戦闘または投擲、サバイバル（任意の分野）、自然、水泳、登攀、目星", "skills_structured": [{"type": "fixed", "id": "occult"}, {"type": "fixed", "id": "listen"}, {"type": "or", "options": [{"label": "近接戦闘", "id": "melee"}, {"label": "投擲", "id": "throw"}], "label": "近接戦闘または投擲"}, {"type": "fixed", "id": "survival:任意"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "swim"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "spot_hidden"}], "credit": [0, 15], "source": "RB", "category": "海外・汎用職業"}, "農夫（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車または馬車）、機械修理、芸術／製作（農業）、自然、重機械操作、追跡、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "art_craft:農業"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "track"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "パイロット（RB）": {"point_formula": "DEX×2+EDU×2", "skills_raw": "科学（天文学）、機械修理、重機械操作、操縦（航空機）、電気修理、ナビゲート、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "science:astronomy"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "pilot:aircraft"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "navigate"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 70], "source": "RB", "category": "海外・汎用職業"}, "ハッカー": {"point_formula": "EDU×4", "skills_raw": "コンピューター、電気修理、電子工学、図書館、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "computer"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "electronics"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 70], "source": "RB", "category": "海外・汎用職業"}, "犯罪者（RB）": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、心理学、目星、対人関係技能から1つ、以下から4つの技能：鍵開け、鑑定、機械修理、近接戦闘、射撃、手さばき、変装", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}, {"type": "choose", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "鑑定", "id": "appraisal"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}, {"label": "手さばき", "id": "sleight_of_hand"}, {"label": "変装", "id": "disguise"}], "label": "以下から選択", "groupLabel": "以下から4つ"}], "credit": [5, 65], "source": "RB", "category": "海外・汎用職業"}, "犯罪者－暗殺者": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、鍵開け、機械修理、近接戦闘、射撃、心理学、電気修理、変装", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "locksmith"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "disguise"}], "credit": [30, 60], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－一匹狼の犯罪者": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "隠密、鍵開けもしくは機械修理、鑑定、近接戦闘もしくは射撃、芸術／製作（演技）もしくは変装、心理学、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "or", "options": [{"label": "鍵開け", "id": "locksmith"}, {"label": "機械修理", "id": "mech_repair"}], "label": "鍵開けもしくは機械修理"}, {"type": "fixed", "id": "appraisal"}, {"type": "or", "options": [{"label": "近接戦闘", "id": "melee"}, {"label": "射撃", "id": "firearms"}], "label": "近接戦闘もしくは射撃"}, {"type": "or", "options": [{"label": "芸術／製作（演技）", "id": "art_craft:演技"}, {"label": "変装", "id": "disguise"}], "label": "芸術／製作（演技）もしくは変装"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [5, 65], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－押し込み強盗": {"point_formula": "DEX×2+EDU×2", "skills_raw": "隠密、鑑定、鍵開け、機械修理もしくは電気修理、聞き耳、手さばき、登攀、目星", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "locksmith"}, {"type": "or", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "電気修理", "id": "elec_repair"}], "label": "機械修理もしくは電気修理"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "spot_hidden"}], "credit": [5, 40], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－偽造犯／偽金造り": {"point_formula": "EDU×4", "skills_raw": "鑑定、芸術／製作（文書偽造）、経理、手さばき、図書館、目星、歴史、個人的な専門あるいは時代に関する任意のほかの1つの技能（コンピューターなど）", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:文書偽造"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "history"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 40], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－銀行強盗": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "威圧、運転（自動車）、鍵開け、機械修理または電気修理、近接戦闘、射撃、重機械操作、個人的な専門あるいは時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "intimidate"}, {"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "locksmith"}, {"type": "or", "options": [{"label": "機械修理", "id": "mech_repair"}, {"label": "電気修理", "id": "elec_repair"}], "label": "機械修理または電気修理"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "any", "label": "任意の技能"}], "credit": [5, 75], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－故売人": {"point_formula": "APP×2+EDU×2", "skills_raw": "鑑定、芸術／製作（偽造）、経理、図書館、目星、歴史、対人関係技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "art_craft:偽造"}, {"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "history"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [20, 40], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－詐欺師": {"point_formula": "APP×2+EDU×2", "skills_raw": "鑑定、聞き耳、芸術／製作（演技）、心理学、手さばき、法律もしくはほかの言語、対人関係技能から2つ", "skills_structured": [{"type": "fixed", "id": "appraisal"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:演技"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "or", "options": [{"label": "法律", "id": "law"}, {"label": "ほかの言語", "id": "other_language"}], "label": "法律もしくはほかの言語"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}], "credit": [10, 65], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－酒密売人／ギャング": {"point_formula": "STR×2+EDU×2", "skills_raw": "運転（自動車）、隠密、近接戦闘、射撃、心理学、目星、対人関係技能から2つ", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}], "credit": [5, 30], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－女性犯罪者": {"point_formula": "APP×2+EDU×2", "skills_raw": "運転（自動車）、隠密、聞き耳、近接戦闘（格闘）か射撃（ピストル）、芸術・製作（任意）、対人関係技能から2つ、個人的な専門または時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "melee:格闘）か射撃（ピストル"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 80], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－ストリート・パンク": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、近接戦闘、射撃、跳躍、手さばき、投擲、登攀、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}], "credit": [5, 10], "source": "PG", "category": "海外・汎用職業"}, "犯罪者－密輸人": {"point_formula": "STR×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "運転（自動車）もしくは操縦（航空機またはボート）、聞き耳、射撃、心理学、手さばき、ナビゲート、目星、対人関係技能から1つ", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "sleight_of_hand"}, {"type": "fixed", "id": "navigate"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}], "credit": [20, 60], "source": "PG", "category": "海外・汎用職業"}, "秘書": {"point_formula": "APP×2+EDU×2またはDEX×2+EDU×2", "skills_raw": "芸術／製作（タイピングまたは速記）、経理、コンピューターもしくは図書館、心理学、母国語、対人関係技能から2つ、個人的な専門または時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "or", "options": [{"label": "芸術／製作（タイピング）", "id": "art_craft:タイピング"}, {"label": "芸術／製作（速記）", "id": "art_craft:速記"}], "label": "芸術／製作（タイピングまたは速記）"}, {"type": "fixed", "id": "accounting"}, {"type": "or", "options": [{"label": "コンピューター", "id": "computer"}, {"label": "図書館", "id": "library_use"}], "label": "コンピューターもしくは図書館"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "own_language"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "PG", "category": "海外・汎用職業"}, "兵士": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、回避、近接戦闘、サバイバル（任意）、射撃、水泳または登攀、以下から2つの技能：応急手当、機械修理、ほかの言語", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "survival:任意"}, {"type": "fixed", "id": "firearms"}, {"type": "or", "options": [{"label": "水泳", "id": "swim"}, {"label": "登攀", "id": "climb"}], "label": "水泳または登攀"}, {"type": "choose", "options": [{"label": "応急手当", "id": "first_aid"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}, {"type": "choose", "options": [{"label": "応急手当", "id": "first_aid"}, {"label": "機械修理", "id": "mech_repair"}, {"label": "ほかの言語", "id": "other_language"}], "label": "以下から選択", "groupLabel": "以下から2つ"}], "credit": [9, 30], "source": "PG", "category": "海外・汎用職業"}, "編集者": {"point_formula": "EDU×4", "skills_raw": "経理、心理学、目星、歴史、図書館、対人関係技能から2つ、そのほかの個人的な専門または時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "accounting", "options": []}, {"type": "fixed", "id": "psychology", "options": []}, {"type": "fixed", "id": "spot_hidden", "options": []}, {"type": "fixed", "id": "history", "options": []}, {"type": "fixed", "id": "library_use", "options": []}, {"type": "ip", "label": "対人関係技能", "options": []}, {"type": "ip", "label": "対人関係技能", "options": []}, {"type": "or", "options": [], "label": "そのほかの個人的な専門または時代に関連する任意のほかの1つの技能"}, {"type": "any", "label": "任意の技能"}], "credit": [10, 30], "source": "PG", "category": "海外・汎用職業"}, "法律家（RB）": {"point_formula": "EDU×4", "skills_raw": "経理、心理学、図書館、法律、対人関係技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "accounting"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "law"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [30, 80], "source": "PG", "category": "海外・汎用職業"}, "放浪者": {"point_formula": "APP×2+DEX×2またはSTR×2+EDU×2", "skills_raw": "隠密、聞き耳、跳躍、登攀、ナビゲート、対人関係技能から2つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "climb"}, {"type": "fixed", "id": "navigate"}, {"type": "ip", "label": "対人関係技能"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 5], "source": "RB", "category": "海外・汎用職業"}, "ボクサー/レスラー": {"point_formula": "STR×2+EDU×2", "skills_raw": "威圧、回避、近接戦闘（格闘）、心理学、跳躍、目星、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "intimidate"}, {"type": "fixed", "id": "dodge"}, {"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "psychology"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 60], "source": "RB", "category": "海外・汎用職業"}, "ミュージシャン（RB）": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "聞き耳、芸術／製作（楽器演奏）、心理学、対人関係技能から1つ、任意のほかの4つの技能", "skills_structured": [{"type": "fixed", "id": "listen"}, {"type": "fixed", "id": "art_craft:楽器演奏"}, {"type": "fixed", "id": "psychology"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "猛獣ハンター": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、科学（植物学または生物学）、聞き耳または目星、サバイバルまたはほかの言語、自然、射撃、追跡、ナビゲート", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "or", "options": [{"label": "科学（植物学）", "id": "science:botany"}, {"label": "科学（生物学）", "id": "science:biology"}], "label": "科学（植物学または生物学）"}, {"type": "or", "options": [{"label": "聞き耳", "id": "listen"}, {"label": "目星", "id": "spot_hidden"}], "label": "聞き耳または目星"}, {"type": "or", "options": [{"label": "サバイバル", "id": "survival"}, {"label": "ほかの言語", "id": "other_language"}], "label": "サバイバルまたはほかの言語"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "firearms"}, {"type": "fixed", "id": "track"}, {"type": "fixed", "id": "navigate"}], "credit": [20, 50], "source": "RB", "category": "海外・汎用職業"}, "労働者－木こり": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "応急手当、回避、科学（物理学または植物学）または自然、機械修理、近接戦闘（チェーンソー）、跳躍、投擲、登攀", "skills_structured": [{"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "dodge"}, {"type": "or", "options": [{"label": "科学（物理学）", "id": "science:physics"}, {"label": "科学（植物学）", "id": "science:botany"}], "label": "科学（物理学または植物学）または自然"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "melee:chainsaw"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}], "credit": [9, 30], "source": "RB", "category": "海外・汎用職業"}, "労働者－鉱山労働者": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "隠密、科学（地質学）、機械修理、重機械操作、跳躍、目星、登攀、個人的な専門あるいは時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "stealth"}, {"type": "fixed", "id": "science:geology"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "fixed", "id": "climb"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "PG", "category": "海外・汎用職業"}, "労働者－未熟練労働者": {"point_formula": "DEX×2+EDU×2またはSTR×2+EDU×2", "skills_raw": "運転（自動車）、応急手当、機械修理、近接戦闘、重機械操作、電気修理、投擲、個人的な専門あるいは時代に関連する任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "drive_auto"}, {"type": "fixed", "id": "first_aid"}, {"type": "fixed", "id": "mech_repair"}, {"type": "fixed", "id": "melee"}, {"type": "fixed", "id": "heavy_machinery"}, {"type": "fixed", "id": "elec_repair"}, {"type": "fixed", "id": "throw"}, {"type": "any", "label": "任意の技能"}], "credit": [9, 30], "source": "PG", "category": "海外・汎用職業"}, "高校生 − 普通科": {"point_formula": "POW×2+EDU×2またはEDU×4", "skills_raw": "図書館、母国語、目星、対人関係技能から1つ、部活動に関する技能から2つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能", "note": "部活動に関する技能"}, {"type": "any", "label": "任意の技能", "note": "部活動に関する技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 20], "source": "Other", "category": "高校生"}, "高校生 − 国際コース": {"point_formula": "POW×2+EDU×2またはEDU×4", "skills_raw": "図書館、母国語、ほかの言語（英語）、ほかの言語（任意）、目星、部活動に関する技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "own_language"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "other_language:任意"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "any", "id": null, "label": "任意の技能", "note": "部活動に関する技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 20], "source": "Other", "category": "高校生"}, "高校生 − 芸術コース": {"point_formula": "DEX×2+EDU×2またはPOW×2+EDU×2", "skills_raw": "芸術／製作（専門分野を選ぶ）、自然、伝承（専門分野を選ぶ）、図書館、目星、対人関係技能から1つ、任意のほかの2つの技能", "skills_structured": [{"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "natural_world"}, {"type": "fixed", "id": "lore:任意"}, {"type": "fixed", "id": "library_use"}, {"type": "fixed", "id": "spot_hidden"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "label": "任意の技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 30], "source": "Other", "category": "高校生"}, "高校生 − スポーツコース": {"point_formula": "STR×2+EDU×2またはDEX×2+EDU×2またはCON×2+EDU×2", "skills_raw": "近接戦闘（格闘）、芸術／製作（任意のスポーツ競技）、跳躍、投擲、登攀、対人関係技能から1つ、部活動に関する技能から1つ、任意のほかの1つの技能", "skills_structured": [{"type": "fixed", "id": "melee:brawl"}, {"type": "fixed", "id": "art_craft:任意"}, {"type": "fixed", "id": "jump"}, {"type": "fixed", "id": "throw"}, {"type": "fixed", "id": "climb"}, {"type": "ip", "label": "対人関係技能"}, {"type": "any", "id": null, "label": "任意の技能", "note": "部活動に関する技能"}, {"type": "any", "label": "任意の技能"}], "credit": [0, 20], "source": "Other", "category": "高校生"}};
@@ -1330,14 +1469,67 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
     <div class="hdr-deco">― 探索者記録簿 ―</div>
     <h1>探索者作成補助ツール</h1>
     <div class="hdr-sub">新クトゥルフ神話TRPG 第7版対応</div>
+    <div class="hdr-save-row">
+      <button class="btn-save" onclick="openSlModal('save')">💾 保存</button>
+      <button class="btn-save" onclick="openSlModal('load')">📂 読み込み</button>
+      <button class="btn-save" onclick="newCharacter()" style="border-color:var(--ink-light);color:var(--ink-light);">✦ 新規作成</button>
+    </div>
   </div>
 
-  <!-- 共通：キャラクターデータ読み込み -->
-  <div class="common-header">
-    <div class="cols" style="margin-bottom:0;">
-      <!-- 左：ファイル読み込み -->
-      <div class="col">
-        <div class="sh">キャラクターデータ</div>
+  <!-- ══════ 常時表示：ステータス作成エリア ══════ -->
+  <div class="common-header" id="statCreateArea">
+
+    <!-- 基本情報 -->
+    <div class="stat-create-basic">
+      <div class="stat-basic-row">
+        <div class="stat-basic-field">
+          <label class="stat-basic-label">探索者名</label>
+          <input type="text" id="inputName" class="stat-basic-input" placeholder="名前を入力">
+        </div>
+        <div class="stat-basic-field stat-basic-field--sm">
+          <label class="stat-basic-label">年齢</label>
+          <input type="number" id="inputAge" class="stat-basic-input" min="15" max="99" value="21" oninput="syncAgeInputs('inputAge');onStatInputChange()" onblur="clampAgeInputs('inputAge');onStatInputChange()">
+        </div>
+        <div class="stat-basic-field stat-basic-field--sm">
+          <label class="stat-basic-label">性別</label>
+          <input type="text" id="inputSex" class="stat-basic-input" placeholder="任意">
+        </div>
+      </div>
+    </div>
+
+    <!-- 能力値入力テーブル -->
+    <div class="stat-table-wrap">
+      <div class="stat-grid-header">
+        <span class="stat-grid-title">能力値</span>
+        <button class="btn-sm" id="btnRollAll" onclick="rollAllStats()">🎲 ランダム生成</button>
+      </div>
+      <div class="stat-table-scroll">
+        <table class="stat-table" id="statGrid"></table>
+      </div>
+    </div>
+
+    <!-- 二次ステータス表示 -->
+    <div class="secondary-stats" id="secondaryStats" style="display:none;">
+      <div class="secondary-chips" id="secondaryChips"></div>
+    </div>
+
+    <!-- 年齢補正リセット警告バナー -->
+    <div id="ageResetWarning" style="display:none;margin-bottom:.7rem;">
+      <div style="background:rgba(184,134,11,.12);border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:3px;padding:.5rem .85rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;">
+        <span style="font-size:.78rem;color:var(--ink-mid);">⚠️ 能力値が変更されました。年齢補正の再適用が必要です。</span>
+        <div style="display:flex;gap:.4rem;">
+          <button class="btn-sm" onclick="confirmAgeReset()" style="font-size:.72rem;">↺ 再補正する</button>
+          <button class="btn-ghost" onclick="hideAgeResetWarning()" style="font-size:.72rem;padding:.2rem .6rem;">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- いあきゃら読込（折りたたみ） -->
+    <div class="iachara-fold" id="iacharaFold">
+      <div class="iachara-fold-label" onclick="toggleIacharaFold()">
+        📄 いあきゃらデータを読み込む <span id="iacharaArrow">▶</span>
+      </div>
+      <div id="iacharaFoldBody" style="display:none;">
         <div style="background:rgba(184,134,11,.07);border:1px solid rgba(184,134,11,.22);border-left:3px solid var(--gold);border-radius:3px;padding:.5rem .8rem;margin-bottom:.65rem;font-size:.73rem;color:var(--ink-mid);line-height:1.75;">
           いあきゃら「キャラ出力」→「ファイルに出力」→「テキスト出力」
         </div>
@@ -1351,66 +1543,49 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
         <textarea id="rawText" placeholder="いあきゃらのテキスト出力をここに貼り付け（自動読み込み）" oninput="autoLoad()"></textarea>
         <div id="parseErr" class="err hidden"></div>
       </div>
-      <!-- 右：読み込み結果ミニ表示 -->
-      <div class="col" style="display:flex;flex-direction:column;justify-content:flex-end;">
-        <div id="charInfoArea" class="hidden">
-          <div class="sh">探索者情報</div>
-          <div style="display:flex;gap:.85rem;align-items:flex-start;">
-            <img id="charIconImg" src="" alt="アイコン"
-              style="width:72px;height:72px;border-radius:6px;object-fit:cover;
-                     border:1px solid var(--border);flex-shrink:0;display:none;">
-            <div style="flex:1;min-width:0;">
-              <div id="charInfoName" class="char-info-name" style="margin-bottom:.25rem;"></div>
-              <div id="charInfoMeta" style="font-size:.75rem;color:var(--ink-mid);margin-bottom:.4rem;"></div>
-              <div id="charInfoVit" style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.45rem;"></div>
-              <div class="char-stat-mini" id="charStatMini"></div>
-              <div id="miniSheetBtnWrap" style="margin-top:.4rem;display:none;">
-                <button class="btn-sm" style="font-size:.72rem;padding:.2rem .6rem;" onclick="openSkillSheet()">📄 技能シートを見る</button>
-              </div>
-            </div>
+    </div>
+
+    <!-- 旧charInfoArea：互換維持（非表示） -->
+    <div id="charInfoArea" class="hidden">
+      <div style="display:flex;gap:.85rem;align-items:flex-start;">
+        <img id="charIconImg" src="" alt="アイコン" style="width:72px;height:72px;border-radius:6px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;display:none;">
+        <div style="flex:1;min-width:0;">
+          <div id="charInfoName" class="char-info-name" style="margin-bottom:.25rem;"></div>
+          <div id="charInfoMeta" style="font-size:.75rem;color:var(--ink-mid);margin-bottom:.4rem;"></div>
+          <div id="charInfoVit" style="display:flex;gap:.3rem;flex-wrap:wrap;margin-bottom:.45rem;"></div>
+          <div class="char-stat-mini" id="charStatMini"></div>
+          <div id="miniSheetBtnWrap" style="margin-top:.4rem;display:none;">
+            <button class="btn-sm" style="font-size:.72rem;padding:.2rem .6rem;" onclick="openSkillSheet()">📄 技能シートを見る</button>
           </div>
-          <div id="charBackstory" class="hidden"></div>
-        </div>
-        <div id="charInfoEmpty" style="color:var(--ink-light);font-size:.78rem;text-align:center;padding:1.5rem 0;opacity:.6;">
-          キャラクターデータを読み込むと<br>ここに能力値が表示されます
         </div>
       </div>
+      <div id="charBackstory" class="hidden"></div>
     </div>
+    <div id="charInfoEmpty" style="display:none;"></div>
+
   </div>
 
   <!-- タブ -->
   <div class="tab-bar">
-    <button class="tab-btn active" id="tabAge">年齢による修正</button>
-    <button class="tab-btn"        id="tabOcc">職業選択</button>
+    <button class="tab-btn active" id="tabAge">年齢補正</button>
+    <button class="tab-btn"        id="tabOcc">職業＆技能</button>
+    <button class="tab-btn"        id="tabBs">バックストーリー</button>
   </div>
 
   <!-- ═══ 年齢タブ ═══ -->
   <div id="paneAge">
 
-  <!-- ① 年齢設定 -->
-  <div class="cols">
-    <div class="col" style="display:none;"></div><!-- spacer -->
-    <div class="col">
-      <div class="sh">年齢と補正ルール</div>
-      <div id="charName" class="hidden" style="font-size:.85rem;color:var(--ink-mid);margin-bottom:.55rem;"></div>
-      <div class="age-block">
-        <div class="age-label">探索者の年齢</div>
-        <div class="age-row">
-          <input type="number" class="age-input" id="ageInp" min="1" max="99" value="21" oninput="onAgeChange()">
-          <span class="age-badge" id="ageBadge">20〜39歳</span>
-        </div>
-        <div class="rule-box" id="ruleBox"></div>
-      </div>
-      <button class="btn-gold" id="startBtn" onclick="startCorrection()" disabled>▶ 年齢補正を開始する</button>
+  <!-- 年齢設定 -->
+  <div id="charName" class="hidden" style="display:none;"></div>
+  <div id="previewSec" class="hidden" style="display:none!important;"><div class="stat-grid" id="previewGrid"></div></div>
+  <div class="age-block" style="margin-bottom:.75rem;">
+    <div class="age-row">
+      <input type="number" class="age-input" id="ageInp" min="15" max="99" value="21" oninput="syncAgeInputs('ageInp');onAgeChange()" onblur="clampAgeInputs('ageInp');onAgeChange()">
+      <span class="age-badge" id="ageBadge">20〜39歳</span>
     </div>
+    <div class="rule-box" id="ruleBox" style="margin-top:.5rem;"></div>
   </div>
-
-  <!-- ② 補正前の能力値プレビュー -->
-  <div id="previewSec" class="hidden">
-    <div style="font-size:.7rem;letter-spacing:.2em;color:var(--ink-light);margin-bottom:.4rem;">補正前の能力値</div>
-    <div class="stat-grid" id="previewGrid"></div>
-    <hr class="divider">
-  </div>
+  <button class="btn-gold" id="startBtn" onclick="startCorrection()" disabled style="margin-bottom:1rem;">▶ 年齢補正を開始する</button>
 
   <!-- ③ ダイスロールエリア -->
   <div id="diceSec" class="hidden">
@@ -1448,7 +1623,6 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       <button class="btn-sm" onclick="copyText()">📋 テキストをコピー</button>
       <button class="btn-sm" id="topSheetBtn" onclick="openSkillSheet()" style="display:none;">📄 技能シートを見る</button>
       <button class="btn-ghost" onclick="redoRoll()">↺ ロールをやり直す</button>
-      <button class="btn-ghost" onclick="resetAll()">新しいキャラクターを読み込む</button>
     </div>
     <hr class="divider">
   </div>
@@ -1474,6 +1648,13 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       </div>
     </div>
     <div id="sideJobSec" style="margin-top:.5rem;display:none;"></div>
+  </div>
+
+  <!-- ═══ バックストーリータブ ═══ -->
+  <div id="paneBs" class="hidden">
+    <div style="text-align:center;padding:3rem 1rem;color:var(--ink-light);font-size:.85rem;opacity:.7;">
+      バックストーリー機能は近日実装予定です
+    </div>
   </div>
 
 </div><!-- /page -->
@@ -1503,8 +1684,8 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
     </div>
     <div class="sj-occ-controls">
       <!-- サプリ設定 -->
-      <div class="supl-box" style="margin-bottom:.5rem;">
-        <div class="supl-box-label">📚 使用するサプリメント</div>
+      <div class="supl-box" id="occSuplBox" style="margin-bottom:.5rem;">
+        <div class="supl-box-label" id="occSuplLabel" onclick="toggleSuplBox()" style="cursor:pointer;user-select:none;">📚 使用するサプリメント <span id="occSuplArrow">▼</span></div>
         <div class="supl-checks" id="occModalSuplChecks"></div>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start;">
@@ -1521,6 +1702,10 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       </div>
       <div class="skill-tags" id="occModalSkillTags" style="margin-top:.3rem;"></div>
       <!-- カテゴリ -->
+      <!-- カテゴリ絞り込み：PC=タグ、スマホ=select -->
+      <select id="occModalCatSelect" class="skill-select" style="display:none;width:100%;margin-top:.35rem;"
+        onchange="occActiveCat=this.value;renderOccModalGrid()">
+      </select>
       <div class="tag-row" id="occModalCatTags" style="margin-top:.4rem;"></div>
     </div>
     <div class="occ-count" id="occModalCount"></div>
@@ -1632,9 +1817,14 @@ const CATEGORIES = [
 function switchTab(tab){
   document.getElementById('paneAge').classList.toggle('hidden', tab!=='age');
   document.getElementById('paneOcc').classList.toggle('hidden', tab!=='occ');
+  var paneBs = document.getElementById('paneBs');
+  if(paneBs) paneBs.classList.toggle('hidden', tab!=='bs');
   document.getElementById('tabAge').classList.toggle('active', tab==='age');
   document.getElementById('tabOcc').classList.toggle('active', tab==='occ');
+  var tabBs = document.getElementById('tabBs');
+  if(tabBs) tabBs.classList.toggle('active', tab==='bs');
   if(tab==='occ' && !occInited) initOccTab();
+  if(tab==='age') refreshAgeTab();
 }
 
 /* ── 職業タブ 状態 ── */
@@ -2130,6 +2320,284 @@ function readFile(f){
 }
 
 let autoTimer = null;
+
+/* ══════════════════════════════════════════
+   ステータス作成UI
+══════════════════════════════════════════ */
+
+// 能力値テーブルを初期描画（ヘッダー行・能力値行・増加分行・現在値行）
+function initStatGrid() {
+  var tbl = document.getElementById('statGrid');
+  if(!tbl) return;
+  var allKeys = KEYS.concat(['LUC']);
+  var labels  = {LUC:'幸運'};
+  // ヘッダー行（キー名）
+  var thRow = '<tr><th></th>' + allKeys.map(function(k){ return '<th>' + (labels[k]||k) + '</th>'; }).join('') + '</tr>';
+  // 能力値入力行
+  var baseRow = '<tr class="row-base"><td class="row-label" style="font-size:.68rem;color:var(--ink-mid);font-weight:700;background:var(--parchment-dark);">能力値</td>'
+    + allKeys.map(function(k){
+        return '<td><input type="number" class="stat-cell-input" id="statInput_' + k + '"'
+          + ' min="1" max="999" value="" placeholder="—" oninput="onStatInputChange()"></td>';
+      }).join('') + '</tr>';
+  // 増加分行（年齢補正後に表示、今は空）
+  var addRow  = '<tr class="row-add"><td style="font-size:.68rem;color:var(--ink-mid);font-weight:700;background:var(--parchment-dark);">増加分</td>'
+    + allKeys.map(function(k){ return '<td id="statAdd_' + k + '" style="font-size:.82rem;color:var(--ink-mid);"></td>'; }).join('') + '</tr>';
+  // 現在値行
+  var curRow  = '<tr class="row-cur"><td style="font-size:.68rem;color:var(--ink-mid);font-weight:700;background:var(--parchment-dark);">現在値</td>'
+    + allKeys.map(function(k){ return '<td id="statCur_' + k + '" style="font-weight:700;"></td>'; }).join('') + '</tr>';
+  // フッター行（キー名繰り返し）
+  var tfRow = '<tr><th></th>' + allKeys.map(function(k){ return '<th>' + (labels[k]||k) + '</th>'; }).join('') + '</tr>';
+  tbl.innerHTML = thRow + baseRow + addRow + curRow + tfRow;
+}
+
+// 3D6×5（STR/CON/POW/DEX/APP）または 2D6+6×5（SIZ/INT/EDU）
+function roll3D6x5() { return (Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6))*5; }
+function roll2D6p6x5(){ return (Math.ceil(Math.random()*6)+Math.ceil(Math.random()*6)+6)*5; }
+
+function rollAllStats() {
+  // 年齢補正済みなら確認
+  var adjSec = document.getElementById('adjSec');
+  if(adjSec && !adjSec.classList.contains('hidden')) {
+    if(!confirm('年齢補正の結果がリセットされます。\nランダム生成を続けますか？')) return;
+  }
+  var rolls = {
+    STR: roll3D6x5(), CON: roll3D6x5(), POW: roll3D6x5(),
+    DEX: roll3D6x5(), APP: roll3D6x5(),
+    SIZ: roll2D6p6x5(), INT: roll2D6p6x5(), EDU: roll2D6p6x5()
+  };
+  KEYS.forEach(function(k) {
+    var el = document.getElementById('statInput_' + k);
+    if(el) el.value = rolls[k];
+  });
+  // 幸運：3D6×5 → input欄にも反映
+  var lucVal = roll3D6x5();
+  var lucEl = document.getElementById('statInput_LUC');
+  if(lucEl) lucEl.value = lucVal;
+  // 年齢補正をリセット
+  resetAgeCorrection();
+  onStatInputChange();
+}
+
+// 手入力変更時：補正済み警告バナーを表示
+function showAgeResetWarning() {
+  var el = document.getElementById('ageResetWarning');
+  if(el) el.style.display = '';
+}
+
+function hideAgeResetWarning() {
+  var el = document.getElementById('ageResetWarning');
+  if(el) el.style.display = 'none';
+}
+
+function confirmAgeReset() {
+  if(confirm('年齢補正の結果をリセットして\n再補正を行いますか？')) {
+    resetAgeCorrection();
+    hideAgeResetWarning();
+    // 年齢補正タブへ
+    switchTab('age');
+  }
+}
+
+// 年齢補正状態をリセット（ダイスロール・補正結果を非表示・workをクリア）
+function resetAgeCorrection() {
+  work = {};
+  document.getElementById('diceSec').classList.add('hidden');
+  document.getElementById('adjSec').classList.add('hidden');
+  hideAgeResetWarning();
+  // 上部テーブルの増加分・現在値を入力値ベースに戻す
+  var allKeys = KEYS.concat(['LUC']);
+  allKeys.forEach(function(k) {
+    var addEl = document.getElementById('statAdd_' + k);
+    if(addEl) { addEl.textContent = ''; addEl.style.color = ''; addEl.style.fontWeight = ''; }
+    var curEl = document.getElementById('statCur_' + k);
+    if(curEl) { curEl.style.color = ''; }
+  });
+}
+
+// 入力値変化時：orig更新・現在値行更新・二次ステータス再計算・年齢入力欄同期
+function onStatInputChange() {
+  var allKeys = KEYS.concat(['LUC']);
+  // origへ反映 + 現在値行を更新
+  allKeys.forEach(function(k) {
+    var el = document.getElementById('statInput_' + k);
+    var v = el ? (parseInt(el.value) || 0) : 0;
+    if(v > 0) { if(k === 'LUC') orig.LUC = v; else orig[k] = v; }
+    else { if(k === 'LUC') delete orig.LUC; else delete orig[k]; }
+    // 現在値セルを更新
+    var curEl = document.getElementById('statCur_' + k);
+    if(curEl) curEl.textContent = v > 0 ? v : '';
+  });
+  // 年齢入力欄から charAge 同期
+  var ageEl = document.getElementById('inputAge');
+  if(ageEl) {
+    charAge = parseInt(ageEl.value) || 21;
+    // 旧年齢タブのageInpにも反映
+    var oldAge = document.getElementById('ageInp');
+    if(oldAge) oldAge.value = charAge;
+    onAgeChange();
+  }
+  // 名前・性別を charName/charSex に反映
+  var nameEl = document.getElementById('inputName');
+  if(nameEl) charName = nameEl.value.trim();
+  var sexEl = document.getElementById('inputSex');
+  if(sexEl) charSex = sexEl.value.trim();
+
+  renderSecondaryStats();
+  syncAllocToWork();
+  // 年齢補正タブのstartBtnを更新
+  var startBtn = document.getElementById('startBtn');
+  if(startBtn) {
+    var hasStats = KEYS.filter(function(k){ return orig[k] > 0; }).length >= 4;
+    startBtn.disabled = !hasStats || !getGroup(charAge);
+  }
+  // 手入力で値が変わったら補正済みの警告を表示
+  var adjSec = document.getElementById('adjSec');
+  if(adjSec && !adjSec.classList.contains('hidden')) {
+    showAgeResetWarning();
+  }
+}
+
+// DB・ビルド計算（新版CoC7th 表に基づく）
+function calcDB(str, siz) {
+  var sum = (str||0) + (siz||0);
+  if(sum <= 64)  return {db:'-2',  bld:-2};
+  if(sum <= 84)  return {db:'-1',  bld:-1};
+  if(sum <= 124) return {db:'0',   bld:0};
+  if(sum <= 164) return {db:'+1D4',bld:1};
+  if(sum <= 204) return {db:'+1D6',bld:2};
+  if(sum <= 284) return {db:'+2D6',bld:3};
+  if(sum <= 364) return {db:'+3D6',bld:4};
+  if(sum <= 444) return {db:'+4D6',bld:5};
+  if(sum <= 524) return {db:'+5D6',bld:6};
+  // 525以上：80ポイントごとに+1D6/+1
+  var extra = Math.floor((sum - 445) / 80);
+  var dice  = 5 + extra + 1;
+  return {db:'+' + dice + 'D6', bld: 6 + extra + 1};
+}
+
+// MOV計算
+function calcMOV(str, dex, siz, age) {
+  var mov = 8;
+  if(dex < siz && str < siz) mov = 7;
+  else if(dex > siz && str > siz) mov = 9;
+  var a = age || 21;
+  if(a >= 40 && a < 50) mov -= 1;
+  else if(a >= 50 && a < 60) mov -= 2;
+  else if(a >= 60 && a < 70) mov -= 3;
+  else if(a >= 70 && a < 80) mov -= 4;
+  else if(a >= 80) mov -= 5;
+  return Math.max(1, mov);
+}
+
+// 二次ステータス表示
+function renderSecondaryStats() {
+  var sec = document.getElementById('secondaryStats');
+  var chips = document.getElementById('secondaryChips');
+  if(!sec || !chips) return;
+
+  // work（年齢補正後）優先、なければ orig（素値）
+  var s = {};
+  KEYS.forEach(function(k){ s[k] = (work[k] != null ? work[k] : orig[k]) || 0; });
+  if(orig.LUC != null) s.LUC = work.LUC != null ? work.LUC : orig.LUC;
+  var hasStats = KEYS.some(function(k){ return s[k] > 0; });
+  if(!hasStats) { sec.style.display = 'none'; return; }
+
+  var hp  = Math.floor(((s.CON||0) + (s.SIZ||0)) / 10);
+  var mp  = Math.floor((s.POW||0) / 5);
+  var san = (s.POW||0);  // SANはPOWの値そのまま
+  var mov = calcMOV(s.STR, s.DEX, s.SIZ, charAge);
+  var db  = calcDB(s.STR, s.SIZ);
+  var luc = orig.LUC || null;
+
+  var items = [
+    ['HP', hp], ['MP', mp], ['SAN', san], ['MOV', mov],
+    ['DB', db.db], ['ビルド', db.bld]
+  ];
+  if(luc !== null) items.push(['幸運', luc]);
+
+  chips.innerHTML = items.map(function(p) {
+    return '<div class="secondary-chip">' + p[0] + '&thinsp;<strong>' + p[1] + '</strong></div>';
+  }).join('');
+  sec.style.display = '';
+}
+
+// いあきゃら折りたたみ
+function toggleIacharaFold() {
+  var body  = document.getElementById('iacharaFoldBody');
+  var arrow = document.getElementById('iacharaArrow');
+  if(!body) return;
+  var open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  if(arrow) arrow.textContent = open ? '▼' : '▶';
+}
+
+// いあきゃら読込後に入力欄へ反映
+function syncStatInputsFromOrig() {
+  KEYS.forEach(function(k) {
+    var el = document.getElementById('statInput_' + k);
+    if(el && orig[k]) el.value = orig[k];
+  });
+  // 幸運
+  var lucEl = document.getElementById('statInput_LUC');
+  if(lucEl && orig.LUC) lucEl.value = orig.LUC;
+  var nameEl = document.getElementById('inputName');
+  if(nameEl && charName) nameEl.value = charName;
+  var ageEl = document.getElementById('inputAge');
+  if(ageEl && charAge) ageEl.value = charAge;
+  var sexEl = document.getElementById('inputSex');
+  if(sexEl && charSex) sexEl.value = charSex;
+  renderSecondaryStats();
+}
+
+
+// 年齢入力欄の双方向同期
+function syncAgeInputs(source) {
+  var val = parseInt(document.getElementById(source).value);
+  if(isNaN(val)) return; // 入力中（空・途中）は何もしない
+  charAge = val;
+  var other = source === 'inputAge' ? 'ageInp' : 'inputAge';
+  var otherEl = document.getElementById(other);
+  if(otherEl) otherEl.value = val;
+}
+
+// フォーカスを外したときに下限クランプ
+function clampAgeInputs(source) {
+  var el = document.getElementById(source);
+  var val = parseInt(el.value);
+  if(isNaN(val) || val < 15) val = 15;
+  el.value = val;
+  charAge = val;
+  var other = source === 'inputAge' ? 'ageInp' : 'inputAge';
+  var otherEl = document.getElementById(other);
+  if(otherEl) otherEl.value = val;
+}
+
+// 年齢補正タブを開いたとき startBtn の状態を更新
+function refreshAgeTab() {
+  // 上部inputAgeと同期
+  var inputAge = document.getElementById('inputAge');
+  if(inputAge && inputAge.value) {
+    charAge = parseInt(inputAge.value) || 21;
+    var ageInp = document.getElementById('ageInp');
+    if(ageInp) ageInp.value = charAge;
+  }
+  // 名前表示を上部inputNameと同期
+  var inputName = document.getElementById('inputName');
+  var charNameEl = document.getElementById('charName');
+  if(charNameEl) {
+    var name = (inputName && inputName.value.trim()) || charName;
+    if(name) {
+      charNameEl.textContent = '探索者：' + name;
+      charNameEl.classList.remove('hidden');
+    }
+  }
+  // origに値があれば開始ボタンを有効化
+  var hasStats = KEYS.filter(function(k){ return orig[k] > 0; }).length >= 4;
+  var startBtn = document.getElementById('startBtn');
+  if(startBtn) startBtn.disabled = !hasStats || !getGroup(charAge);
+  onAgeChange();
+}
+
 function autoLoad(){
   clearTimeout(autoTimer);
   autoTimer = setTimeout(()=>{ if(document.getElementById('rawText').value.trim()) loadChar(); }, 600);
@@ -2246,6 +2714,9 @@ function loadChar(){
   document.getElementById('ageInp').value = charAge;
   onAgeChange();
   document.getElementById('startBtn').disabled = false;
+
+  /* ステータス作成UIの入力欄に反映 */
+  syncStatInputsFromOrig();
 
   /* プレビュー */
   renderPreview();
@@ -2672,6 +3143,7 @@ function applyStrSiz(){
       if(!document.getElementById('adjSec').classList.contains('hidden')){
         renderAdjTable(); updatePreviewAfter(); renderFinal(); updateCharInfoBar();
       }
+      syncAllocToWork();
 
       // ログをリアルタイム更新（keyで上書き）
       addLog(`STR:${s0}→${work['STR']}　SIZ:${sz0}→${work['SIZ']}（STR+SIZ合計-${TOTAL}）`,'li','ss_stat');
@@ -2804,6 +3276,7 @@ function applyPenalty(total,appPen){
       if(!document.getElementById('adjSec').classList.contains('hidden')){
         renderAdjTable(); updatePreviewAfter(); renderFinal(); updateCharInfoBar();
       }
+      syncAllocToWork();
 
       // ログをリアルタイム更新（keyで上書き）
       addLog(`STR:${s0}→${work['STR']}　CON:${c0}→${work['CON']}　DEX:${d0}→${work['DEX']}`,'li','pen_stat');
@@ -2871,10 +3344,44 @@ function showAdj(){
   updatePreviewAfter();
   renderFinal();
   updateCharInfoBar();
+  updateStatTableFromWork();  // 上部テーブルの増加分・現在値を更新
+  syncAllocToWork();
   setTimeout(function() {
     var adj = document.getElementById('adjSec');
     if(adj) adj.scrollIntoView({behavior:'smooth', block:'start'});
   }, 80);
+}
+
+// 上部ステータステーブルに補正結果（work）を反映する
+function updateStatTableFromWork() {
+  var allKeys = KEYS.concat(['LUC']);
+  allKeys.forEach(function(k) {
+    var o = (k === 'LUC') ? (orig.LUC || 0) : (orig[k] || 0);
+    var w = (k === 'LUC') ? (work['LUC'] != null ? work['LUC'] : o) : (work[k] != null ? work[k] : o);
+    var diff = w - o;
+    // 増加分セル
+    var addEl = document.getElementById('statAdd_' + k);
+    if(addEl) {
+      if(diff === 0) {
+        addEl.textContent = '';
+        addEl.style.color = '';
+      } else if(diff > 0) {
+        addEl.textContent = '+' + diff;
+        addEl.style.color = 'var(--green, #2a6020)';
+        addEl.style.fontWeight = '700';
+      } else {
+        addEl.textContent = diff;
+        addEl.style.color = 'var(--accent)';
+        addEl.style.fontWeight = '700';
+      }
+    }
+    // 現在値セル
+    var curEl = document.getElementById('statCur_' + k);
+    if(curEl && o > 0) {
+      curEl.textContent = w;
+      curEl.style.color = diff !== 0 ? (diff > 0 ? 'var(--green, #2a6020)' : 'var(--accent)') : '';
+    }
+  });
 }
 
 function renderAdjTable(locked=false){
@@ -2959,13 +3466,19 @@ function updatePreviewAfter(){
 /* ===== 最終シート ===== */
 
 function calcDB(){
-  const t=(work['STR']||50)+(work['SIZ']||50);
-  if(t<=64)  return{db:'-2',bld:-2};
-  if(t<=84)  return{db:'-1',bld:-1};
-  if(t<=124) return{db:'0',bld:0};
-  if(t<=164) return{db:'+1D4',bld:1};
-  if(t<=204) return{db:'+1D6',bld:2};
-  return{db:'+2D6',bld:3};
+  var stats = (Object.keys(work).length > 0) ? work : orig;
+  var t = (stats['STR']||0) + (stats['SIZ']||0);
+  if(t<=64)  return{db:'-2',   bld:-2};
+  if(t<=84)  return{db:'-1',   bld:-1};
+  if(t<=124) return{db:'0',    bld:0};
+  if(t<=164) return{db:'+1D4', bld:1};
+  if(t<=204) return{db:'+1D6', bld:2};
+  if(t<=284) return{db:'+2D6', bld:3};
+  if(t<=364) return{db:'+3D6', bld:4};
+  if(t<=444) return{db:'+4D6', bld:5};
+  if(t<=524) return{db:'+5D6', bld:6};
+  var extra = Math.floor((t-445)/80);
+  return{db:'+'+(6+extra)+'D6', bld:7+extra};
 }
 
 function renderFinal(){
@@ -2999,6 +3512,25 @@ function copyText(){
   });
 }
 
+function clearStatTable() {
+  var allKeys = KEYS.concat(['LUC']);
+  allKeys.forEach(function(k) {
+    var addEl = document.getElementById('statAdd_' + k);
+    if(addEl) { addEl.textContent = ''; addEl.style.color = ''; }
+    var curEl = document.getElementById('statCur_' + k);
+    if(curEl) { curEl.textContent = ''; curEl.style.color = ''; }
+    var inEl = document.getElementById('statInput_' + k);
+    if(inEl) inEl.value = '';
+  });
+  var sec = document.getElementById('secondaryStats');
+  if(sec) sec.style.display = 'none';
+  // 基本情報もクリア
+  ['inputName','inputAge','inputSex'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if(el) { el.value = id === 'inputAge' ? '21' : ''; }
+  });
+}
+
 function resetAll(){
   orig={};work={};charName='';charAge=21;
   document.getElementById('rawText').value='';
@@ -3013,7 +3545,64 @@ function resetAll(){
   document.getElementById('dropSub').textContent='いあきゃら .txt 出力ファイル';
   charJob=''; charSex=''; charHP=0; charMP=0; charSAN=0; charMOV=0;
   charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={};
+  clearStatTable();
   updateCharInfoBar();
+}
+
+function newCharacter(){
+  if(!confirm('現在の作業内容をすべてリセットして新規作成しますか？')) return;
+
+  // 基本情報
+  orig={}; work={}; charName=''; charAge=21; charSex=''; charJob='';
+  charHP=0; charMP=0; charSAN=0; charMOV=0;
+  charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={};
+
+  // 入力欄リセット
+  ['inputName','inputSex'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var ageEl=document.getElementById('inputAge'); if(ageEl) ageEl.value='21';
+  clearStatTable();
+
+  // いあきゃらドロップゾーンリセット
+  var dz2=document.getElementById('dropZone');
+  if(dz2) dz2.classList.remove('ok');
+  var dm=document.getElementById('dropMain'); if(dm) dm.textContent='ファイルをドロップ / クリックして選択';
+  var ds=document.getElementById('dropSub');  if(ds) ds.textContent='いあきゃら .txt 出力ファイル';
+  var rt=document.getElementById('rawText');  if(rt) rt.value='';
+
+  // 年齢補正タブ
+  ['diceSec','adjSec','previewSec'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.classList.add('hidden');
+  });
+  var sb=document.getElementById('startBtn'); if(sb) sb.disabled=true;
+  var cn=document.getElementById('charName'); if(cn) cn.classList.add('hidden');
+
+  // 配分状態リセット
+  allocOcc=null; allocName=null; allocDone=false; _renderedAllocName=null;
+  allocRows=[]; allocTotal=0; allocSelectedFormula=null; allocCredit=0;
+  interestRows=[{selectedId:null,add:0,spec:''}]; interestTotal=0;
+
+  // 副業リセット
+  sideJobEnabled=false; sideJobOccName=null; sideJobChecksLeft=5;
+  sideJobCreditChecked=false; sideJobCreditAdd=0; sideJobSkills=[];
+  var sideChk=document.getElementById('sideJobChk'); if(sideChk) sideChk.checked=false;
+  var togArea=document.getElementById('sideJobToggleArea'); if(togArea) togArea.classList.add('hidden');
+  var sjSec=document.getElementById('sideJobSec'); if(sjSec) sjSec.innerHTML='';
+
+  // 職業タブリセット
+  occSelected=null; occInited=false;
+  var skillAllocSec=document.getElementById('skillAllocSec');
+  if(skillAllocSec){ skillAllocSec.classList.add('hidden'); skillAllocSec.innerHTML=''; }
+  var miniWrap=document.getElementById('miniSheetBtnWrap'); if(miniWrap) miniWrap.style.display='none';
+
+  // 二次ステータス・ミニステータス更新
+  renderSecondaryStats();
+  updateCharInfoBar();
+
+  // 年齢補正タブへ
+  switchTab('age');
+  onAgeChange();
 }
 
 /* 初期表示 */
@@ -3021,6 +3610,7 @@ function resetAll(){
 onAgeChange();
 document.getElementById('tabAge')?.addEventListener('click', ()=>switchTab('age'));
 document.getElementById('tabOcc')?.addEventListener('click', ()=>switchTab('occ'));
+document.getElementById('tabBs')?.addEventListener('click', ()=>switchTab('bs'));
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
     closeBottomSheet();
@@ -3039,6 +3629,8 @@ let allocRows            = [];
 let allocTotal           = 0;
 let allocSelectedFormula = null;
 let allocCredit          = 0;  // 信用の現在値（cMinからの増加分をポイント消費）
+let interestRows         = [{selectedId:null, add:0, spec:''}];
+let interestTotal        = 0;
 
 /* ===== 副業 ===== */
 let sideJobEnabled       = false;   // KPチェックON/OFF
@@ -3142,17 +3734,21 @@ function getEffectiveBase(r){
   const childId = parts[1];
   // child_idがある（専門分野確定）場合はSPEC_BASE_MAPの値を優先
   if(childId && childId !== '任意') {
-    const specVal = getSkillBase(childId);
+    const specVal = SPEC_BASE_MAP[childId];
     if(specVal !== undefined) return specVal;
+    // SPEC_BASE_MAPにない専門分野（art_craft等）は親の基本値を返す
+    return getSkillBase(baseId);
   }
   // spec（興味・任意スロットで選んだ専門分野名）がある場合もchild_idに変換
   if(r.spec) {
     const parentDef = SKILL_DATA[baseId];
     if(parentDef && parentDef.specializations) {
-      const entry = parentDef.specializations.find(s => s.child_name_ja === r.spec);
+      const entry = parentDef.specializations.find(function(s){ return s.child_name_ja === r.spec; });
       if(entry) {
-        const specVal2 = getSkillBase(entry.child_id);
+        const specVal2 = SPEC_BASE_MAP[entry.child_id];
         if(specVal2 !== undefined) return specVal2;
+        // SPEC_BASE_MAPにない → 親の基本値
+        return getSkillBase(baseId);
       }
     }
   }
@@ -3320,7 +3916,7 @@ function buildAllocFullHTML(){
         +'</div>'
         +'<div class="alloc-section">'
           +'<div class="alloc-pt-summary">'
-            +'<div class="alloc-pt-total-box"><span class="alloc-pt-num">'+interestTotal+'</span><span class="alloc-pt-unit">pt</span></div>'
+            +'<div class="alloc-pt-total-box"><span class="alloc-pt-num" id="interestPtBig">'+interestTotal+'</span><span class="alloc-pt-unit">pt</span></div>'
             +'<div class="alloc-pt-remain" id="interestPtRemain"></div>'
           +'</div>'
           +'<div class="alloc-bar-wrap"><div class="alloc-bar-fill" id="interestBarFill"></div></div>'
@@ -3434,14 +4030,31 @@ function hasIpSlot(){
 const IP_IDS = ['charm','intimidate','fast_talk','persuade'];
 
 function renderRowV2(r, i, left){
-  const base  = getEffectiveBase(r);
+  // any_art は setArtSpec で r.base=5 を設定済みなのでそちらを優先
+  // 近接・射撃で現在値を手入力した場合はそれを基本値として使う
+  const baseRaw = (r.kind === 'any_art' && r.base != null) ? r.base : getEffectiveBase(r);
+  const base = (r.curValManual != null) ? r.curValManual : baseRaw;
   const total = base + r.add;
   const over  = (r.id||r.selectedId) && total > 90;
   const totalHtml = (r.id||r.selectedId)
     ? (over?`<span class="alloc-over-val">${total}⚠</span>`:`<span class="${r.add>0?'alloc-added-val':''}">${total}</span>`)
     : '<span class="alloc-empty">—</span>';
   const baseHtml = (r.id||r.selectedId) ? base : '<span class="alloc-empty">—</span>';
-  const curHtml  = r.curVal!=null ? `<span class="alloc-cur-val">${r.curVal}</span>` : '<span class="alloc-empty">—</span>';
+  // 専門分野が未指定の近接戦闘・射撃は現在値を手入力できるようにする
+  const CUR_INPUT_BASES = new Set(['melee','firearms']);
+  const rBaseId = (r.id||r.selectedId||'').split(':')[0];
+  const rChildId = (r.id||r.selectedId||'').split(':')[1];
+  const needsCurInput = CUR_INPUT_BASES.has(rBaseId) && (!rChildId || rChildId === '任意') && r.curVal == null;
+
+  const curHtml  = r.curVal != null
+    ? `<span class="alloc-cur-val">${r.curVal}</span>`
+    : needsCurInput
+      ? `<input class="alloc-cur-inp" type="number" min="0" max="99" placeholder="${base}"
+           value="${r.curValManual != null ? r.curValManual : ''}"
+           oninput="setCurValInput(${i}, this.value)">`
+      : (r.id||r.selectedId) && base > 0
+        ? `<span class="alloc-base-val">${base}</span>`
+        : '<span class="alloc-empty">—</span>';
 
   const kindBadge = {
     fixed:   '',
@@ -3581,6 +4194,13 @@ function setArtSpec(i, val){
   updatePointDisplay();
 }
 
+// 近接戦闘・射撃など専門分野未指定技能の現在値手入力
+function setCurValInput(i, val) {
+  var v = parseInt(val);
+  allocRows[i].curValManual = isNaN(v) ? null : v;
+  updatePointDisplay();
+}
+
 function setChoiceSkillV2(i, skillId){
   const SJ_SPEC_BASE = ['melee','firearms','art_craft','science','other_language','survival','lore','pilot','drive_auto'];
   allocRows[i].selectedId = skillId||null;
@@ -3642,6 +4262,8 @@ function resetAllocV2(){
 onAgeChange();
 document.getElementById('tabAge')?.addEventListener('click', ()=>switchTab('age'));
 document.getElementById('tabOcc')?.addEventListener('click', ()=>switchTab('occ'));
+document.getElementById('tabBs')?.addEventListener('click', ()=>switchTab('bs'));
+initStatGrid();
 
 /* ===== テンキーパッド ===== */
 let _npRowIdx  = -1;   // 対象のallocRows index
@@ -3779,6 +4401,7 @@ function renderInterestRow(r, i, left){
     var label = SKILL_DATA[r.selectedId] ? SKILL_DATA[r.selectedId].name_ja : '';
     var cur = lookupCharSkill(label, r.selectedId);
     if(cur!=null) curHtml = '<span class="alloc-cur-val">'+cur+'</span>';
+    else if(base > 0) curHtml = '<span class="alloc-base-val">'+base+'</span>';
   }
 
   // specializations配列がある技能は専門分野入力欄を常表示
@@ -4307,6 +4930,36 @@ function applyAllocDone() {
   // ミニステータスエリアのボタンも連動
   var miniWrap = document.getElementById('miniSheetBtnWrap');
   if(miniWrap) miniWrap.style.display = allocDone ? '' : 'none';
+
+  // 二次ステータスとミニステータスを最新のwork値で更新
+  renderSecondaryStats();
+  updateCharInfoBar();
+}
+
+// workが更新されたとき配分ポイントを再計算して表示を同期する
+function syncAllocToWork() {
+  if(!allocOcc || !allocSelectedFormula) return; // 職業未選択なら何もしない
+
+  // 職業技能ポイント再計算
+  var newTotal = evalSingleFormula(allocSelectedFormula);
+  var oldTotal = allocTotal;
+  allocTotal = newTotal;
+
+  // 興味技能ポイント再計算（INT×2）
+  var newIntTotal = ((work['INT'] != null ? work['INT'] : orig['INT']) || 0) * 2;
+  interestTotal = newIntTotal;
+
+  // ヘッダー表示を更新（配分UIが表示されているときのみ）
+  var sec = document.getElementById('skillAllocSec');
+  if(sec && !sec.classList.contains('hidden')) {
+    // 興味技能合計の数字を直接更新（buildAllocFullHTMLを呼ばずに済む）
+    var totalEl = document.getElementById('interestPtTotal');
+    if(totalEl) totalEl.textContent = interestTotal;
+    var bigEl = document.getElementById('interestPtBig');
+    if(bigEl) bigEl.textContent = interestTotal;
+    updateAllocHeader();
+    rerenderInterest();
+  }
 }
 
 // 技能の統合現在値を返す（いあきゃら値 + 職業配分 + 興味配分）
@@ -4369,9 +5022,31 @@ function openOccModal() {
         }).join('');
   }
 
+  // スマホ時はサプリ欄を自動で折りたたむ
+  if(window.innerWidth <= 640) {
+    var checks = document.getElementById('occModalSuplChecks');
+    var arrow  = document.getElementById('occSuplArrow');
+    if(checks) checks.style.display = 'none';
+    if(arrow)  arrow.textContent = '▶';
+  } else {
+    var checks = document.getElementById('occModalSuplChecks');
+    var arrow  = document.getElementById('occSuplArrow');
+    if(checks) checks.style.display = '';
+    if(arrow)  arrow.textContent = '▼';
+  }
+
   renderOccModalGrid();
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+}
+
+function toggleSuplBox() {
+  var checks = document.getElementById('occModalSuplChecks');
+  var arrow  = document.getElementById('occSuplArrow');
+  if(!checks) return;
+  var hidden = checks.style.display === 'none';
+  checks.style.display = hidden ? '' : 'none';
+  if(arrow) arrow.textContent = hidden ? '▼' : '▶';
 }
 
 function closeOccModal() {
@@ -4387,12 +5062,24 @@ function renderOccModalGrid() {
   if(!grid) return;
 
   // カテゴリタグ
-  var catEl = document.getElementById('occModalCatTags');
-  if(catEl) {
+  var catEl    = document.getElementById('occModalCatTags');
+  var catSel   = document.getElementById('occModalCatSelect');
+  var isMobile = window.innerWidth <= 640;
+  if(catEl)  catEl.style.display  = isMobile ? 'none' : '';
+  if(catSel) catSel.style.display = isMobile ? '' : 'none';
+  if(catEl && !isMobile) {
     catEl.innerHTML = CATEGORIES.map(function(c) {
       return '<button class="tag-btn' + (occActiveCat === c ? ' active' : '') + '"'
         + ' onclick="occActiveCat=\'' + c + '\';renderOccModalGrid()">' + c + '</button>';
     }).join('');
+  }
+  if(catSel && isMobile) {
+    if(catSel.options.length <= 1) {
+      catSel.innerHTML = CATEGORIES.map(function(c) {
+        return '<option value="' + c + '">' + c + '</option>';
+      }).join('');
+    }
+    catSel.value = occActiveCat || 'すべて';
   }
 
   // OR/ANDボタン
@@ -5048,6 +5735,225 @@ function resetSideJob() {
   updateSideJobChecksDisplay();
   rerenderInterest();
 }
+
+/* =============================================
+   セーブ / ロード
+   ============================================= */
+
+const SL_KEY    = 'coc7_slots';
+const SL_COUNT  = 5;
+let slMode      = 'save';   // 'save' | 'load'
+let slSelected  = null;     // 選択中スロットindex
+
+function slGetSlots() {
+  try { return JSON.parse(localStorage.getItem(SL_KEY)) || []; }
+  catch(e) { return []; }
+}
+function slSetSlots(arr) {
+  localStorage.setItem(SL_KEY, JSON.stringify(arr));
+}
+
+function openSlModal(mode) {
+  setSlMode(mode);
+  document.getElementById('slModal').classList.remove('hidden');
+}
+function closeSlModal() {
+  document.getElementById('slModal').classList.add('hidden');
+  slSelected = null;
+}
+function setSlMode(mode) {
+  slMode = mode;
+  document.getElementById('slTabSave').classList.toggle('active', mode === 'save');
+  document.getElementById('slTabLoad').classList.toggle('active', mode === 'load');
+  document.getElementById('slTitle').textContent = mode === 'save' ? '保存' : '読み込み';
+  document.getElementById('slExecBtn').textContent = mode === 'save' ? '保存する' : '読み込む';
+  slSelected = null;
+  renderSlSlots();
+}
+
+function renderSlSlots() {
+  const slots = slGetSlots();
+  const el = document.getElementById('slSlots');
+  let html = '';
+  for(let i = 0; i < SL_COUNT; i++) {
+    const s = slots[i];
+    const sel = slSelected === i;
+    if(s) {
+      const date = new Date(s.savedAt).toLocaleString('ja-JP', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const occ  = s.allocName ? s.allocName : '（職業未選択）';
+      html += '<div class="sl-slot' + (sel?' selected':'') + '" onclick="slSelectSlot(' + i + ')">'
+        + '<div class="sl-slot-num">' + (i+1) + '</div>'
+        + '<div class="sl-slot-info">'
+          + '<div class="sl-slot-name">' + (s.charName || '名前なし') + '</div>'
+          + '<div class="sl-slot-meta">' + occ + '　' + date + '</div>'
+        + '</div>'
+        + (slMode==='save' ? '<button class="sl-slot-del" onclick="slDeleteSlot(event,' + i + ')">🗑</button>' : '')
+        + '</div>';
+    } else {
+      html += '<div class="sl-slot' + (sel?' selected':'') + '" onclick="slSelectSlot(' + i + ')">'
+        + '<div class="sl-slot-num">' + (i+1) + '</div>'
+        + '<div class="sl-slot-empty">― 空きスロット ―</div>'
+        + '</div>';
+    }
+  }
+  el.innerHTML = html;
+}
+
+function slSelectSlot(i) {
+  slSelected = i;
+  renderSlSlots();
+}
+
+function slDeleteSlot(e, i) {
+  e.stopPropagation();
+  if(!confirm('スロット' + (i+1) + 'のデータを削除しますか？')) return;
+  const slots = slGetSlots();
+  slots[i] = null;
+  slSetSlots(slots);
+  if(slSelected === i) slSelected = null;
+  renderSlSlots();
+}
+
+function slCollectState() {
+  return {
+    savedAt: Date.now(),
+    charName, charAge, charSex, charJob,
+    orig: Object.assign({}, orig),
+    work: Object.assign({}, work),
+    charCurrent: Object.assign({}, charCurrent),
+    charLuckCurrent,
+    charSkills: Object.assign({}, charSkills),
+    charBackstory: Object.assign({}, charBackstory),
+    charIcon,
+    // 配分状態
+    allocName,
+    allocSelectedFormula,
+    allocCredit,
+    allocDone,
+    allocRows: JSON.parse(JSON.stringify(allocRows)),
+    interestRows: JSON.parse(JSON.stringify(interestRows)),
+    interestTotal,
+    // 副業
+    sideJobEnabled,
+    sideJobOccName,
+    sideJobChecksLeft,
+    sideJobCreditChecked,
+    sideJobCreditAdd,
+    sideJobSkills: JSON.parse(JSON.stringify(sideJobSkills)),
+  };
+}
+
+function slRestoreState(s) {
+  charName          = s.charName || '';
+  charAge           = s.charAge  || 21;
+  charSex           = s.charSex  || '';
+  charJob           = s.charJob  || '';
+  orig              = Object.assign({}, s.orig || {});
+  work              = Object.assign({}, s.work || {});
+  charCurrent       = Object.assign({}, s.charCurrent || {});
+  charLuckCurrent   = s.charLuckCurrent ?? null;
+  charSkills        = Object.assign({}, s.charSkills || {});
+  charBackstory     = Object.assign({}, s.charBackstory || {});
+  charIcon          = s.charIcon || '';
+
+  // 入力欄へ反映
+  var nameEl = document.getElementById('inputName');
+  if(nameEl) nameEl.value = charName;
+  var ageEl = document.getElementById('inputAge');
+  if(ageEl) ageEl.value = charAge;
+  var sexEl = document.getElementById('inputSex');
+  if(sexEl) sexEl.value = charSex;
+  syncStatInputsFromOrig();
+
+  // 年齢補正タブのUI復元
+  // work と orig に差分があれば adjSec を表示して再描画
+  var hasWorkDiff = Object.keys(orig).some(function(k){ return work[k] != null && work[k] !== orig[k]; });
+  var adjSec = document.getElementById('adjSec');
+  if(adjSec) {
+    if(hasWorkDiff) {
+      adjSec.classList.remove('hidden');
+      renderAdjTable(true);   // locked=true（確定済み表示）
+      updatePreviewAfter();
+      renderFinal();
+      updateStatTableFromWork();
+      updateCharInfoBar();
+    } else {
+      adjSec.classList.add('hidden');
+    }
+  }
+  allocName             = s.allocName  || null;
+  allocSelectedFormula  = s.allocSelectedFormula || null;
+  allocCredit           = s.allocCredit || 0;
+  allocDone             = s.allocDone   || false;
+  allocRows             = s.allocRows   ? JSON.parse(JSON.stringify(s.allocRows))   : [];
+  interestRows          = s.interestRows? JSON.parse(JSON.stringify(s.interestRows)): [{selectedId:null,add:0,spec:''}];
+  interestTotal         = s.interestTotal || 0;
+
+  if(allocName && OCC_DATA[allocName]) {
+    allocOcc   = OCC_DATA[allocName];
+    allocTotal = evalSingleFormula(allocSelectedFormula);
+    // 配分UIを再描画
+    renderAllocUIV2();
+    // 副業エリア表示状態
+    var togArea = document.getElementById('sideJobToggleArea');
+    if(togArea) {
+      togArea.classList.remove('hidden');
+      togArea.style.opacity       = allocDone ? '1' : '0.4';
+      togArea.style.pointerEvents = allocDone ? '' : 'none';
+    }
+    // 完了状態を反映
+    applyAllocDone();
+    occSelected  = allocName;
+    occInited    = true;
+    renderOccTab();
+  }
+
+  // 副業
+  sideJobEnabled      = s.sideJobEnabled      || false;
+  sideJobOccName      = s.sideJobOccName      || null;
+  sideJobChecksLeft   = s.sideJobChecksLeft   ?? 5;
+  sideJobCreditChecked= s.sideJobCreditChecked|| false;
+  sideJobCreditAdd    = s.sideJobCreditAdd    || 0;
+  sideJobSkills       = s.sideJobSkills       ? JSON.parse(JSON.stringify(s.sideJobSkills)) : [];
+  if(sideJobEnabled && sideJobOccName) {
+    var chk = document.getElementById('sideJobChk');
+    if(chk) chk.checked = true;
+    renderSideJobSection();
+  }
+
+  renderSecondaryStats();
+  updateCharInfoBar();
+
+  // 年齢補正タブへ移動（復元完了後）
+  switchTab('age');
+}
+
+function slExec() {
+  if(slSelected === null) {
+    alert('スロットを選択してください。');
+    return;
+  }
+  if(slMode === 'save') {
+    const slots = slGetSlots();
+    if(slots[slSelected]) {
+      if(!confirm('スロット' + (slSelected+1) + 'のデータを上書きしますか？')) return;
+    }
+    slots[slSelected] = slCollectState();
+    slSetSlots(slots);
+    closeSlModal();
+    // 一瞬ボタンを「保存しました」に
+    var btn = document.getElementById('slExecBtn');
+    btn.textContent = '✓ 保存しました';
+    setTimeout(function(){ btn.textContent = '保存する'; }, 1500);
+  } else {
+    const slots = slGetSlots();
+    const s = slots[slSelected];
+    if(!s) { alert('このスロットにはデータがありません。'); return; }
+    if(!confirm('現在の作業内容を破棄して読み込みますか？')) return;
+    slRestoreState(s);
+    closeSlModal();
+  }
+}
 </script>
 
 <button id="backToTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="トップへ戻る">▲</button>
@@ -5075,5 +5981,22 @@ function resetSideJob() {
 }
 #backToTopBtn:hover { opacity: 1; }
 </style>
+
+<!-- セーブ/ロードモーダル -->
+<div id="slModal" class="sl-modal hidden">
+  <div class="sl-overlay" onclick="closeSlModal()"></div>
+  <div class="sl-panel">
+    <div class="sl-title" id="slTitle">保存</div>
+    <div class="sl-mode-tabs">
+      <button class="sl-mode-tab" id="slTabSave" onclick="setSlMode('save')">💾 保存</button>
+      <button class="sl-mode-tab" id="slTabLoad" onclick="setSlMode('load')">📂 読み込み</button>
+    </div>
+    <div class="sl-slots" id="slSlots"></div>
+    <div class="sl-actions">
+      <button class="btn-sm" onclick="closeSlModal()">閉じる</button>
+      <button class="btn-primary" id="slExecBtn" onclick="slExec()">保存する</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
