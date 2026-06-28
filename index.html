@@ -407,6 +407,101 @@ textarea:focus { outline: none; border-color: var(--accent); }
   background: var(--gold); color: #1a0f08; border-color: var(--gold); font-weight: 700;
 }
 
+/* ── バックストーリータブ ── */
+.bs-grid {
+  display: flex; flex-direction: column; gap: .85rem;
+  margin-bottom: 1.1rem;
+}
+.bs-cell {
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: .65rem .75rem .7rem;
+  background: rgba(255,255,255,.15);
+}
+.bs-two-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .6rem;
+}
+.bs-two-sublabel {
+  font-size: .63rem; color: var(--ink-light); margin-bottom: .2rem; letter-spacing: .1em;
+}
+.bs-cell-label {
+  font-size: .68rem; letter-spacing: .2em; color: var(--accent);
+  margin-bottom: .45rem; display: flex; align-items: center; gap: .4rem;
+}
+.bs-cell-btns {
+  margin-left: auto; display: flex; gap: .3rem; flex-shrink: 0;
+}
+.bs-rand-btn, .bs-copy-btn {
+  font-size: .62rem; padding: .1rem .45rem; border-radius: 3px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--ink-light); cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.bs-rand-btn:hover { border-color: var(--gold); color: var(--gold); }
+.bs-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bs-textarea {
+  width: 100%; min-height: 60px;
+  background: rgba(255,255,255,.38); border: 1px solid var(--border);
+  border-radius: 3px; padding: .45rem .6rem;
+  font-family: inherit; font-size: .78rem; color: var(--ink); resize: vertical; line-height: 1.65;
+}
+.bs-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* 恐怖症・マニア別枠 */
+.bs-phobia-wrap {
+  border: 1px solid var(--border); border-radius: 3px;
+  padding: .7rem .85rem .75rem;
+  background: rgba(255,255,255,.18);
+  margin-bottom: .85rem;
+}
+.bs-phobia-label {
+  font-size: .68rem; letter-spacing: .2em; color: var(--ink-mid);
+  margin-bottom: .45rem; display: flex; align-items: center; justify-content: space-between;
+}
+.bs-phobia-label span { color: var(--ink-light); letter-spacing: 0; font-size: .65rem; }
+.bs-phobia-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.bs-phobia-item label {
+  font-size: .65rem; color: var(--ink-light); display: block; margin-bottom: .2rem;
+}
+.bs-phobia-item textarea {
+  width: 100%; min-height: 54px;
+  background: rgba(255,255,255,.38); border: 1px solid var(--border);
+  border-radius: 3px; padding: .4rem .55rem;
+  font-family: inherit; font-size: .76rem; color: var(--ink); resize: vertical; line-height: 1.6;
+}
+.bs-phobia-item textarea:focus { outline: none; border-color: var(--ink-mid); }
+.bs-phobia-rand {
+  font-size: .62rem; padding: .1rem .4rem; border-radius: 3px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--ink-light); cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.bs-phobia-rand:hover { border-color: var(--gold); color: var(--gold); }
+
+/* キー・コネクション */
+.bs-kc-wrap {
+  display: flex; align-items: center; gap: .4rem; margin-left: .3rem;
+}
+.bs-kc-cb {
+  width: 14px; height: 14px; accent-color: var(--gold); cursor: pointer; flex-shrink: 0;
+}
+.bs-kc-label {
+  font-size: .62rem; color: var(--ink-light); cursor: pointer; white-space: nowrap;
+  transition: color .15s;
+}
+.bs-kc-label.active { color: var(--gold); font-weight: 700; }
+.bs-cell.kc-active {
+  border-color: var(--gold);
+  background: rgba(184,134,11,.07);
+}
+
+.bs-action-row {
+  display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .2rem;
+  padding-top: .9rem; border-top: 1px solid var(--border);
+}
+
+@media(max-width:480px) {
+  .bs-two-inner { grid-template-columns: 1fr; }
+  .bs-phobia-grid { grid-template-columns: 1fr; }
+}
+
 /* 技能絞り込み */
 .skill-filter-row {
   display: flex; gap: .5rem; align-items: flex-start; flex-wrap: wrap;
@@ -757,15 +852,24 @@ textarea:focus { outline: none; border-color: var(--accent); }
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: .35rem .6rem;
-  display: flex; justify-content: space-between; align-items: baseline;
-  gap: .3rem;
+  display: flex; flex-direction: column; gap: .18rem;
 }
-.ss-skill-card.boosted { border-color: var(--gold); background: rgba(184,150,62,.08); }
-.ss-skill-card.side-job { border-color: #5a3820; background: rgba(90,56,32,.06); }
+.ss-skill-card.occ      { border-color: var(--gold);  background: rgba(184,150,62,.08); }
+.ss-skill-card.interest { border-color: #4a7a5a;       background: rgba(74,122,90,.07); }
+.ss-skill-card.sidejob  { border-color: #5a3820;       background: rgba(90,56,32,.06); }
+.ss-skill-card-top { display: flex; justify-content: space-between; align-items: center; gap: .3rem; }
 .ss-skill-name { font-size: .78rem; color: var(--ink); flex: 1; min-width: 0; word-break: break-all; }
 .ss-skill-val  { font-size: 1rem; font-weight: 900; color: var(--ink); white-space: nowrap; }
-.ss-skill-val.boosted { color: var(--gold); }
-.ss-skill-val.side-job { color: #5a3820; }
+.ss-skill-val.occ      { color: var(--gold); }
+.ss-skill-val.interest { color: #3a7a5a; }
+.ss-skill-val.sidejob  { color: #5a3820; }
+.ss-skill-breakdown { display: flex; gap: .3rem; flex-wrap: wrap; }
+.ss-bd-item { font-size: .62rem; display: flex; align-items: center; gap: .18rem; }
+.ss-bd-badge { font-weight: 700; padding: .02rem .22rem; border-radius: 2px; }
+.ss-bd-badge.occ      { background: rgba(184,150,62,.3); color: #7a5a10; }
+.ss-bd-badge.interest { background: rgba(74,122,90,.25); color: #2a6040; }
+.ss-bd-badge.sidejob  { background: rgba(90,56,32,.2);   color: #5a3820; }
+.ss-bd-pts { color: var(--ink-mid); font-weight: 700; }
 .ss-unchanged-toggle {
   font-size: .75rem; color: var(--ink-mid); cursor: pointer;
   margin-top: .6rem; text-decoration: underline; display: inline-block;
@@ -1026,6 +1130,16 @@ textarea:focus { outline: none; border-color: var(--accent); }
   display: inline-block; font-size: .7rem; background: var(--accent);
   color: #fff; border-radius: 20px; padding: .1rem .6rem; margin-left: .4rem; font-weight: 700;
 }
+.alloc-over-banner {
+  background: rgba(139,32,32,.1); border: 1.5px solid var(--accent);
+  border-radius: 4px; padding: .45rem .75rem; margin: .5rem 0;
+  font-size: .78rem; color: var(--accent); font-weight: 700; display: flex; gap: .4rem; align-items: center;
+}
+.ss-over-banner {
+  background: rgba(139,32,32,.1); border: 1.5px solid var(--accent);
+  border-radius: 4px; padding: .5rem .75rem; margin-bottom: .8rem;
+  font-size: .8rem; color: var(--accent); font-weight: 700;
+}
 
 /* 信用スライダー */
 .alloc-credit-row {
@@ -1046,6 +1160,28 @@ textarea:focus { outline: none; border-color: var(--accent); }
 }
 .alloc-credit-val { font-size: 1.1rem; font-weight: 900; color: var(--accent); }
 .alloc-credit-pct { font-size: .72rem; color: var(--ink-light); }
+.credit-wealth-info {
+  margin-top: .45rem; font-size: .72rem; color: var(--ink-light);
+  display: flex; gap: .6rem; flex-wrap: wrap; letter-spacing: 0;
+}
+.credit-wealth-header { color: var(--ink-mid); font-size: .68rem; width: 100%; margin-bottom: -.2rem; }
+.credit-wealth-item { display: flex; gap: .2rem; align-items: baseline; }
+.credit-wealth-label { color: var(--ink-mid); font-weight: 700; }
+.credit-wealth-label::after { content: '：'; }
+.credit-wealth-val   { color: var(--ink); }
+/* 完成シート内財産目安 */
+.ss-wealth-info {
+  display: flex; flex-wrap: wrap; gap: .4rem .7rem; align-items: baseline;
+  margin: .4rem 0 .6rem; padding: .4rem .6rem;
+  background: rgba(184,150,62,.06); border: 1px solid rgba(184,150,62,.25); border-radius: 4px;
+  font-size: .74rem;
+}
+.ss-wealth-header { color: var(--ink-mid); font-size: .65rem; width: 100%; margin-bottom: -.15rem; }
+.ss-wealth-item { display: flex; gap: .15rem; align-items: baseline; }
+.ss-wealth-label { color: var(--ink-mid); font-weight: 700; }
+.ss-wealth-label::after { content: '：'; }
+.ss-wealth-val { color: var(--ink); font-weight: 700; }
+.ss-wealth-sep { color: var(--ink-light); }
 
 /* テーブル v2 */
 .alloc-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
@@ -1513,7 +1649,12 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       <div class="secondary-chips" id="secondaryChips"></div>
     </div>
 
-    <!-- 年齢補正リセット警告バナー -->
+    <!-- 配分ポイント超過警告バナー -->
+    <div id="allocOverWarning" style="display:none;margin-bottom:.7rem;">
+      <div style="background:rgba(139,32,32,.09);border:1px solid var(--accent);border-left:3px solid var(--accent);border-radius:3px;padding:.5rem .85rem;font-size:.78rem;color:var(--accent);font-weight:700;" id="allocOverWarningText"></div>
+    </div>
+
+
     <div id="ageResetWarning" style="display:none;margin-bottom:.7rem;">
       <div style="background:rgba(184,134,11,.12);border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:3px;padding:.5rem .85rem;display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;">
         <span style="font-size:.78rem;color:var(--ink-mid);">⚠️ 能力値が変更されました。年齢補正の再適用が必要です。</span>
@@ -1652,9 +1793,19 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
 
   <!-- ═══ バックストーリータブ ═══ -->
   <div id="paneBs" class="hidden">
-    <div style="text-align:center;padding:3rem 1rem;color:var(--ink-light);font-size:.85rem;opacity:.7;">
-      バックストーリー機能は近日実装予定です
+
+    <!-- 全エントリーランダム生成 -->
+    <div class="bs-action-row" style="margin-bottom:.9rem;padding-top:0;border-top:none;">
+      <button class="btn-sm" onclick="bsRandAll()">🎲 全エントリーランダム生成</button>
+      <button class="btn-sm" onclick="bsClearAll()">✕ 全てクリア</button>
     </div>
+
+    <!-- ── バックストーリー 6フィールド ── -->
+    <div class="bs-grid" id="bsGrid"></div>
+
+    <!-- ── 恐怖症・マニア 別枠 ── -->
+    <div class="bs-phobia-wrap" id="bsPhobiaWrap"></div>
+
   </div>
 
 </div><!-- /page -->
@@ -1825,6 +1976,7 @@ function switchTab(tab){
   if(tabBs) tabBs.classList.toggle('active', tab==='bs');
   if(tab==='occ' && !occInited) initOccTab();
   if(tab==='age') refreshAgeTab();
+  if(tab==='bs') bsInit();
 }
 
 /* ── 職業タブ 状態 ── */
@@ -2199,7 +2351,730 @@ function showBsTab(idx, btn){
   });
 }
 
+/* ===== バックストーリータブ ===== */
+
+/* ===== バックストーリーデータ ===== */
+
+/* ===== バックストーリーデータ ===== */
+
+/*
+  タグ設計（2段階フィールドの矛盾回避）
+  --- 重要な人々 ---
+  誰タグ:    dead / unknown / fictional / alive / contact
+  理由タグ:  req_alive / req_contact
+  NGペア:    dead×req_alive, fictional×req_contact, unknown×req_contact
+
+  --- 場所 ---
+  場所タグ:  exists / gone
+  思い出タグ: req_exists / req_gone
+  NGペア:    gone×req_exists, exists×req_gone
+
+  --- 秘蔵の品 ---
+  品物タグ:  self_made / broken / no_giver
+  思い出タグ: req_giver / req_self / req_broken
+  NGペア:    self_made×req_giver, no_giver×req_giver
+*/
+
+/* ── 1段階フィールド ── */
+const BS_FIELDS = [
+  {
+    key: '容姿の描写',
+    label: '容姿の描写',
+    hint: '外見・体格・特徴的な服装など',
+    /*
+      statItems: ステータス連動項目
+      各項目: { text, stat, tier }
+        stat: 'APP'|'SIZ'|'STR'|'CON'|'DEX'|'POW'|'INT'|'EDU'|'LUC'
+        tier: 'hi'(66+) | 'lo'(39-) | 'any'(常時候補)
+      高(66+)・低(39-)に合致する項目は重み3、anyは重み1
+      ステータス未入力時は全て重み1で均等抽選
+    */
+    statItems: [
+      /* APP */
+      { text: '目元が鋭く印象に残る',           stat:'APP', tier:'hi' },
+      { text: '背筋が伸び、姿勢が美しい',        stat:'APP', tier:'hi' },
+      { text: '笑うと急に幼く見える',             stat:'APP', tier:'hi' },
+      { text: '髪色や髪型に強いこだわりがある',   stat:'APP', tier:'hi' },
+      { text: '派手なアクセサリーを好む',         stat:'APP', tier:'hi' },
+      { text: '服装は流行を意識している',         stat:'APP', tier:'hi' },
+      { text: 'どこか不健康そうに見える',         stat:'APP', tier:'lo' },
+      { text: '常に少し煤けた、くたびれた印象がある', stat:'APP', tier:'lo' },
+      { text: '無表情で感情が読みにくい',         stat:'APP', tier:'lo' },
+      { text: '人混みに入ると存在感が薄れる',     stat:'APP', tier:'lo' },
+      { text: '常に帽子やフードをかぶっている',   stat:'APP', tier:'lo' },
+      /* SIZ */
+      { text: '大柄で存在感がある',               stat:'SIZ', tier:'hi' },
+      { text: '肩幅が広く威圧感がある',           stat:'SIZ', tier:'hi' },
+      { text: '手が大きく骨ばっている',           stat:'SIZ', tier:'hi' },
+      { text: '小柄で華奢な印象',                 stat:'SIZ', tier:'lo' },
+      { text: '細い首が目を引く',                 stat:'SIZ', tier:'lo' },
+      { text: '子どもっぽく見られることが多い',   stat:'SIZ', tier:'lo' },
+      { text: '年齢より若く見られる',             stat:'SIZ', tier:'lo' },
+      { text: '年齢より老けて見られる',           stat:'SIZ', tier:'hi' },
+      /* STR */
+      { text: '引き締まった体格をしている',       stat:'STR', tier:'hi' },
+      { text: '手がひどく荒れている',             stat:'STR', tier:'hi' },
+      { text: '腕や肩の筋肉が服の上からわかる',   stat:'STR', tier:'hi' },
+      { text: '猫背でどこか頼りなげ',             stat:'STR', tier:'lo' },
+      { text: '細腕で頼りなく見える',             stat:'STR', tier:'lo' },
+      /* CON */
+      { text: '肌に血色がよく健康的に見える',     stat:'CON', tier:'hi' },
+      { text: '日に焼けた肌が印象的',             stat:'CON', tier:'hi' },
+      { text: '顔色が悪く心配される',             stat:'CON', tier:'lo' },
+      { text: '目の下にいつもくまがある',         stat:'CON', tier:'lo' },
+      { text: '常に疲れた様子をしている',         stat:'CON', tier:'lo' },
+      /* DEX */
+      { text: '動きが無駄なくスムーズ',           stat:'DEX', tier:'hi' },
+      { text: '歩き方に独特のリズムがある',       stat:'DEX', tier:'hi' },
+      { text: '指が人より長い',                   stat:'DEX', tier:'hi' },
+      { text: 'ぎこちない動きが目につく',         stat:'DEX', tier:'lo' },
+      { text: '落ち着きなく体が揺れる',           stat:'DEX', tier:'lo' },
+      /* POW */
+      { text: '目に強い光がある',                 stat:'POW', tier:'hi' },
+      { text: '静かにしていても存在感がある',     stat:'POW', tier:'hi' },
+      { text: '香水やにおいに強いこだわりがある', stat:'POW', tier:'hi' },
+      { text: '目がうつろで焦点が定まらない',     stat:'POW', tier:'lo' },
+      { text: 'いつもどこか遠くを見ている',       stat:'POW', tier:'lo' },
+      /* INT */
+      { text: '視線が鋭く観察眼を感じさせる',     stat:'INT', tier:'hi' },
+      { text: '眼鏡をかけている',                 stat:'INT', tier:'hi' },
+      { text: '常に本や書類を携帯している',       stat:'INT', tier:'hi' },
+      { text: '話すとき視線をほとんど合わせない', stat:'INT', tier:'hi' },
+      { text: '表情が豊かで感情が顔に出やすい',   stat:'INT', tier:'lo' },
+      /* EDU */
+      { text: '服装に清潔感と品がある',           stat:'EDU', tier:'hi' },
+      { text: '立ち居振る舞いが洗練されている',   stat:'EDU', tier:'hi' },
+      { text: '靴が常に磨かれている',             stat:'EDU', tier:'hi' },
+      { text: '服装は常に実用重視',               stat:'EDU', tier:'lo' },
+      { text: 'くたびれた作業着が板についている', stat:'EDU', tier:'lo' },
+      /* LUC */
+      { text: 'なんとなく運がよさそうな顔をしている', stat:'LUC', tier:'hi' },
+      { text: 'いつも少し余裕のある表情',         stat:'LUC', tier:'hi' },
+      { text: '笑顔が自然で人を引きつける',       stat:'LUC', tier:'hi' },
+      { text: '常に眠たそうな目をしている',       stat:'LUC', tier:'lo' },
+      { text: 'ぽっちゃりして愛嬌がある',         stat:'LUC', tier:'lo' },
+      /* any（常時候補） */
+      { text: '目立つ傷や痣がある',               stat:null,  tier:'any' },
+      { text: '前髪で片目が隠れている',           stat:null,  tier:'any' },
+      { text: '左右非対称な顔立ちが個性的',       stat:null,  tier:'any' },
+      { text: '声が低くよく通る',                 stat:null,  tier:'any' },
+      { text: '声が高く独特のトーンがある',       stat:null,  tier:'any' },
+    ],
+    rand: [] /* 後方互換用（未使用）*/
+  },
+  {
+    key: 'イデオロギー/信念',
+    label: 'イデオロギー/信念',
+    hint: '思想・宗教・倫理観・人生哲学',
+    rand: [
+      '世界は努力で変えられると信じている',
+      '人は本質的に孤独だと考えている',
+      '正義のためなら多少の犠牲はやむを得ない',
+      '真実を知ることこそ人生の価値',
+      '自分の専門分野を極めることが使命',
+      '金銭こそ自由の象徴',
+      '名誉を何より重んじる',
+      '家族を守ることが最優先',
+      '常に最新情報を追い続けている',
+      '強い者が生き残るべきだと思っている',
+      '人は分かり合えると信じている',
+      '運命は決まっている',
+      '超常的な何かの存在を感じている',
+      '弱点は克服すべき課題',
+      '夢や目標のためなら無理をする',
+      '他人の評価を強く意識している',
+      '特定の文化や作品を人生の支えにしている',
+      '仲間との絆を最も重視する',
+      '常に疑いの目を持って物事を見る',
+      '平穏こそ最良だと思っている',
+      '過去は変えられないが未来は変えられる',
+      '人の本性は変わらないと思っている',
+      '秩序こそが社会を守ると信じている',
+      '自由と自律を何より大切にしている',
+      '知識は危険だとどこかで感じている',
+      '善人も状況次第で悪になると思っている',
+      '死は終わりではないと信じている',
+      '復讐は正義の一形態だと思っている',
+      '記録することが歴史を守ると信じている',
+      '笑いと遊びこそ生きる力だと思っている',
+    ]
+  },
+  {
+    key: '特徴',
+    label: '特徴',
+    hint: '独自の特技・癖・口癖・奇妙な習慣など',
+    rand: [
+      '口癖がある',
+      '独特な笑い方をする',
+      '毎朝必ず同じ行動をする',
+      '驚異的な集中力を持つ',
+      '無謀な挑戦を好む',
+      '慎重すぎる',
+      '楽観的',
+      '悲観的',
+      '義理堅い',
+      '冷淡に見える',
+      '夢見がち',
+      '現実主義',
+      '強い野心を持つ',
+      '影の顔がある',
+      '感情が表に出やすい',
+      '感情を隠すのが上手い',
+      '妙な特技がある',
+      '特定の匂いや音に弱い',
+      '負けず嫌い',
+      '人を放っておけない',
+      '気づくと独り言を言っている',
+      '嘘をついていると体に出てしまう',
+      '初対面の人の手元や足元を必ず見る',
+      '話すとき手ぶりが多い',
+      '沈黙が得意',
+      '人の名前をすぐ忘れるが顔は覚えている',
+      'いつも少し早く到着する',
+      '物を捨てられない',
+      '頭の回転が速すぎて言葉が追いつかない',
+      '直感で動くことが多い',
+    ]
+  },
+];
+
+/* ── 2段階フィールド ── */
+const BS_TWO_FIELDS = [
+  {
+    key:    '重要な人々',
+    label:  '重要な人々',
+    hint:   '最も大切な人物',
+    keyA:   '重要な人々_誰',
+    keyB:   '重要な人々_理由',
+    labelA: '誰',
+    labelB: '理由',
+    colA: [
+      { text: '幼なじみ',                   tags: [] },
+      { text: '恩師',                        tags: [] },
+      { text: 'かつての同僚',               tags: [] },
+      { text: '家族',                        tags: [] },
+      { text: '恋人',                        tags: ['alive'] },
+      { text: 'ライバル',                    tags: ['alive','contact'] },
+      { text: '自分を慕う後輩',             tags: ['alive','contact'] },
+      { text: '尊敬する先輩',               tags: ['alive'] },
+      { text: 'ネット上の友人',             tags: ['alive'] },
+      { text: '行きつけの店の店主',         tags: ['alive','contact'] },
+      { text: '推している著名人',           tags: ['fictional'] },
+      { text: '過去に助けられた人物',       tags: [] },
+      { text: '守るべき子ども',             tags: ['alive','contact'] },
+      { text: '共に困難を越えた仲間',       tags: [] },
+      { text: 'すでに亡くなった人物',       tags: ['dead'] },
+      { text: '幼少期の友人（今は疎遠）',   tags: [] },
+      { text: '上司または部下',             tags: ['alive','contact'] },
+      { text: '取引相手',                   tags: ['alive','contact'] },
+      { text: 'セッションに登場するNPC',   tags: ['fictional'] },
+      { text: '架空のキャラクター',         tags: ['fictional'] },
+      { text: '初恋の人',                   tags: [] },
+      { text: 'かつて敵対した相手',         tags: [] },
+      { text: '同じ趣味を持つ仲間',         tags: ['alive'] },
+      { text: '捜索している行方不明者',     tags: ['unknown'] },
+      { text: '手紙だけで繋がっている相手', tags: ['alive'] },
+      { text: '師と仰ぐ故人',               tags: ['dead'] },
+      { text: 'かつての恋人の家族',         tags: [] },
+      { text: '自分の子ども（別居中）',     tags: ['alive','contact'] },
+      { text: '血の繋がらない兄弟姉妹',     tags: ['alive'] },
+      { text: '遠縁の親戚',                 tags: [] },
+    ],
+    colB: [
+      { text: '感謝している',                         tags: [] },
+      { text: '乗り越えたい存在',                     tags: [] },
+      { text: '密かに想っている',                     tags: ['req_alive'] },
+      { text: '失敗を償いたい',                       tags: [] },
+      { text: '守りたい',                             tags: ['req_alive'] },
+      { text: '尊敬している',                         tags: [] },
+      { text: '恐れている',                           tags: [] },
+      { text: '恩を返したい',                         tags: ['req_alive'] },
+      { text: '真実を知りたい',                       tags: ['req_contact'] },
+      { text: '過去を共有している',                   tags: [] },
+      { text: '競い合っている',                       tags: ['req_alive','req_contact'] },
+      { text: '疑念を抱いている',                     tags: ['req_contact'] },
+      { text: '理想像として見ている',                 tags: [] },
+      { text: '約束を交わした',                       tags: [] },
+      { text: '裏切られた',                           tags: [] },
+      { text: '支えになっている',                     tags: [] },
+      { text: '弱みを握られている',                   tags: ['req_alive','req_contact'] },
+      { text: '自分を理解してくれる唯一の存在',       tags: [] },
+      { text: '憎んでいる',                           tags: [] },
+      { text: '忘れられない',                         tags: [] },
+      { text: '幸せを見届けたい',                     tags: ['req_alive'] },
+      { text: '正体を知りたい',                       tags: ['req_contact'] },
+      { text: 'もう一度会いたい',                     tags: ['req_alive'] },
+      { text: '自分の本心を試される存在',             tags: [] },
+      { text: '共に成長してきた',                     tags: ['req_alive'] },
+      { text: '自分の影のような存在',                 tags: [] },
+      { text: 'その人がいなければ今の自分はいない',   tags: [] },
+      { text: '残した言葉を今も引きずっている',       tags: [] },
+      { text: '何かを一緒に成し遂げたい',             tags: ['req_alive'] },
+      { text: 'いつか別れが来ると分かっている',       tags: ['req_alive'] },
+    ],
+    ngPairs: [
+      ['dead',     'req_alive'],
+      ['fictional','req_contact'],
+      ['unknown',  'req_contact'],
+    ]
+  },
+  {
+    key:    '意味のある場所',
+    label:  '意味のある場所',
+    hint:   '特別な意味を持つ場所',
+    keyA:   '意味のある場所_場所',
+    keyB:   '意味のある場所_思い出',
+    labelA: '場所',
+    labelB: '思い出',
+    colA: [
+      { text: '生まれ育った家',         tags: ['exists'] },
+      { text: '通っていた学校',         tags: [] },
+      { text: '静かな図書館',           tags: ['exists'] },
+      { text: '行きつけの店',           tags: ['exists'] },
+      { text: '高台や屋上',             tags: ['exists'] },
+      { text: '海辺',                   tags: ['exists'] },
+      { text: '山の中',                 tags: ['exists'] },
+      { text: '廃墟',                   tags: ['gone'] },
+      { text: '川沿いの道',             tags: ['exists'] },
+      { text: '深夜の繁華街',           tags: ['exists'] },
+      { text: '古い神社',               tags: ['exists'] },
+      { text: '研究室や作業場',         tags: ['exists'] },
+      { text: '車やバイクの中',         tags: ['exists'] },
+      { text: '病院',                   tags: ['exists'] },
+      { text: '古い教会',               tags: ['exists'] },
+      { text: '繁華街の路地裏',         tags: ['exists'] },
+      { text: '遠く離れた外国の街',     tags: ['exists'] },
+      { text: '墓地',                   tags: ['exists'] },
+      { text: '地下空間',               tags: [] },
+      { text: 'ネット上のコミュニティ', tags: ['gone'] },
+      { text: '昔住んでいた街',         tags: [] },
+      { text: '今は閉まってしまった店', tags: ['gone'] },
+      { text: '乗り物の車内（列車・飛行機など）', tags: [] },
+      { text: '見知らぬ人の家',         tags: [] },
+      { text: '廃校',                   tags: ['gone'] },
+      { text: '灯台',                   tags: ['exists'] },
+      { text: '峠の休憩所',             tags: ['exists'] },
+      { text: '早朝の公園',             tags: ['exists'] },
+      { text: '祭りが行われる広場',     tags: ['exists'] },
+      { text: '病院の待合室',           tags: ['exists'] },
+    ],
+    colB: [
+      { text: '大切な人と最後に会った場所',           tags: [] },
+      { text: '一人でよく逃げ込んでいた',             tags: ['req_exists'] },
+      { text: '忘れられない会話をした',               tags: [] },
+      { text: '人生の転機になった出来事があった',     tags: [] },
+      { text: '泣いたことがある',                     tags: [] },
+      { text: '誰かを傷つけてしまった',               tags: [] },
+      { text: '誰かに助けられた',                     tags: [] },
+      { text: '何かを決意した',                       tags: [] },
+      { text: '怖い思いをしたのに、また行ってしまう', tags: ['req_exists'] },
+      { text: 'もう存在しない',                       tags: ['req_gone'] },
+      { text: '今も夢に出てくる',                     tags: [] },
+      { text: '誰かと約束した場所',                   tags: [] },
+      { text: '本当の自分でいられる気がする',         tags: ['req_exists'] },
+      { text: 'なぜか落ち着く',                       tags: ['req_exists'] },
+      { text: '大切なものを置いてきた気がする',       tags: [] },
+      { text: '一番孤独を感じた場所',                 tags: [] },
+      { text: '初めて世界が広いと感じた',             tags: [] },
+      { text: '秘密を知ってしまった場所',             tags: [] },
+      { text: '何度も訪れているのに、毎回違って見える', tags: ['req_exists'] },
+      { text: 'もう一度だけ行きたいと思っている',     tags: [] },
+      { text: '初めて誰かを信じた場所',               tags: [] },
+      { text: '怒りが爆発した場所',                   tags: [] },
+      { text: '迷子になったことがある',               tags: [] },
+      { text: 'そこにいると時間を忘れる',             tags: ['req_exists'] },
+      { text: '大切なものを失った場所',               tags: [] },
+      { text: '自分の嘘がばれた場所',                 tags: [] },
+      { text: '再出発を誓った場所',                   tags: [] },
+      { text: '奇妙なものを見た場所',                 tags: [] },
+      { text: '思い出そうとしても細部が思い出せない', tags: [] },
+      { text: 'ある匂いを嗅ぐと必ず思い出す',         tags: [] },
+    ],
+    ngPairs: [
+      ['gone',   'req_exists'],
+      ['exists', 'req_gone'],
+    ]
+  },
+  {
+    key:    '秘蔵の品',
+    label:  '秘蔵の品',
+    hint:   '大切にしている宝物・お守り・形見など',
+    keyA:   '秘蔵の品_品物',
+    keyB:   '秘蔵の品_思い出',
+    labelA: '品物',
+    labelB: '思い出',
+    colA: [
+      { text: '使い込んだ財布',         tags: [] },
+      { text: '古い写真',               tags: [] },
+      { text: '手紙',                   tags: [] },
+      { text: '指輪',                   tags: [] },
+      { text: '古い本',                 tags: [] },
+      { text: 'お守り',                 tags: [] },
+      { text: 'ナイフ',                 tags: [] },
+      { text: '日記',                   tags: ['self_made'] },
+      { text: '小さなオルゴール',       tags: [] },
+      { text: '書きかけの原稿',         tags: ['self_made'] },
+      { text: '古いコインの束',         tags: [] },
+      { text: '古い懐中時計',           tags: [] },
+      { text: '古文書',                 tags: ['no_giver'] },
+      { text: '壊れた機械',             tags: ['broken'] },
+      { text: '封を開けていない小包',   tags: ['no_giver'] },
+      { text: '鍵',                     tags: ['no_giver'] },
+      { text: 'USBメモリ',              tags: ['no_giver'] },
+      { text: 'ペンダント',             tags: [] },
+      { text: '記念メダル',             tags: [] },
+      { text: '走り書きのメモ',         tags: ['no_giver'] },
+      { text: '地図の切れ端',           tags: ['no_giver'] },
+      { text: '古いカセットテープ',     tags: [] },
+      { text: '壊れた眼鏡',             tags: ['broken'] },
+      { text: '子どもの頃に描いた絵',   tags: ['self_made'] },
+      { text: '薬の空き瓶',             tags: [] },
+      { text: '見知らぬ人の名刺',       tags: ['no_giver'] },
+      { text: '骨董品の置き物',         tags: [] },
+      { text: '切り抜いた新聞記事',     tags: ['self_made','no_giver'] },
+      { text: '染みのついたハンカチ',   tags: [] },
+      { text: '弦の切れた楽器',         tags: ['broken'] },
+    ],
+    colB: [
+      { text: 'もう会えない人からもらった',                         tags: ['req_giver'] },
+      { text: '大切な場面で偶然手に入れた',                         tags: [] },
+      { text: '自分で作った・書いた',                               tags: ['req_self'] },
+      { text: 'ずっと探していたものだった',                         tags: [] },
+      { text: '誰かに預かってほしいと頼まれた',                     tags: ['req_giver'] },
+      { text: '捨てられなかっただけなのに、今は手放せない',         tags: [] },
+      { text: '中身や意味をまだ知らない',                           tags: [] },
+      { text: '本当の持ち主が別にいる',                             tags: ['req_giver'] },
+      { text: '拾ったものだが、誰かが大切にしていたと感じた',       tags: [] },
+      { text: '昔の自分への戒めとして持っている',                   tags: [] },
+      { text: '夢や目標を思い出させてくれる',                       tags: [] },
+      { text: '大切な約束の証',                                     tags: [] },
+      { text: '手放そうとしたことがあるが、結局戻ってきてしまった', tags: [] },
+      { text: '誰にも見せたことがない',                             tags: [] },
+      { text: '壊れているが直せない・直したくない',                 tags: ['req_broken'] },
+      { text: 'これがあると落ち着く',                               tags: [] },
+      { text: '偶然助かった時に身につけていた',                     tags: [] },
+      { text: '尊敬する人が持っていたのと同じもの',                 tags: [] },
+      { text: '夢の中で何度も出てきた',                             tags: [] },
+      { text: '手放したら何かが終わる気がする',                     tags: [] },
+      { text: '渡す相手がいつか現れると思っている',                 tags: [] },
+      { text: 'ある場所へ行くための手がかりになるかもしれない',     tags: [] },
+      { text: '手に入れた経緯を人には言えない',                     tags: [] },
+      { text: '旅先で偶然手に入れた',                               tags: [] },
+      { text: 'いつかは返さなければならないと思っている',           tags: ['req_giver'] },
+      { text: '誰かと同じものを持っていると気づいた',               tags: [] },
+      { text: '壊れているのに、それが今の状態にふさわしい気がする', tags: ['req_broken'] },
+      { text: '見るたびにあの日のことを思い出す',                   tags: [] },
+      { text: '存在すら忘れていたのに、ふと出てきた',               tags: [] },
+      { text: 'これを手にした日、何かが変わった',                   tags: [] },
+    ],
+    ngPairs: [
+      ['self_made', 'req_giver'],
+      ['no_giver',  'req_giver'],
+    ]
+  },
+];
+
+/* ── タグ矛盾チェック付き抽選 ── */
+function bsPickCompatible(colA, colB, ngPairs) {
+  var maxTry = 50;
+  for(var t = 0; t < maxTry; t++) {
+    var a = colA[Math.floor(Math.random() * colA.length)];
+    var b = colB[Math.floor(Math.random() * colB.length)];
+    var ok = true;
+    for(var i = 0; i < ngPairs.length; i++) {
+      var tA = ngPairs[i][0], tB = ngPairs[i][1];
+      if(a.tags.indexOf(tA) !== -1 && b.tags.indexOf(tB) !== -1) { ok = false; break; }
+    }
+    if(ok) return { a: a.text, b: b.text };
+  }
+  /* フォールバック: タグなしのものだけから選ぶ */
+  var safeA = colA.filter(function(x){ return x.tags.length === 0; });
+  var safeB = colB.filter(function(x){ return x.tags.length === 0; });
+  return {
+    a: (safeA.length ? safeA : colA)[Math.floor(Math.random() * (safeA.length || colA.length))].text,
+    b: (safeB.length ? safeB : colB)[Math.floor(Math.random() * (safeB.length || colB.length))].text,
+  };
+}
+
+/* 恐怖症・マニアは別枠 */
+const BS_PHOBIA_FIELDS = [
+  {
+    key: 'phobia_fear',
+    label: '恐怖症',
+    hint: '恐怖症・パニックを引き起こすもの',
+    rand: [
+      '閉所恐怖症。エレベーターは使えず、狭い部屋で長時間過ごすと発作が出る。',
+      '血液恐怖症。傷口を見ると意識が遠のく。医療現場が特に苦手。',
+      '高所恐怖症。3階以上のベランダには出られない。',
+      '暗所恐怖症。外出時は必ず懐中電灯を携帯する。',
+      '昆虫恐怖症。特に多足類が駄目。画像を見るだけで鳥肌が立つ。',
+      '見知らぬ人の目が怖い。人混みでは常に俯き加減になる。',
+      '水（特に深い水）への恐怖。船に乗るたび冷や汗をかく。',
+      '火への恐怖。マッチやライターを人前で使えない。',
+      '犬への恐怖。幼少期に噛まれた記憶が抜けない。',
+      '嵐恐怖症。雷鳴が聞こえると外に出られなくなる。',
+    ]
+  },
+  {
+    key: 'phobia_mania',
+    label: 'マニア',
+    hint: '強迫観念・偏執的なこだわり・収集癖など',
+    rand: [
+      '「7」という数字への執着。物の数や日付が7の倍数でないと気になる。',
+      '収集癖。古いコインを集めており、知らない国のコインを見ると思わず手が伸びる。',
+      '整理整頓への強迫観念。他人が触った物の位置がわずかにずれても気づく。',
+      '特定の喫茶店のブレンドコーヒー以外飲めない。出先でも探してしまう。',
+      '本の角を折ることへの嫌悪感。他人がやると声をかけずにいられない。',
+      '廃墟・廃屋への異常な興味。見つけると必ず中を探索しようとする。',
+      '自分の話した言葉を記録する癖。小型のノートを常に持ち歩く。',
+      '古地図コレクション。部屋の壁が地図で埋まりつつある。',
+      '毎朝の儀式が崩れると一日中落ち着かない。',
+      '特定のメロディーが頭から離れない。数週間単位で続くことがある。',
+    ]
+  },
+];
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── グリッド描画 ── */
+function bsRenderGrid() {
+  var grid = document.getElementById('bsGrid');
+  if(!grid) return;
+  var html = '';
+
+  /*
+    表示順: 容姿の描写(BS_FIELDS[0]) / イデオロギー/信念(BS_FIELDS[1]) /
+            重要な人々(BS_TWO_FIELDS[0]) / 意味のある場所(BS_TWO_FIELDS[1]) /
+            秘蔵の品(BS_TWO_FIELDS[2]) / 特徴(BS_FIELDS[2])
+  */
+  var ORDER = [
+    { type: 'one', idx: 0 },
+    { type: 'one', idx: 1 },
+    { type: 'two', idx: 0 },
+    { type: 'two', idx: 1 },
+    { type: 'two', idx: 2 },
+    { type: 'one', idx: 2 },
+  ];
+  ORDER.forEach(function(o) {
+    var kcKey  = (o.type === 'one') ? BS_FIELDS[o.idx].key : BS_TWO_FIELDS[o.idx].key;
+    var kcId   = 'bsKC_' + o.type + '_' + o.idx;
+    var isKC   = (charKeyConnection === kcKey);
+    var kcCellCls = isKC ? ' kc-active' : '';
+    var kcLabelCls = isKC ? ' active' : '';
+    var kcChecked  = isKC ? ' checked' : '';
+    var kcWidget = '<div class="bs-kc-wrap">'
+      + '<input type="checkbox" class="bs-kc-cb" id="' + kcId + '"' + kcChecked + ' onchange="bsToggleKC(\'' + kcKey + '\',this)">'
+      + '<label class="bs-kc-label' + kcLabelCls + '" for="' + kcId + '">キー・コネクション</label>'
+      + '</div>';
+
+    if(o.type === 'one') {
+      var f = BS_FIELDS[o.idx];
+      var val = charBackstory[f.key] || '';
+      html += '<div class="bs-cell' + kcCellCls + '" id="bsCell_' + o.type + '_' + o.idx + '">';
+      html += '<div class="bs-cell-label"><span>' + f.label + '</span>';
+      html += kcWidget;
+      html += '<div class="bs-cell-btns">';
+      html += '<button class="bs-rand-btn" onclick="bsRandOne(' + o.idx + ')">🎲 ランダム</button>';
+      html += '<button class="bs-copy-btn" onclick="bsCopyOne(\'' + f.key + '\')">📋 コピー</button>';
+      html += '</div></div>';
+      html += '<textarea class="bs-textarea" id="bsTA_' + o.idx + '" placeholder="' + f.hint + '" oninput="bsOnInput(' + o.idx + ',this.value)">' + escHtml(val) + '</textarea>';
+      html += '</div>';
+    } else {
+      var f = BS_TWO_FIELDS[o.idx];
+      var valA = charBackstory[f.keyA] || '';
+      var valB = charBackstory[f.keyB] || '';
+      html += '<div class="bs-cell' + kcCellCls + '" id="bsCell_' + o.type + '_' + o.idx + '">';
+      html += '<div class="bs-cell-label"><span>' + f.label + '</span>';
+      html += kcWidget;
+      html += '<div class="bs-cell-btns">';
+      html += '<button class="bs-rand-btn" onclick="bsRandTwo(' + o.idx + ')">🎲 ランダム</button>';
+      html += '<button class="bs-copy-btn" onclick="bsCopyTwo(' + o.idx + ')">📋 コピー</button>';
+      html += '</div></div>';
+      html += '<div class="bs-two-inner">';
+      html += '<div><div class="bs-two-sublabel">' + f.labelA + '</div>';
+      html += '<textarea class="bs-textarea" id="bsTTA_' + o.idx + '_A" placeholder="' + f.labelA + '..." oninput="bsOnTwoInput(' + o.idx + ',\'A\',this.value)">' + escHtml(valA) + '</textarea></div>';
+      html += '<div><div class="bs-two-sublabel">' + f.labelB + '</div>';
+      html += '<textarea class="bs-textarea" id="bsTTA_' + o.idx + '_B" placeholder="' + f.labelB + '..." oninput="bsOnTwoInput(' + o.idx + ',\'B\',this.value)">' + escHtml(valB) + '</textarea></div>';
+      html += '</div>';
+      html += '</div>';
+    }
+  });
+  grid.innerHTML = html;
+}
+
+/* ── 恐怖症・マニア別枠描画 ── */
+function bsRenderPhobia() {
+  var wrap = document.getElementById('bsPhobiaWrap');
+  if(!wrap) return;
+  var html = '<div class="bs-phobia-label"><span>恐怖症／マニア</span><span>バックストーリーとは別に記録します</span></div>';
+  html += '<div class="bs-phobia-grid">';
+  BS_PHOBIA_FIELDS.forEach(function(f, i) {
+    var val = charBackstory[f.key] || '';
+    html += '<div class="bs-phobia-item"><label>' + f.label;
+    html += ' <button class="bs-phobia-rand" onclick="bsRandPhobia(' + i + ')">🎲</button></label>';
+    html += '<textarea id="bsPTA_' + i + '" placeholder="' + f.hint + '" oninput="bsOnPhobiaInput(' + i + ',this.value)">' + escHtml(val) + '</textarea>';
+    html += '</div>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+/* ── イベント ── */
+function bsOnInput(idx, val) {
+  charBackstory[BS_FIELDS[idx].key] = val;
+}
+function bsOnTwoInput(idx, col, val) {
+  charBackstory[col === 'A' ? BS_TWO_FIELDS[idx].keyA : BS_TWO_FIELDS[idx].keyB] = val;
+}
+function bsOnPhobiaInput(idx, val) {
+  charBackstory[BS_PHOBIA_FIELDS[idx].key] = val;
+}
+
+/* ── ランダム ── */
+/* ステータス連動抽選（容姿専用） */
+function bsPickAppearance() {
+  var f = BS_FIELDS[0]; /* 容姿の描写 */
+  var items = f.statItems;
+  /* 重みリスト構築 */
+  var weighted = [];
+  items.forEach(function(item) {
+    var w = 1;
+    if(item.tier === 'any') {
+      w = 1;
+    } else if(item.stat) {
+      /* work[] または orig[] からステータス値を取得 */
+      var val = (work[item.stat] != null ? work[item.stat] : (orig[item.stat] != null ? orig[item.stat] : null));
+      /* LUC は orig['LUC'] */
+      if(item.stat === 'LUC') val = (work['LUC'] != null ? work['LUC'] : (orig['LUC'] != null ? orig['LUC'] : null));
+      if(val != null) {
+        if(item.tier === 'hi' && val >= 66) w = 3;
+        else if(item.tier === 'lo' && val <= 39) w = 3;
+        else w = 1;
+      }
+    }
+    for(var i = 0; i < w; i++) weighted.push(item.text);
+  });
+  return weighted[Math.floor(Math.random() * weighted.length)];
+}
+
+function bsRandOne(idx) {
+  var f = BS_FIELDS[idx];
+  var picked;
+  if(f.statItems && f.statItems.length > 0) {
+    picked = bsPickAppearance();
+  } else {
+    picked = f.rand[Math.floor(Math.random() * f.rand.length)];
+  }
+  charBackstory[f.key] = picked;
+  var ta = document.getElementById('bsTA_' + idx);
+  if(ta) ta.value = picked;
+}
+function bsRandTwo(idx) {
+  var f = BS_TWO_FIELDS[idx];
+  var res = bsPickCompatible(f.colA, f.colB, f.ngPairs);
+  charBackstory[f.keyA] = res.a;
+  charBackstory[f.keyB] = res.b;
+  var taA = document.getElementById('bsTTA_' + idx + '_A');
+  var taB = document.getElementById('bsTTA_' + idx + '_B');
+  if(taA) taA.value = res.a;
+  if(taB) taB.value = res.b;
+}
+function bsToggleKC(key, cb) {
+  if(cb.checked) {
+    /* 他を全解除してからセット */
+    charKeyConnection = key;
+  } else {
+    charKeyConnection = null;
+  }
+  /* DOM更新（再描画せず直接操作） */
+  document.querySelectorAll('.bs-kc-cb').forEach(function(el) {
+    var isThis = (el.getAttribute('onchange') && el.getAttribute('onchange').indexOf("'" + key + "'") !== -1);
+    el.checked = (charKeyConnection === key) && isThis;
+  });
+  document.querySelectorAll('.bs-kc-label').forEach(function(el) {
+    var cb2 = el.previousElementSibling;
+    el.classList.toggle('active', !!(cb2 && cb2.checked));
+  });
+  document.querySelectorAll('.bs-cell[id^="bsCell_"]').forEach(function(cell) {
+    /* kcKeyをcellのkc-activeで判定するためにdata属性を参照 */
+    var kcCb = cell.querySelector('.bs-kc-cb');
+    if(kcCb) cell.classList.toggle('kc-active', kcCb.checked);
+  });
+}
+
+function bsCopyOne(key) {
+  var val = (charBackstory[key] || '').trim();
+  if(!val) return;
+  navigator.clipboard.writeText(val).then(function() {
+    var btns = document.querySelectorAll('#bsGrid .bs-copy-btn');
+    btns.forEach(function(btn) {
+      if(btn.getAttribute('onclick') && btn.getAttribute('onclick').indexOf(key) !== -1) {
+        var orig = btn.textContent;
+        btn.textContent = '✓ コピー済';
+        setTimeout(function(){ btn.textContent = orig; }, 1500);
+      }
+    });
+  });
+}
+function bsCopyTwo(idx) {
+  var f = BS_TWO_FIELDS[idx];
+  var vA = (charBackstory[f.keyA] || '').trim();
+  var vB = (charBackstory[f.keyB] || '').trim();
+  var text = '';
+  if(vA) text += f.labelA + '：' + vA;
+  if(vA && vB) text += '\n';
+  if(vB) text += f.labelB + '：' + vB;
+  if(!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.querySelector('[onclick="bsCopyTwo(' + idx + ')"]');
+    if(btn) { var o = btn.textContent; btn.textContent = '✓ コピー済'; setTimeout(function(){ btn.textContent = o; }, 1500); }
+  });
+}
+
+function bsRandPhobia(idx) {
+  var f = BS_PHOBIA_FIELDS[idx];
+  var picked = f.rand[Math.floor(Math.random() * f.rand.length)];
+  charBackstory[f.key] = picked;
+  var ta = document.getElementById('bsPTA_' + idx);
+  if(ta) ta.value = picked;
+}
+function bsRandAll() {
+  BS_FIELDS.forEach(function(f) {
+    if(f.statItems && f.statItems.length > 0) {
+      charBackstory[f.key] = bsPickAppearance();
+    } else {
+      charBackstory[f.key] = f.rand[Math.floor(Math.random() * f.rand.length)];
+    }
+  });
+  BS_TWO_FIELDS.forEach(function(f, i) {
+    var res = bsPickCompatible(f.colA, f.colB, f.ngPairs);
+    charBackstory[f.keyA] = res.a;
+    charBackstory[f.keyB] = res.b;
+  });
+  BS_PHOBIA_FIELDS.forEach(function(f) {
+    charBackstory[f.key] = f.rand[Math.floor(Math.random() * f.rand.length)];
+  });
+  bsRenderGrid();
+  bsRenderPhobia();
+}
+function bsClearAll() {
+  if(!confirm('全フィールドをクリアします。よろしいですか？')) return;
+  BS_FIELDS.forEach(function(f) { charBackstory[f.key] = ''; });
+  BS_TWO_FIELDS.forEach(function(f) { charBackstory[f.keyA] = ''; charBackstory[f.keyB] = ''; });
+  BS_PHOBIA_FIELDS.forEach(function(f) { charBackstory[f.key] = ''; });
+  bsRenderGrid();
+  bsRenderPhobia();
+}
+function bsInit() {
+  bsRenderGrid();
+  bsRenderPhobia();
+}
+
+
 /* ===== 技能初期値（全ブロック共通） ===== */
+
 const SKILL_BASE = {
   intimidate:15, fast_talk:5, medicine:1, drive_auto:20, first_aid:30,
   occult:5, stealth:20, dodge:'DEX/2', science:1, locksmith:1,
@@ -2275,7 +3150,7 @@ function lookupCharSkill(jaLabel, skillId){
 
 let charJob='', charSex='', charHP=0, charMP=0, charSAN=0, charMOV=0;
 let charCurrent={}, charLuckCurrent=null; // 現在値（いあきゃら読み込み時）
-let charIcon='', charSkills={}, charBackstory={};
+let charIcon='', charSkills={}, charBackstory={}, charKeyConnection=null;
 const KEYS   = ['STR','CON','POW','DEX','APP','SIZ','INT','EDU'];
 const JP     = {STR:'筋力',CON:'体力',POW:'意志力',DEX:'敏捷',APP:'外見',SIZ:'体格',INT:'知性',EDU:'教育',LUC:'幸運'};
 const GROUPS = {
@@ -3544,7 +4419,7 @@ function resetAll(){
   document.getElementById('dropMain').textContent='ファイルをドロップ / クリックして選択';
   document.getElementById('dropSub').textContent='いあきゃら .txt 出力ファイル';
   charJob=''; charSex=''; charHP=0; charMP=0; charSAN=0; charMOV=0;
-  charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={};
+  charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={}; charKeyConnection=null;
   clearStatTable();
   updateCharInfoBar();
 }
@@ -3555,7 +4430,7 @@ function newCharacter(){
   // 基本情報
   orig={}; work={}; charName=''; charAge=21; charSex=''; charJob='';
   charHP=0; charMP=0; charSAN=0; charMOV=0;
-  charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={};
+  charIcon=''; charCurrent={}; charLuckCurrent=null; charSkills={}; charBackstory={}; charKeyConnection=null;
 
   // 入力欄リセット
   ['inputName','inputSex'].forEach(function(id){
@@ -3589,6 +4464,7 @@ function newCharacter(){
   var sideChk=document.getElementById('sideJobChk'); if(sideChk) sideChk.checked=false;
   var togArea=document.getElementById('sideJobToggleArea'); if(togArea) togArea.classList.add('hidden');
   var sjSec=document.getElementById('sideJobSec'); if(sjSec) sjSec.innerHTML='';
+  var overWrap2=document.getElementById('allocOverWarning'); if(overWrap2) overWrap2.style.display='none';
 
   // 職業タブリセット
   occSelected=null; occInited=false;
@@ -3755,6 +4631,45 @@ function getEffectiveBase(r){
   return getSkillBase(baseId);
 }
 
+/* 信用値から財産情報を返す（現代日本・目安） */
+function getCreditWealth(cr) {
+  cr = parseInt(cr) || 0;
+  if(cr === 0)  return {spend:'¥0',          cash:'¥0〜500',      asset:'なし'};
+  if(cr <= 2)   return {spend:'¥100',         cash:'〜¥1,000',     asset:'〜1万'};
+  if(cr <= 5)   return {spend:'¥300',         cash:'〜¥3,000',     asset:'〜10万'};
+  if(cr <= 9)   return {spend:'¥500',         cash:'〜¥10,000',    asset:'〜50万'};
+  if(cr <= 14)  return {spend:'¥1,000',       cash:'〜¥20,000',    asset:'〜100万'};
+  if(cr <= 19)  return {spend:'¥2,000',       cash:'〜¥40,000',    asset:'〜200万'};
+  if(cr <= 24)  return {spend:'¥4,000',       cash:'〜¥60,000',    asset:'〜300万'};
+  if(cr <= 29)  return {spend:'¥6,000',       cash:'〜¥80,000',    asset:'〜500万'};
+  if(cr <= 34)  return {spend:'¥8,000',       cash:'〜¥100,000',   asset:'〜700万'};
+  if(cr <= 39)  return {spend:'¥12,000',      cash:'〜¥150,000',   asset:'〜1,000万'};
+  if(cr <= 44)  return {spend:'¥15,000',      cash:'〜¥200,000',   asset:'〜1,500万'};
+  if(cr <= 49)  return {spend:'¥20,000',      cash:'〜¥300,000',   asset:'〜2,000万'};
+  if(cr <= 54)  return {spend:'¥30,000',      cash:'〜¥400,000',   asset:'〜3,000万'};
+  if(cr <= 59)  return {spend:'¥50,000',      cash:'〜¥600,000',   asset:'〜5,000万'};
+  if(cr <= 64)  return {spend:'¥70,000',      cash:'〜¥800,000',   asset:'〜7,000万'};
+  if(cr <= 69)  return {spend:'¥100,000',     cash:'〜¥100万',     asset:'〜1億'};
+  if(cr <= 74)  return {spend:'¥150,000',     cash:'〜¥150万',     asset:'〜2億'};
+  if(cr <= 79)  return {spend:'¥200,000',     cash:'〜¥200万',     asset:'〜5億'};
+  if(cr <= 84)  return {spend:'¥300,000',     cash:'〜¥300万',     asset:'〜10億'};
+  if(cr <= 89)  return {spend:'¥400,000',     cash:'〜¥400万',     asset:'〜30億'};
+  if(cr <= 93)  return {spend:'¥500,000',     cash:'〜¥500万',     asset:'〜50億'};
+  if(cr <= 96)  return {spend:'¥800,000',     cash:'〜¥800万',     asset:'〜100億'};
+  if(cr <= 98)  return {spend:'¥1,000,000',   cash:'〜¥1,000万',   asset:'〜200億'};
+  return               {spend:'気にしない',    cash:'無制限',        asset:'数百億以上'};
+}
+
+function renderCreditWealthInfo(cr) {
+  var w = getCreditWealth(cr);
+  return '<div class="credit-wealth-info">'
+    + '<span class="credit-wealth-header">支出財産の目安（現代日本）：</span>'
+    + '<span class="credit-wealth-item"><span class="credit-wealth-label">支出レベル</span><span class="credit-wealth-val">' + w.spend + '</span></span>'
+    + '<span class="credit-wealth-item"><span class="credit-wealth-label">所持金</span><span class="credit-wealth-val">' + w.cash + '</span></span>'
+    + '<span class="credit-wealth-item"><span class="credit-wealth-label">資産</span><span class="credit-wealth-val">' + w.asset + '</span></span>'
+    + '</div>';
+}
+
 /* 信用スライダー変更 */
 function onCreditSlide(val){
   const newVal = parseInt(val);
@@ -3771,6 +4686,8 @@ function onCreditSlide(val){
   const valEl  = document.getElementById('allocCreditVal');
   if(slider) slider.value = allocCredit;
   if(valEl)  valEl.textContent = allocCredit;
+  var wealthEl = document.getElementById('creditWealthInfo');
+  if(wealthEl) wealthEl.innerHTML = renderCreditWealthInfo(allocCredit);
   updatePointDisplay();
 }
 
@@ -3884,6 +4801,7 @@ function buildAllocFullHTML(){
               +'<span class="alloc-credit-pct">%</span>'
             +'</div>'
           +'</div>'
+          +'<div id="creditWealthInfo">'+renderCreditWealthInfo(allocCredit)+'</div>'
         +'</div>'
         +'<div class="alloc-section">'
           +'<div class="alloc-section-label">職業技能</div>'
@@ -3970,6 +4888,30 @@ function updateAllocHeader(){
   if(ptEl) ptEl.textContent=allocTotal;
   if(rmEl){ rmEl.innerHTML=remHtml; rmEl.style.color=leftColor; }
   if(brEl){ brEl.style.width=pct+'%'; brEl.style.background=barColor; }
+
+  // 超過バナー（名前入力欄下の固定エリア）
+  var occLeft = allocTotal - used;
+  var intUsed2 = interestRows.reduce(function(s,r){return s+r.add;},0);
+  var intLeft2 = interestTotal - intUsed2;
+  var overWrap = document.getElementById('allocOverWarning');
+  var overText = document.getElementById('allocOverWarningText');
+  if(overWrap && overText) {
+    var msgs = [];
+    if(occLeft < 0) msgs.push('⚠ 職業技能ポイントが ' + (-occLeft) + ' pt 超過');
+    if(intLeft2 < 0) msgs.push('⚠ 興味技能ポイントが ' + (-intLeft2) + ' pt 超過');
+    if(msgs.length > 0) {
+      overText.innerHTML = msgs.join('　／　') + '　— ステータス変更により合計ポイントが減少した可能性があります';
+      overWrap.style.display = '';
+    } else {
+      overWrap.style.display = 'none';
+    }
+  }
+
+  // skillAllocSec内の旧バナーを削除（重複防止）
+  var sec = document.getElementById('skillAllocSec');
+  if(sec) { var ob = sec.querySelector('.alloc-over-banner'); if(ob) ob.remove(); }
+  var intSec = document.getElementById('interestSec');
+  if(intSec) { var ib = intSec.querySelector('.alloc-over-banner'); if(ib) ib.remove(); }
 }
 function allocSelectFormula(formula){
   allocSelectedFormula = formula;
@@ -4033,7 +4975,23 @@ function renderRowV2(r, i, left){
   // any_art は setArtSpec で r.base=5 を設定済みなのでそちらを優先
   // 近接・射撃で現在値を手入力した場合はそれを基本値として使う
   const baseRaw = (r.kind === 'any_art' && r.base != null) ? r.base : getEffectiveBase(r);
-  const base = (r.curValManual != null) ? r.curValManual : baseRaw;
+
+  // 専門分野が確定している場合、専門分野込みラベルでいあきゃら現在値を再 lookup
+  const _rBaseId = (r.id||r.selectedId||'').split(':')[0];
+  const _rChildId = (r.id||r.selectedId||'').split(':')[1];
+  var resolvedCurVal = r.curVal;
+  if(resolvedCurVal == null && (r.spec || r.specFree)) {
+    var _specName = r.specFree || r.spec;
+    if(_specName) {
+      var _parentName = _rBaseId && SKILL_DATA[_rBaseId] ? SKILL_DATA[_rBaseId].name_ja : '';
+      var _specLabel = _parentName + '（' + _specName + '）';
+      resolvedCurVal = lookupCharSkill(_specLabel, _rBaseId);
+    }
+  }
+
+  const base = (r.curValManual != null) ? r.curValManual
+             : (resolvedCurVal != null)  ? resolvedCurVal
+             : baseRaw;
   const total = base + r.add;
   const over  = (r.id||r.selectedId) && total > 90;
   const totalHtml = (r.id||r.selectedId)
@@ -4042,12 +5000,12 @@ function renderRowV2(r, i, left){
   const baseHtml = (r.id||r.selectedId) ? base : '<span class="alloc-empty">—</span>';
   // 専門分野が未指定の近接戦闘・射撃は現在値を手入力できるようにする
   const CUR_INPUT_BASES = new Set(['melee','firearms']);
-  const rBaseId = (r.id||r.selectedId||'').split(':')[0];
-  const rChildId = (r.id||r.selectedId||'').split(':')[1];
-  const needsCurInput = CUR_INPUT_BASES.has(rBaseId) && (!rChildId || rChildId === '任意') && r.curVal == null;
+  const rBaseId = _rBaseId;
+  const rChildId = _rChildId;
+  const needsCurInput = CUR_INPUT_BASES.has(rBaseId) && (!rChildId || rChildId === '任意') && !r.spec && r.curVal == null;
 
-  const curHtml  = r.curVal != null
-    ? `<span class="alloc-cur-val">${r.curVal}</span>`
+  const curHtml  = resolvedCurVal != null
+    ? `<span class="alloc-cur-val">${resolvedCurVal}</span>`
     : needsCurInput
       ? `<input class="alloc-cur-inp" type="number" min="0" max="99" placeholder="${base}"
            value="${r.curValManual != null ? r.curValManual : ''}"
@@ -4080,15 +5038,53 @@ function renderRowV2(r, i, left){
       : `<span class="alloc-skill-name">${r.label}</span>`;
   } else if(r.kind==='or'){
     const opts = r.options.map(o=>`<option value="${o.id}" ${r.selectedId===o.id?'selected':''}>${o.label}</option>`).join('');
+    // 選択後に専門分野入力欄が必要な技能かチェック
+    const SPEC_BASE = ['art_craft','science','other_language','survival','lore','melee','firearms','pilot','drive_auto'];
+    let orSpecHtml = '';
+    if(r.selectedId) {
+      const orBaseId = r.selectedId.split(':')[0];
+      const orChildId = r.selectedId.split(':')[1];
+      // 専門分野が未指定（:任意 または childIdなし）の場合に入力欄表示
+      if(SPEC_BASE.includes(orBaseId) && (!orChildId || orChildId === '任意')) {
+        const selDef = SKILL_DATA[orBaseId];
+        const selSpecs = selDef && selDef.specializations && selDef.specializations.length > 0 ? selDef.specializations : null;
+        if(selSpecs) {
+          const specOpts = selSpecs.map(s=>`<option value="${s.child_name_ja}"${r.spec===s.child_name_ja?' selected':''}>${s.child_name_ja}</option>`).join('');
+          orSpecHtml = `<select class="alloc-art-inp" onchange="setOrSpec(${i},this.value)">`
+            + `<option value="">— 専門分野を選択 —</option>${specOpts}</select>`
+            + `<input class="alloc-art-inp" type="text" placeholder="自由記入…" value="${r.specFree||''}" oninput="setOrSpecFree(${i},this.value)">`;
+        } else {
+          orSpecHtml = `<input class="alloc-art-inp" type="text" placeholder="専門分野…" value="${r.spec||''}" oninput="setOrSpecText(${i},this.value)">`;
+        }
+      }
+    }
     nameCell = `<select class="alloc-sel alloc-sel-or" onchange="setOrSkill(${i},this.value)">
-      <option value="">— どちらか選択 —</option>${opts}</select>`;
+      <option value="">— どちらか選択 —</option>${opts}</select>${orSpecHtml}`;
   } else if(r.kind==='choose'){
     const opts = r.options
       .filter(o=>!isSkillUsed(o.id, i) || r.selectedId===o.id)
       .map(o=>`<option value="${o.id}" ${r.selectedId===o.id?'selected':''}>${o.label}</option>`).join('');
+    const SPEC_BASE_C = ['art_craft','science','other_language','survival','lore','melee','firearms','pilot','drive_auto'];
+    let chooseSpecHtml = '';
+    if(r.selectedId) {
+      const cBaseId = r.selectedId.split(':')[0];
+      const cChildId = r.selectedId.split(':')[1];
+      if(SPEC_BASE_C.includes(cBaseId) && (!cChildId || cChildId === '任意')) {
+        const cDef = SKILL_DATA[cBaseId];
+        const cSpecs = cDef && cDef.specializations && cDef.specializations.length > 0 ? cDef.specializations : null;
+        if(cSpecs) {
+          const specOpts = cSpecs.map(s=>`<option value="${s.child_name_ja}"${r.spec===s.child_name_ja?' selected':''}>${s.child_name_ja}</option>`).join('');
+          chooseSpecHtml = `<select class="alloc-art-inp" onchange="setChoiceSpec(${i},this.value)">`
+            + `<option value="">— 専門分野を選択 —</option>${specOpts}</select>`
+            + `<input class="alloc-art-inp" type="text" placeholder="自由記入…" value="${r.specFree||''}" oninput="setChoiceSpecFree(${i},this.value)">`;
+        } else {
+          chooseSpecHtml = `<input class="alloc-art-inp" type="text" placeholder="専門分野…" value="${r.spec||''}" oninput="setChoiceSpecText(${i},this.value)">`;
+        }
+      }
+    }
     nameCell = `<div class="alloc-choose-label">${r.groupLabel}</div>
       <select class="alloc-sel alloc-sel-choose" onchange="setChoiceSkillV2(${i},this.value)">
-      <option value="">— 選択してください —</option>${opts}</select>`;
+      <option value="">— 選択してください —</option>${opts}</select>${chooseSpecHtml}`;
   } else if(r.kind==='ip'){
     const ipOpts = IP_IDS
       .filter(id=>!isSkillUsed(id,i)||r.selectedId===id)
@@ -4148,6 +5144,25 @@ function setOrSkill(i, skillId){
   allocRows[i].base = skillId ? getSkillBase(skillId.split(':')[0]) : 0;
   allocRows[i].curVal = skillId ? lookupCharSkill(skillLabel(skillId), skillId.split(':')[0]) : null;
   allocRows[i].add = 0;
+  allocRows[i].spec = null;
+  allocRows[i].specFree = null;
+  renderAllocUIV2();
+}
+
+// or行の専門分野（リストから選択）
+function setOrSpec(i, val) {
+  allocRows[i].spec = val || null;
+  allocRows[i].specFree = null;
+  renderAllocUIV2();
+}
+// or行の専門分野（自由記入）
+function setOrSpecFree(i, val) {
+  allocRows[i].specFree = val || null;
+  renderAllocUIV2();
+}
+// or行の専門分野（テキスト直接）
+function setOrSpecText(i, val) {
+  allocRows[i].spec = val || null;
   renderAllocUIV2();
 }
 
@@ -4210,7 +5225,6 @@ function setChoiceSkillV2(i, skillId){
   if(skillId) {
     const [baseId, childId] = skillId.split(':');
     allocRows[i].base = childId ? getSkillBase(childId) : getSkillBase(baseId);
-    // 専門分野が必要な技能、またはchild_idがある場合はcurValをnullに
     const needsSpec = SJ_SPEC_BASE.includes(baseId);
     allocRows[i].curVal = (needsSpec || childId)
       ? null
@@ -4220,6 +5234,20 @@ function setChoiceSkillV2(i, skillId){
     allocRows[i].curVal = null;
   }
   allocRows[i].add = 0;
+  renderAllocUIV2();
+}
+
+function setChoiceSpec(i, val) {
+  allocRows[i].spec = val || null;
+  allocRows[i].specFree = null;
+  renderAllocUIV2();
+}
+function setChoiceSpecFree(i, val) {
+  allocRows[i].specFree = val || null;
+  renderAllocUIV2();
+}
+function setChoiceSpecText(i, val) {
+  allocRows[i].spec = val || null;
   renderAllocUIV2();
 }
 
@@ -4375,18 +5403,37 @@ function renderInterestRow(r, i, left){
 
   // 専門分野選択時はSPEC_BASE_MAPの専門分野初期値を優先
   var base = 0;
+  var iaVal = null;
   if(r.selectedId) {
     var baseId = r.selectedId.split(':')[0];
+    // いあきゃら現在値
+    var _lbl = SKILL_DATA[r.selectedId] ? SKILL_DATA[r.selectedId].name_ja : '';
+    if(r.spec || r.specFree) {
+      var _sn = r.specFree || r.spec;
+      _lbl = (SKILL_DATA[baseId] ? SKILL_DATA[baseId].name_ja : '') + '（' + _sn + '）';
+    }
+    iaVal = lookupCharSkill(_lbl, baseId);
+    // 専門分野の初期値
+    var rawBase;
     if(r.spec) {
-      // 選択中の専門分野名からchild_idを逆引きしてSPEC_BASE_MAPで初期値取得
       var parentDef2 = SKILL_DATA[baseId];
       var specEntry  = parentDef2 && parentDef2.specializations
         ? parentDef2.specializations.find(function(s){ return s.child_name_ja === r.spec; })
         : null;
-      base = specEntry ? getSkillBase(specEntry.child_id) : getSkillBase(baseId);
+      rawBase = specEntry ? (SPEC_BASE_MAP[specEntry.child_id] || getSkillBase(baseId)) : getSkillBase(baseId);
     } else {
-      base = getSkillBase(baseId);
+      rawBase = getSkillBase(baseId);
     }
+    // 職業技能で割り振ったポイント
+    var _occAdd = 0;
+    allocRows.forEach(function(ar) {
+      var rid = ar.id || ar.selectedId;
+      if(!rid) return;
+      if(rid === r.selectedId || (rid.split(':')[0] === baseId && !r.selectedId.includes(':') && !rid.includes(':')))
+        _occAdd = Math.max(_occAdd, ar.add);
+    });
+    var effectiveBase = iaVal != null ? iaVal : rawBase;
+    base = effectiveBase + _occAdd;
   }
   var total = base + r.add;
   var over  = r.selectedId && total > 90;
@@ -4398,10 +5445,19 @@ function renderInterestRow(r, i, left){
   var baseHtml = r.selectedId ? base : '<span class="alloc-empty">—</span>';
   var curHtml  = '<span class="alloc-empty">—</span>';
   if(r.selectedId){
-    var label = SKILL_DATA[r.selectedId] ? SKILL_DATA[r.selectedId].name_ja : '';
-    var cur = lookupCharSkill(label, r.selectedId);
-    if(cur!=null) curHtml = '<span class="alloc-cur-val">'+cur+'</span>';
-    else if(base > 0) curHtml = '<span class="alloc-base-val">'+base+'</span>';
+    if(iaVal != null) {
+      var _occAdd2 = 0;
+      var _bid = r.selectedId.split(':')[0];
+      allocRows.forEach(function(ar){
+        var rid = ar.id || ar.selectedId;
+        if(!rid) return;
+        if(rid === r.selectedId || (rid.split(':')[0] === _bid && !r.selectedId.includes(':') && !rid.includes(':')))
+          _occAdd2 = Math.max(_occAdd2, ar.add);
+      });
+      curHtml = '<span class="alloc-cur-val">'+(iaVal+_occAdd2)+'</span>';
+    } else if(base > 0) {
+      curHtml = '<span class="alloc-base-val">'+base+'</span>';
+    }
   }
 
   // specializations配列がある技能は専門分野入力欄を常表示
@@ -4596,6 +5652,16 @@ function buildSkillSheetBody() {
 
   // ── 基本情報 ──
   var html = '';
+
+  // 超過警告バナー
+  var occLeft = allocTotal - usedPoints();
+  var intUsed = interestRows.reduce(function(s,r){return s+r.add;},0);
+  var intLeft = interestTotal - intUsed;
+  if(occLeft < 0)
+    html += '<div class="ss-over-banner">⚠ 職業技能ポイントが ' + (-occLeft) + ' pt 超過しています。ステータスの再確認をおすすめします。</div>';
+  if(intLeft < 0)
+    html += '<div class="ss-over-banner">⚠ 興味技能ポイントが ' + (-intLeft) + ' pt 超過しています。ステータスの再確認をおすすめします。</div>';
+
   html += '<div class="ss-char-name">' + (charName || '名称不明') + '</div>';
   html += '<div class="ss-char-meta">';
   var metaParts = [];
@@ -4605,6 +5671,19 @@ function buildSkillSheetBody() {
   if(occ)      metaParts.push('配分職業：' + occ);
   if(sideJobOccName) metaParts.push('副業：' + sideJobOccName);
   html += metaParts.join('　') + '</div>';
+
+  // 信用・財産目安（配分済みの場合のみ）
+  if(allocOcc && allocCredit != null) {
+    var w = getCreditWealth(allocCredit);
+    html += '<div class="ss-wealth-info">'
+      + '<span class="ss-wealth-header">支出財産の目安（現代日本）：</span>'
+      + '<span class="ss-wealth-item"><span class="ss-wealth-label">信用</span><span class="ss-wealth-val">' + allocCredit + '</span></span>'
+      + '<span class="ss-wealth-sep">／</span>'
+      + '<span class="ss-wealth-item"><span class="ss-wealth-label">支出レベル</span><span class="ss-wealth-val">' + w.spend + '</span></span>'
+      + '<span class="ss-wealth-item"><span class="ss-wealth-label">所持金</span><span class="ss-wealth-val">' + w.cash + '</span></span>'
+      + '<span class="ss-wealth-item"><span class="ss-wealth-label">資産</span><span class="ss-wealth-val">' + w.asset + '</span></span>'
+      + '</div>';
+  }
 
   // ── 能力値（縦テーブル：能力値・増加分・現在値） ──
   var statKeys = ['STR','CON','POW','DEX','APP','SIZ','INT','EDU'];
@@ -4651,11 +5730,15 @@ function buildSkillSheetBody() {
 
   // ── 副次能力値 ──
   html += '<div class="ss-chips-row">';
-  var hp  = Math.floor(((work['CON']||0) + (work['SIZ']||0)) / 10);
-  var mp  = Math.floor((work['POW']||0) / 5);
-  var san = work['POW'] || 0;
-  var luc = work['LUC'] != null ? work['LUC'] : '—';
-  var mov = charMOV || '—';
+  var _s = {};
+  ['STR','CON','POW','DEX','APP','SIZ','INT','EDU','LUC'].forEach(function(k){
+    _s[k] = (work[k] != null ? work[k] : orig[k]) || 0;
+  });
+  var hp  = Math.floor((_s['CON'] + _s['SIZ']) / 10);
+  var mp  = Math.floor(_s['POW'] / 5);
+  var san = _s['POW'];
+  var luc = work['LUC'] != null ? work['LUC'] : (orig['LUC'] != null ? orig['LUC'] : '—');
+  var mov = charMOV || calcMOV(_s['STR'], _s['DEX'], _s['SIZ'], charAge) || '—';
   [['HP', hp],['MP', mp],['SAN', san],['幸運', luc],['MOV', mov],['DB', db.db],['ビルド', db.bld]].forEach(function(pair) {
     html += '<span class="ss-chip"><span class="ss-chip-label">' + pair[0] + '</span><strong>' + pair[1] + '</strong></span>';
   });
@@ -4665,6 +5748,14 @@ function buildSkillSheetBody() {
   // 全技能の最終値を収集
   var boosted = [];
   var unchanged = [];
+
+  // 信用（allocCredit で管理、allocRows には含まれない）
+  if(allocOcc && allocCredit != null) {
+    var creditSideGain = 0;
+    sideJobSkills.forEach(function(sk){ if(sk.isCredit) creditSideGain += sk.gain || 0; });
+    boosted.push({label: '信用', val: allocCredit + creditSideGain, type: 'occ', order: -1,
+                  _creditOccAdd: allocCredit, _creditSideGain: creditSideGain});
+  }
 
   // 職業技能
   allocRows.forEach(function(r) {
@@ -4751,10 +5842,8 @@ function buildSkillSheetBody() {
   // いあきゃら順でorderを付与
   var skillOrder = Object.keys(charSkills);
   function getOrder(label) {
-    // 専門分野付き技能名（例：「科学（生物学）」）を「科学（生物学）」として検索
     var idx = skillOrder.indexOf(label);
     if(idx >= 0) return idx;
-    // 括弧なしの親名で検索
     var baseName = label.replace(/（[^）]*）/g,'').trim();
     idx = skillOrder.findIndex(function(k){ return k.startsWith(baseName); });
     return idx >= 0 ? idx : 99999;
@@ -4762,31 +5851,85 @@ function buildSkillSheetBody() {
   boosted.forEach(function(s)   { s.order = getOrder(s.label); });
   unchanged.forEach(function(s) { s.order = getOrder(s.label); });
 
-  // 重複除去
-  var merged = {};
+  // ラベル単位で集約（職業・興味両方振った技能を正しく扱う）
+  var labelMap = {};
   boosted.concat(unchanged).forEach(function(s) {
-    if(!merged[s.label] || merged[s.label].val < s.val) merged[s.label] = s;
+    if(!labelMap[s.label]) {
+      labelMap[s.label] = { label: s.label, order: s.order, types: [], totalAdd: 0 };
+    }
+    if(labelMap[s.label].types.indexOf(s.type) < 0) labelMap[s.label].types.push(s.type);
   });
-  var boostedFinal   = boosted.filter(function(s,i,a){
-    return merged[s.label] && merged[s.label].type === s.type
-      && a.findIndex(function(x){ return x.label===s.label; }) === i;
+
+  // 各ラベルについて正確な合計値を計算
+  Object.values(labelMap).forEach(function(m) {
+    var baseId = '';
+    var label = m.label;
+    // labelからbaseIdを逆引き
+    Object.entries(SKILL_DATA).forEach(function(e) {
+      if(label === e[1].name_ja || label.startsWith(e[1].name_ja + '（')) baseId = e[0];
+    });
+    var iaBase = lookupCharSkill(label, baseId) || getSkillBase(baseId);
+    var occAdd = 0, intAdd = 0, sideGain = 0;
+    // 信用は allocRows に含まれないので boosted の _creditOccAdd を使う
+    var creditEntry = boosted.find(function(s){ return s.label === label && s._creditOccAdd != null; });
+    if(creditEntry) {
+      occAdd    = creditEntry._creditOccAdd;
+      sideGain  = creditEntry._creditSideGain || 0;
+      m.val = occAdd + sideGain;
+    } else {
+      allocRows.forEach(function(r) {
+        if(buildSkillLabel(r) === label) occAdd = Math.max(occAdd, r.add);
+      });
+      interestRows.forEach(function(r) {
+        var lbl = SKILL_DATA[r.selectedId] ? SKILL_DATA[r.selectedId].name_ja : '';
+        if(r.spec) lbl += '（' + r.spec + '）';
+        if(r.specFree) lbl += '（' + r.specFree + '）';
+        if(lbl === label) intAdd = Math.max(intAdd, r.add);
+      });
+      sideJobSkills.forEach(function(sk) {
+        var lbl = sk.label;
+        if(sk.spec) lbl += '（' + sk.spec + '）';
+        if(sk.specFree) lbl += '（' + sk.specFree + '）';
+        if(lbl === label && !sk.isCredit) sideGain = sk.gain || 0;
+      });
+      m.val = iaBase + occAdd + intAdd + sideGain;
+    }
+    m.occAdd = occAdd; m.intAdd = intAdd; m.sideGain = sideGain;
+    // 副業gainがあればsidejobを追加
+    if(sideGain > 0 && m.types.indexOf('sidejob') < 0) m.types.push('sidejob');
+  });
+
+  // boosted（何か振った）とunchanged（振ってない）に分類
+  var boostedFinal = Object.values(labelMap).filter(function(m) {
+    return m.occAdd > 0 || m.intAdd > 0 || m.sideGain > 0;
   }).sort(function(a,b){ return a.order - b.order; });
-  var unchangedFinal = unchanged.filter(function(s,i,a){
-    return !boostedFinal.some(function(b){ return b.label===s.label; })
-      && a.findIndex(function(x){ return x.label===s.label; }) === i;
+  var unchangedFinal = Object.values(labelMap).filter(function(m) {
+    return m.occAdd === 0 && m.intAdd === 0 && m.sideGain === 0;
   }).sort(function(a,b){ return a.order - b.order; });
 
   // 配分した技能
+  var TYPE_LABEL = { occ: '職業', interest: '興味', sidejob: '副業' };
   html += '<div class="ss-section-label">ポイントを配分した技能</div>';
   if(boostedFinal.length === 0) {
     html += '<div style="font-size:.8rem;color:var(--ink-light);">なし</div>';
   } else {
     html += '<div class="ss-skills-grid">';
     boostedFinal.forEach(function(s) {
-      var cls = s.type === 'sidejob' ? 'side-job' : 'boosted';
-      html += '<div class="ss-skill-card ' + cls + '">'
-        + '<span class="ss-skill-name">' + s.label + '</span>'
-        + '<span class="ss-skill-val ' + cls + '">' + s.val + '</span>'
+      // 主typeを決定（副業 > 両方 > 職業 > 興味）
+      var mainType = s.types.indexOf('sidejob') >= 0 ? 'sidejob'
+                   : (s.types.indexOf('occ') >= 0 && s.types.indexOf('interest') >= 0) ? 'occ'
+                   : s.types[0] || 'occ';
+      // 内訳行
+      var bdParts = '';
+      if(s.occAdd > 0)   bdParts += '<span class="ss-bd-item"><span class="ss-bd-badge occ">職業</span><span class="ss-bd-pts">+' + s.occAdd + '</span></span>';
+      if(s.intAdd > 0)   bdParts += '<span class="ss-bd-item"><span class="ss-bd-badge interest">興味</span><span class="ss-bd-pts">+' + s.intAdd + '</span></span>';
+      if(s.sideGain > 0) bdParts += '<span class="ss-bd-item"><span class="ss-bd-badge sidejob">副業</span><span class="ss-bd-pts">+' + s.sideGain + '</span></span>';
+      html += '<div class="ss-skill-card ' + mainType + '">'
+        + '<div class="ss-skill-card-top">'
+          + '<span class="ss-skill-name">' + s.label + '</span>'
+          + '<span class="ss-skill-val ' + mainType + '">' + s.val + '</span>'
+        + '</div>'
+        + (bdParts ? '<div class="ss-skill-breakdown">' + bdParts + '</div>' : '')
         + '</div>';
     });
     html += '</div>';
@@ -4802,6 +5945,44 @@ function buildSkillSheetBody() {
         + '</div>';
     });
     html += '</div>';
+  }
+
+  // ── バックストーリー ──
+  var hasBs = BS_FIELDS.some(function(f){ return charBackstory[f.key] && charBackstory[f.key].trim(); }) ||
+              BS_TWO_FIELDS.some(function(f){ return (charBackstory[f.keyA]&&charBackstory[f.keyA].trim()) || (charBackstory[f.keyB]&&charBackstory[f.keyB].trim()); });
+  if(hasBs) {
+    html += '<div class="sh" style="margin-top:1.4rem;">バックストーリー</div>';
+    if(charKeyConnection) {
+      html += '<div style="font-size:.68rem;color:var(--gold);margin-bottom:.6rem;">★ キー・コネクション：' + escHtml(charKeyConnection) + '</div>';
+    }
+    BS_FIELDS.forEach(function(f) {
+      var v = charBackstory[f.key];
+      if(!v || !v.trim()) return;
+      html += '<div style="margin-bottom:.85rem;">';
+      html += '<div style="font-size:.68rem;letter-spacing:.2em;color:var(--accent);margin-bottom:.3rem;">' + f.key + '</div>';
+      html += '<div style="font-size:.82rem;color:var(--ink-mid);line-height:1.75;white-space:pre-wrap;">' + escHtml(v.trim()) + '</div>';
+      html += '</div>';
+    });
+    BS_TWO_FIELDS.forEach(function(f) {
+      var vA = charBackstory[f.keyA], vB = charBackstory[f.keyB];
+      if((!vA||!vA.trim()) && (!vB||!vB.trim())) return;
+      html += '<div style="margin-bottom:.85rem;">';
+      html += '<div style="font-size:.68rem;letter-spacing:.2em;color:var(--accent);margin-bottom:.3rem;">' + f.label + '</div>';
+      if(vA&&vA.trim()) html += '<div style="font-size:.75rem;color:var(--ink-light);margin-bottom:.1rem;">' + f.labelA + '</div><div style="font-size:.82rem;color:var(--ink-mid);line-height:1.75;margin-bottom:.4rem;">' + escHtml(vA.trim()) + '</div>';
+      if(vB&&vB.trim()) html += '<div style="font-size:.75rem;color:var(--ink-light);margin-bottom:.1rem;">' + f.labelB + '</div><div style="font-size:.82rem;color:var(--ink-mid);line-height:1.75;">' + escHtml(vB.trim()) + '</div>';
+      html += '</div>';
+    });
+  }
+  // ── 恐怖症・マニア ──
+  var phobiaFilled = BS_PHOBIA_FIELDS.filter(function(f){ return charBackstory[f.key] && charBackstory[f.key].trim(); });
+  if(phobiaFilled.length > 0) {
+    html += '<div class="sh" style="margin-top:1.1rem;">恐怖症／マニア</div>';
+    phobiaFilled.forEach(function(f) {
+      html += '<div style="margin-bottom:.75rem;">';
+      html += '<div style="font-size:.68rem;letter-spacing:.15em;color:var(--ink-mid);margin-bottom:.25rem;">' + f.label + '</div>';
+      html += '<div style="font-size:.82rem;color:var(--ink-mid);line-height:1.75;white-space:pre-wrap;">' + escHtml(charBackstory[f.key].trim()) + '</div>';
+      html += '</div>';
+    });
   }
 
   body.innerHTML = html;
@@ -4843,6 +6024,36 @@ function copySkillSheet() {
       var name = card.querySelector('.ss-skill-name');
       var val  = card.querySelector('.ss-skill-val');
       if(name && val) lines.push(name.textContent.trim() + '：' + val.textContent.trim());
+    });
+  }
+  // バックストーリー
+  var hasBsCopy = BS_FIELDS.some(function(f){ return charBackstory[f.key]&&charBackstory[f.key].trim(); }) ||
+                  BS_TWO_FIELDS.some(function(f){ return (charBackstory[f.keyA]&&charBackstory[f.keyA].trim())||(charBackstory[f.keyB]&&charBackstory[f.keyB].trim()); });
+  if(hasBsCopy) {
+    lines.push('');
+    lines.push('【バックストーリー】');
+    if(charKeyConnection) lines.push('★ キー・コネクション：' + charKeyConnection);
+    BS_FIELDS.forEach(function(f) {
+      var v = charBackstory[f.key];
+      if(!v||!v.trim()) return;
+      lines.push('[' + f.key + ']');
+      lines.push(v.trim());
+    });
+    BS_TWO_FIELDS.forEach(function(f) {
+      var vA = charBackstory[f.keyA], vB = charBackstory[f.keyB];
+      if((!vA||!vA.trim())&&(!vB||!vB.trim())) return;
+      lines.push('[' + f.label + ']');
+      if(vA&&vA.trim()) lines.push(f.labelA + '：' + vA.trim());
+      if(vB&&vB.trim()) lines.push(f.labelB + '：' + vB.trim());
+    });
+  }
+  var phobiaFilled2 = BS_PHOBIA_FIELDS.filter(function(f){ return charBackstory[f.key] && charBackstory[f.key].trim(); });
+  if(phobiaFilled2.length > 0) {
+    lines.push('');
+    lines.push('【恐怖症／マニア】');
+    phobiaFilled2.forEach(function(f) {
+      lines.push('[' + f.label + ']');
+      lines.push(charBackstory[f.key].trim());
     });
   }
   navigator.clipboard.writeText(lines.join('\n')).then(function() {
@@ -5824,6 +7035,7 @@ function slCollectState() {
     charLuckCurrent,
     charSkills: Object.assign({}, charSkills),
     charBackstory: Object.assign({}, charBackstory),
+    charKeyConnection: charKeyConnection,
     charIcon,
     // 配分状態
     allocName,
@@ -5854,6 +7066,7 @@ function slRestoreState(s) {
   charLuckCurrent   = s.charLuckCurrent ?? null;
   charSkills        = Object.assign({}, s.charSkills || {});
   charBackstory     = Object.assign({}, s.charBackstory || {});
+  charKeyConnection = s.charKeyConnection || null;
   charIcon          = s.charIcon || '';
 
   // 入力欄へ反映
