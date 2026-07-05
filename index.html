@@ -151,6 +151,17 @@ textarea:focus { outline: none; border-color: var(--accent); }
   font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
   border: 1px solid var(--border); border-radius: 20px; padding: .16rem .7rem;
 }
+.age-picker { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .3rem; }
+.age-picker button {
+  min-width: 2.1em; padding: .32rem .3rem; font-family: inherit; font-size: .88rem;
+  font-weight: 700; color: var(--ink); background: rgba(255,255,255,.5);
+  border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.age-picker button:active { transform: scale(.94); }
+.age-picker button.active {
+  background: var(--accent); color: #f5f0e8; border-color: var(--accent);
+}
 .rule-box {
   font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
   border: 1px solid var(--border); border-left: 3px solid var(--accent);
@@ -1758,6 +1769,7 @@ textarea:focus { outline: none; border-color: var(--accent); }
   display: flex; flex-direction: column; gap: .2rem; flex: 1; min-width: 120px;
 }
 .stat-basic-field--sm { flex: 0 0 80px; min-width: 70px; }
+.stat-basic-field--sm.age-wide { flex: 0 0 auto; min-width: 260px; }
 .stat-basic-label {
   font-size: .68rem; color: var(--ink-light); font-weight: 700; letter-spacing: .08em;
 }
@@ -1976,9 +1988,10 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
           <label class="stat-basic-label">探索者名</label>
           <input type="text" id="inputName" class="stat-basic-input" placeholder="名前を入力">
         </div>
-        <div class="stat-basic-field stat-basic-field--sm">
+        <div class="stat-basic-field stat-basic-field--sm" id="inputAgeFieldWrap">
           <label class="stat-basic-label">年齢</label>
-          <input type="number" id="inputAge" class="stat-basic-input" min="15" max="99" value="21" oninput="syncAgeInputs('inputAge');onStatInputChange()" onblur="clampAgeInputs('inputAge');onStatInputChange()">
+          <input type="number" id="inputAge" class="stat-basic-input" min="15" max="99" value="21" readonly style="cursor:pointer;" onclick="openAgeNumpad('inputAge')">
+          <div class="age-picker" id="inputAge_agePicker" style="display:none;"></div>
         </div>
         <div class="stat-basic-field stat-basic-field--sm">
           <label class="stat-basic-label">性別</label>
@@ -2101,9 +2114,10 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
   <div id="previewSec" class="hidden" style="display:none!important;"><div class="stat-grid" id="previewGrid"></div></div>
   <div class="age-block" style="margin-bottom:.75rem;">
     <div class="age-row">
-      <input type="number" class="age-input" id="ageInp" min="15" max="99" value="21" oninput="syncAgeInputs('ageInp');onAgeChange()" onblur="clampAgeInputs('ageInp');onAgeChange()">
+      <input type="number" class="age-input" id="ageInp" min="15" max="99" value="21" readonly style="cursor:pointer;" onclick="openAgeNumpad('ageInp')">
       <span class="age-badge" id="ageBadge">20〜39歳</span>
     </div>
+    <div class="age-picker" id="ageInp_agePicker" style="display:none;"></div>
     <div class="rule-box" id="ruleBox" style="margin-top:.5rem;"></div>
   </div>
   <button class="btn-gold" id="startBtn" onclick="startCorrection()" disabled style="margin-bottom:1rem;">▶ 年齢補正を開始する</button>
@@ -4559,7 +4573,16 @@ function applyYoungModeUI(keepValues){
     el.min = youngMode ? 7 : 15;
     el.max = youngMode ? 14 : 99;
     if(!keepValues) el.value = youngMode ? 10 : 21;
+    /* 年少探索者モード：数値入力欄を隠し、7〜14の選択ボタン群に切替 */
+    el.style.display = youngMode ? 'none' : '';
+    var picker = document.getElementById(id + '_agePicker');
+    if(picker){
+      picker.style.display = youngMode ? 'flex' : 'none';
+      if(youngMode) renderYoungAgePicker(id);
+    }
   });
+  var ageWrap = document.getElementById('inputAgeFieldWrap');
+  if(ageWrap) ageWrap.classList.toggle('age-wide', youngMode);
   if(!keepValues) charAge = youngMode ? 10 : 21;
   /* EDU欄：年少では(年齢-6)×5の自動算出（手入力不可） */
   var eduEl = document.getElementById('statInput_EDU');
@@ -4603,6 +4626,35 @@ function updateYoungRollGate(){
   var ok = youngAgeValid(charAge);
   if(btn)  btn.disabled = !ok;
   if(warn) warn.style.display = ok ? 'none' : '';
+  renderYoungAgePicker('inputAge');
+  renderYoungAgePicker('ageInp');
+}
+
+/* 年少探索者：7〜14の年齢選択ボタン群を描画・ハイライト更新 */
+function renderYoungAgePicker(sourceId){
+  var picker = document.getElementById(sourceId + '_agePicker');
+  if(!picker) return;
+  if(!picker.dataset.built){
+    var html = '';
+    for(var a = 7; a <= 14; a++){
+      html += '<button type="button" onclick="selectYoungAge(\'' + sourceId + '\',' + a + ')">' + a + '</button>';
+    }
+    picker.innerHTML = html;
+    picker.dataset.built = '1';
+  }
+  var cur = charAge;
+  Array.prototype.forEach.call(picker.querySelectorAll('button'), function(b){
+    b.classList.toggle('active', parseInt(b.textContent, 10) === cur);
+  });
+}
+
+/* 年少探索者：年齢選択ボタンをタップしたときの処理 */
+function selectYoungAge(sourceId, age){
+  if(!youngMode) return;
+  var el = document.getElementById(sourceId);
+  if(el) el.value = age;
+  syncAgeInputs(sourceId);
+  if(sourceId === 'inputAge') onStatInputChange(); else onAgeChange();
 }
 
 /* 年少：EDU自動算出をorig・入力欄へ反映 */
@@ -7526,6 +7578,9 @@ let _npRowIdx  = -1;   // 対象のallocRows index
 let _npValStr  = '0';  // 現在入力中の文字列
 let _npMax     = 90;   // 上限値
 let _npUnifiedKey = null; // 全技能一覧（試験版）の対象行key（nullなら対象外）
+let _npAgeSource = null; // 年齢テンキーの対象input id（'inputAge'/'ageInp'、nullなら対象外）
+let _npAgeMin = 15;
+let _npAgeMax = 99;
 
 function openNumpad(rowIdx, currentVal, labelText, maxVal){
   _npRowIdx = rowIdx;
@@ -7539,6 +7594,31 @@ function openNumpad(rowIdx, currentVal, labelText, maxVal){
   // テンキーをボタンのそばに表示
   positionNumpad(rowIdx);
   document.getElementById('numpadOverlay').classList.add('open');
+}
+
+function openAgeNumpad(sourceId){
+  if(youngMode) return; // 年少探索者モードは選択ボタン方式のため対象外
+  _npAgeSource = sourceId;
+  _npAgeMin = 15;
+  _npAgeMax = 99;
+  var srcEl = document.getElementById(sourceId);
+  var cur = (srcEl && srcEl.value) ? srcEl.value : (charAge || 21);
+  _npValStr = String(cur);
+
+  document.getElementById('numpadLabel').textContent = '年齢';
+  document.getElementById('numpadVal').textContent   = _npValStr;
+  document.getElementById('numpadHint').textContent  = _npAgeMin + '〜' + _npAgeMax + '歳';
+
+  positionNumpadCentered();
+  document.getElementById('numpadOverlay').classList.add('open');
+}
+
+function positionNumpadCentered(){
+  const box = document.getElementById('numpadBox');
+  if(!box) return;
+  const bw = 220, bh = 300;
+  box.style.left = Math.max(8, (window.innerWidth  - bw) / 2) + 'px';
+  box.style.top  = Math.max(8, (window.innerHeight - bh) / 2) + 'px';
 }
 
 function positionNumpad(rowIdx){
@@ -7572,14 +7652,22 @@ function numpadInput(key){
     if(_npValStr === '0') _npValStr = key;
     else if(_npValStr.length < 3) _npValStr += key;
     // 上限チェック
-    if(parseInt(_npValStr) > _npMax) _npValStr = String(_npMax);
+    var capMax = _npAgeSource ? _npAgeMax : _npMax;
+    if(parseInt(_npValStr) > capMax) _npValStr = String(capMax);
   }
   document.getElementById('numpadVal').textContent = _npValStr;
 }
 
 function numpadConfirm(){
   const val = parseInt(_npValStr) || 0;
-  if(_npUnifiedKey != null){
+  if(_npAgeSource){
+    var clamped = Math.max(_npAgeMin, Math.min(_npAgeMax, val));
+    var ageEl = document.getElementById(_npAgeSource);
+    if(ageEl) ageEl.value = clamped;
+    syncAgeInputs(_npAgeSource);
+    if(_npAgeSource === 'inputAge') { clampAgeInputs('inputAge'); onStatInputChange(); }
+    else { clampAgeInputs('ageInp'); onAgeChange(); }
+  } else if(_npUnifiedKey != null){
     // 全技能一覧（試験版）
     var urow = unifiedFindRow(_npUnifiedKey);
     if(urow) { urow.intAdd = Math.max(0, val); unifiedRender(); renderAllocTable(); }
@@ -7597,6 +7685,7 @@ function closeNumpad(){
   document.getElementById('numpadOverlay').classList.remove('open');
   _npRowIdx = -1;
   _npUnifiedKey = null;
+  _npAgeSource = null;
 }
 
 
@@ -10185,6 +10274,12 @@ function slImportJsonFile(input) {
 
   /* バーの高さ分、本文の最後が隠れないように余白を確保 */
   body { padding-bottom: 56px; }
+
+  /* 配分サマリーバー（職業/興味ポイントの合計・残り）が下部固定バーに隠れないよう、その上に浮かせる */
+  .alloc-summary-bar {
+    bottom: calc(56px + env(safe-area-inset-bottom, 0));
+    z-index: 890; /* mobileActionBar(900)の下に来るよう調整 */
+  }
 }
 
 /* ===== スマホでタップ時に自動ズームされる問題への対策 =====
