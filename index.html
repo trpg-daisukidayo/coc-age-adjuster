@@ -151,17 +151,14 @@ textarea:focus { outline: none; border-color: var(--accent); }
   font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
   border: 1px solid var(--border); border-radius: 20px; padding: .16rem .7rem;
 }
-.age-picker { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .3rem; }
-.age-picker button {
-  min-width: 2.1em; padding: .32rem .3rem; font-family: inherit; font-size: .88rem;
-  font-weight: 700; color: var(--ink); background: rgba(255,255,255,.5);
-  border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
+.age-picker { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; margin-top: .3rem; }
+.age-picker-unit { font-size: .85rem; color: var(--ink-mid); }
+.age-picker-select {
+  font-family: inherit; font-size: 1rem; font-weight: 700; color: var(--ink);
+  background: rgba(255,255,255,.6); border: 1px solid var(--border);
+  border-radius: 5px; padding: .35rem .5rem; cursor: pointer;
 }
-.age-picker button:active { transform: scale(.94); }
-.age-picker button.active {
-  background: var(--accent); color: #f5f0e8; border-color: var(--accent);
-}
+.age-picker-select:focus { outline: none; border-color: var(--accent); }
 .rule-box {
   font-size: .74rem; color: var(--ink-mid); background: var(--parchment-dark);
   border: 1px solid var(--border); border-left: 3px solid var(--accent);
@@ -1769,7 +1766,7 @@ textarea:focus { outline: none; border-color: var(--accent); }
   display: flex; flex-direction: column; gap: .2rem; flex: 1; min-width: 120px;
 }
 .stat-basic-field--sm { flex: 0 0 80px; min-width: 70px; }
-.stat-basic-field--sm.age-wide { flex: 0 0 auto; min-width: 260px; }
+.stat-basic-field--sm.age-wide { flex: 0 0 auto; min-width: 100px; }
 .stat-basic-label {
   font-size: .68rem; color: var(--ink-light); font-weight: 700; letter-spacing: .08em;
 }
@@ -4635,17 +4632,16 @@ function renderYoungAgePicker(sourceId){
   var picker = document.getElementById(sourceId + '_agePicker');
   if(!picker) return;
   if(!picker.dataset.built){
-    var html = '';
+    var html = '<select class="age-picker-select" onchange="selectYoungAge(\'' + sourceId + '\', parseInt(this.value,10))">';
     for(var a = 7; a <= 14; a++){
-      html += '<button type="button" onclick="selectYoungAge(\'' + sourceId + '\',' + a + ')">' + a + '</button>';
+      html += '<option value="' + a + '">' + a + '</option>';
     }
+    html += '</select><span class="age-picker-unit">歳</span>';
     picker.innerHTML = html;
     picker.dataset.built = '1';
   }
-  var cur = charAge;
-  Array.prototype.forEach.call(picker.querySelectorAll('button'), function(b){
-    b.classList.toggle('active', parseInt(b.textContent, 10) === cur);
-  });
+  var sel = picker.querySelector('select');
+  if(sel) sel.value = String(charAge);
 }
 
 /* 年少探索者：年齢選択ボタンをタップしたときの処理 */
