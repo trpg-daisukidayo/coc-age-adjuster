@@ -1055,6 +1055,26 @@ textarea:focus { outline: none; border-color: var(--accent); }
   background: rgba(184,134,11,.2); color: var(--gold);
   border-radius: 3px; margin-left: .3rem; vertical-align: middle;
 }
+/* ===== 探索者の人物像カード ===== */
+.cp-intro { font-size: .76rem; color: var(--ink-mid); margin-bottom: .8rem; line-height: 1.5; }
+.cp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: .55rem;
+}
+.cp-card {
+  background: var(--parchment-dark);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: .55rem .7rem;
+}
+.cp-card.empty { border-left-color: var(--ink-light); opacity: .65; }
+.cp-card-top { display: flex; align-items: baseline; gap: .4rem; margin-bottom: .3rem; }
+.cp-key { font-size: .68rem; font-weight: 700; color: var(--ink-light); letter-spacing: .08em; }
+.cp-label { font-size: .78rem; font-weight: 700; color: var(--ink); }
+.cp-val { margin-left: auto; font-size: .95rem; font-weight: 900; color: var(--accent); }
+.cp-text { font-size: .8rem; color: var(--ink-mid); line-height: 1.55; }
 /* 五十音区切り行：スクロールターゲットとして残しつつ視覚的に非表示 */
 .unified-kana-sep { line-height: 0; height: 0; visibility: hidden; }
 .unified-kana-sep td { padding: 0; border: none; font-size: 0; }
@@ -1825,6 +1845,35 @@ textarea:focus { outline: none; border-color: var(--accent); }
 .stat-cell-input::-webkit-outer-spin-button,
 .stat-cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stat-cell-input { -moz-appearance: textfield; appearance: textfield; }
+/* 能力値ドラッグ入れ替え：ドラッグ中のみ強調表示（通常時の見た目は変更しない） */
+.stat-drag-input { touch-action: none; cursor: grab; }
+.stat-drag-input.stat-drag-source { background: rgba(184,134,11,.28); border-radius: 3px; cursor: grabbing; }
+.stat-drag-input.stat-drag-target { background: rgba(46,139,87,.25); border-radius: 3px; box-shadow: inset 0 0 0 2px #2e8b57; }
+@keyframes statSwapFlash {
+  0%   { background: rgba(46,139,87,.6); }
+  100% { background: transparent; }
+}
+.stat-drag-input.stat-drag-swapped { animation: statSwapFlash .55s ease; border-radius: 3px; }
+/* ドラッグ中に指・カーソルへ追従する案内バッジ */
+.stat-drag-ghost {
+  position: fixed; z-index: 9999; pointer-events: none;
+  left: 0; top: 0; transform: translate(-50%, -135%);
+  background: var(--ink); color: #fff;
+  font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+  padding: .32rem .65rem; border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.28);
+  white-space: nowrap; display: none;
+  transition: background-color .1s ease;
+}
+.stat-drag-ghost::after {
+  content: ''; position: absolute; left: 50%; top: 100%;
+  transform: translateX(-50%); border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.stat-drag-ghost.stat-drag-ghost-active {
+  background: #2e8b57;
+}
+.stat-drag-ghost.stat-drag-ghost-active::after { border-top-color: #2e8b57; }
 
 /* 二次ステータス */
 .secondary-stats {
@@ -2070,7 +2119,10 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
     <div class="stat-table-wrap">
       <div class="stat-grid-header">
         <span class="stat-grid-title">能力値</span>
-        <button class="btn-sm" id="btnRollAll" onclick="rollAllStats()">🎲 ランダム生成</button>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          <button class="btn-sm" id="btnRollAll" onclick="rollAllStats()">🎲 ランダム生成</button>
+          <button class="btn-sm" id="btnCharPortrait" onclick="openCharPortrait()">🪞 人物像を見る</button>
+        </div>
       </div>
       <div id="youngAgeWarn">⚠️ 年齢（7〜14）を入力するとランダム生成できます。STR・CON・SIZ・EDUは年齢によって決まります。</div>
       <div id="youngBandNotice">
@@ -2321,6 +2373,20 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       </div>
     </div>
     <div class="skill-sheet-body" id="skillSheetBody"></div>
+  </div>
+</div>
+
+<!-- 探索者の人物像モーダル -->
+<div id="charPortraitModal" class="skill-sheet-modal hidden">
+  <div class="skill-sheet-overlay" onclick="closeCharPortrait()"></div>
+  <div class="skill-sheet-panel">
+    <div class="skill-sheet-header">
+      <div class="skill-sheet-title">探索者の人物像</div>
+      <div class="skill-sheet-actions">
+        <button class="btn-modal-close" onclick="closeCharPortrait()">✕ 閉じる</button>
+      </div>
+    </div>
+    <div class="skill-sheet-body" id="charPortraitBody"></div>
   </div>
 </div>
 
@@ -6536,8 +6602,8 @@ let youngHome = null; /* {roll, cls, credit, allowance, manual} */
 
 function youngHomeFromRoll(r){
   if(r <= 9)  return {roll:r, cls:'貧乏',   credit:r,  allowance:'500円'};
-  if(r <= 49) return {roll:r, cls:'平均',   credit:r,  allowance:(r * 50).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（信用×50円）</span>'};
-  if(r <= 89) return {roll:r, cls:'裕福',   credit:r,  allowance:(r * 100).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（信用×100円）</span>'};
+  if(r <= 49) return {roll:r, cls:'平均',   credit:r,  allowance:(r * 50).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（親の信用×50円）</span>'};
+  if(r <= 89) return {roll:r, cls:'裕福',   credit:r,  allowance:(r * 100).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（親の信用×100円）</span>'};
   if(r <= 98) return {roll:r, cls:'富豪',   credit:r,  allowance:'1〜5万円'};
   return       {roll:r, cls:'大富豪', credit:99, allowance:'望むがまま'};
 }
@@ -6559,19 +6625,25 @@ async function youngHomeRoll(){
   youngHome.manual = false;
   allocCredit = youngHome.credit;
   renderYoungHomeResult();
+  var slider = document.getElementById('youngHomeSlider');
+  var sliderVal = document.getElementById('youngHomeSliderVal');
+  if(slider) slider.value = r;
+  if(sliderVal) sliderVal.textContent = r;
   updateAllocHeader();
   if(btn) btn.disabled = false;
 }
 
-/* 家庭環境：信用を直接入力（自由記入） */
-function youngHomeSetManual(val){
+/* 家庭環境：親の信用をスライダーで直接指定（通常探索者の信用スライダーと同仕様） */
+function youngHomeSlide(val){
   if(!youngMode) return;
   var v = parseInt(val, 10);
-  if(isNaN(v)) { alert('0〜99の数値を入力してください'); return; }
+  if(isNaN(v)) return;
   v = Math.max(0, Math.min(99, v));
   youngHome = youngHomeFromRoll(v);
   youngHome.manual = true;
   allocCredit = youngHome.credit;
+  var valEl = document.getElementById('youngHomeSliderVal');
+  if(valEl) valEl.textContent = v;
   renderYoungHomeResult();
   updateAllocHeader();
 }
@@ -6580,7 +6652,7 @@ function renderYoungHomeResult(){
   var box = document.getElementById('youngHomeResult');
   if(!box) return;
   if(!youngHome){
-    box.innerHTML = '<div style="font-size:.75rem;color:var(--ink-light);margin-top:.35rem;">まだ決定していません。1D100を振るか、信用を直接入力してください。</div>';
+    box.innerHTML = '<div style="font-size:.75rem;color:var(--ink-light);margin-top:.35rem;">まだ決定していません。1D100を振るか、スライダーで親の信用を指定してください。</div>';
     return;
   }
   var h = youngHome;
@@ -6588,22 +6660,29 @@ function renderYoungHomeResult(){
   box.innerHTML = '<div class="young-home-chips" style="margin-top:.4rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;">'
     + '<span class="secondary-chip">' + dispRoll + '</span>'
     + '<span class="secondary-chip">生活水準&thinsp;<strong>' + h.cls + '</strong></span>'
-    + '<span class="secondary-chip">信用&thinsp;<strong>' + h.credit + '</strong>%</span>'
+    + '<span class="secondary-chip">親の信用&thinsp;<strong>' + h.credit + '</strong>%</span>'
     + '<span class="secondary-chip">お小遣い&thinsp;<strong>' + h.allowance + '</strong></span>'
     + '</div>';
 }
 
 function buildYoungHomeSectionHTML(){
   return '<div class="alloc-section" id="allocCreditSection">'
-    + '<div class="alloc-section-label">家庭環境　<span style="font-size:.72rem;color:var(--ink-light);letter-spacing:0;font-weight:400;">1D100で決定 ／ 信用にポイントは消費しません</span></div>'
+    + '<div class="alloc-section-label">家庭環境　<span style="font-size:.72rem;color:var(--ink-light);letter-spacing:0;font-weight:400;">1D100で決定 ／ 親の信用にポイントは消費しません</span></div>'
     + '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.2rem;">'
     + '<button class="btn-sm" id="youngHomeRollBtn" onclick="youngHomeRoll()">🎲 1D100を振る</button>'
     + '<span style="font-size:.7rem;color:var(--ink-light);">1〜9:貧乏／10〜49:平均／50〜89:裕福／90〜98:富豪／99〜00:大富豪（信用99）</span>'
     + '</div>'
-    + '<div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:.4rem;">'
-    + '<span style="font-size:.72rem;color:var(--ink-light);">または信用を直接入力：</span>'
-    + '<input type="number" id="youngHomeManualInput" min="0" max="99" placeholder="0〜99" style="width:4.5em;padding:.2rem .4rem;border:1px solid var(--border);border-radius:4px;">'
-    + '<button class="btn-ghost" style="font-size:.72rem;padding:.2rem .6rem;" onclick="youngHomeSetManual(document.getElementById(\'youngHomeManualInput\').value)">決定</button>'
+    + '<div style="font-size:.72rem;color:var(--ink-light);margin-top:.4rem;">または親の信用を直接指定：</div>'
+    + '<div class="alloc-credit-row">'
+      + '<span class="alloc-credit-min">0%</span>'
+      + '<div class="alloc-credit-slider-wrap">'
+        + '<input type="range" class="alloc-credit-slider" id="youngHomeSlider" min="0" max="99" value="' + (youngHome ? youngHome.credit : 0) + '" oninput="youngHomeSlide(this.value)">'
+      + '</div>'
+      + '<span class="alloc-credit-max">99%</span>'
+      + '<div class="alloc-credit-val-box">'
+        + '<span id="youngHomeSliderVal" class="alloc-credit-val">' + (youngHome ? youngHome.credit : 0) + '</span>'
+        + '<span class="alloc-credit-pct">%</span>'
+      + '</div>'
     + '</div>'
     + '<div id="youngHomeResult"></div>'
     + '</div>';
@@ -6651,7 +6730,10 @@ function initStatGrid() {
   // 能力値入力行
   var baseRow = '<tr class="row-base"><td class="row-label" style="font-size:.68rem;color:var(--ink-mid);font-weight:700;background:var(--parchment-dark);">能力値</td>'
     + allKeys.map(function(k){
-        return '<td><input type="number" class="stat-cell-input" id="statInput_' + k + '"'
+        // 幸運（LUC）以外はドラッグ&ドロップで数値を入れ替え可能にする
+        var cls = (k === 'LUC') ? 'stat-cell-input' : 'stat-cell-input stat-drag-input';
+        var dataAttr = (k === 'LUC') ? '' : ' data-stat-key="' + k + '"';
+        return '<td><input type="number" class="' + cls + '" id="statInput_' + k + '"' + dataAttr
           + ' min="1" max="999" value="" placeholder="—" oninput="onStatInputChange()"></td>';
       }).join('') + '</tr>';
   // 増加分行（年齢補正後に表示、今は空）
@@ -6663,6 +6745,132 @@ function initStatGrid() {
   // フッター行（キー名繰り返し）
   var tfRow = '<tr><th></th>' + allKeys.map(function(k){ return '<th>' + (labels[k]||k) + '</th>'; }).join('') + '</tr>';
   tbl.innerHTML = thRow + baseRow + addRow + curRow + tfRow;
+  initStatDragSwap();
+}
+
+// 能力値（幸運以外）のドラッグ&ドロップ入れ替え
+// マウス・タッチ両対応（Pointer Events）。#statGridへのイベント委譲のため、
+// initStatGridでinnerHTMLが再構築されても再バインド不要（tbl自体は再生成されないため）。
+function initStatDragSwap() {
+  var tbl = document.getElementById('statGrid');
+  if(!tbl || tbl._dragSwapBound) return;
+  tbl._dragSwapBound = true;
+
+  // 指・カーソルに追従する案内バッジ（「移動中」「⇄ 入れ替え」を表示）
+  var ghost = document.getElementById('statDragGhost');
+  if(!ghost) {
+    ghost = document.createElement('div');
+    ghost.id = 'statDragGhost';
+    ghost.className = 'stat-drag-ghost';
+    document.body.appendChild(ghost);
+  }
+
+  var dragState = null; // {key, el, startX, startY, moved, pointerId}
+
+  function clearDragClasses(){
+    var els = tbl.querySelectorAll('.stat-drag-source, .stat-drag-target');
+    for(var i=0;i<els.length;i++){
+      els[i].classList.remove('stat-drag-source');
+      els[i].classList.remove('stat-drag-target');
+    }
+  }
+
+  function moveGhost(x, y){
+    ghost.style.left = x + 'px';
+    ghost.style.top = y + 'px';
+  }
+
+  function updateGhostText(srcKey, targetKey){
+    if(targetKey) {
+      ghost.textContent = srcKey + ' ⇄ ' + targetKey + '　入れ替える';
+      ghost.classList.add('stat-drag-ghost-active');
+    } else {
+      ghost.textContent = srcKey + ' を移動中…';
+      ghost.classList.remove('stat-drag-ghost-active');
+    }
+  }
+
+  // ドラッグ操作直後に発火する余分なclick（フォーカス）を1回だけ抑制
+  function suppressNextClick(el){
+    var handler = function(ev){ ev.preventDefault(); ev.stopPropagation(); el.removeEventListener('click', handler, true); };
+    el.addEventListener('click', handler, true);
+    setTimeout(function(){ el.removeEventListener('click', handler, true); }, 500);
+  }
+
+  // 入れ替え完了を一瞬フラッシュして知らせる
+  function flashSwapped(el){
+    el.classList.remove('stat-drag-swapped');
+    void el.offsetWidth; // reflow（アニメーション再トリガー用）
+    el.classList.add('stat-drag-swapped');
+    setTimeout(function(){ el.classList.remove('stat-drag-swapped'); }, 600);
+  }
+
+  tbl.addEventListener('pointerdown', function(e){
+    var el = e.target.closest('.stat-drag-input');
+    if(!el) return;
+    dragState = { key: el.getAttribute('data-stat-key'), el: el, startX: e.clientX, startY: e.clientY, moved: false, pointerId: e.pointerId };
+  });
+
+  tbl.addEventListener('pointermove', function(e){
+    if(!dragState || dragState.pointerId !== e.pointerId) return;
+    var dx = e.clientX - dragState.startX, dy = e.clientY - dragState.startY;
+    if(!dragState.moved && Math.sqrt(dx*dx + dy*dy) > 10) {
+      dragState.moved = true;
+      dragState.el.classList.add('stat-drag-source');
+      updateGhostText(dragState.key, null);
+      moveGhost(e.clientX, e.clientY);
+      ghost.style.display = 'block';
+    }
+    if(dragState.moved) {
+      e.preventDefault(); // ドラッグ中はテキスト選択・スクロールを抑制
+      moveGhost(e.clientX, e.clientY);
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var targetEl = under ? under.closest('.stat-drag-input') : null;
+      var prevTarget = tbl.querySelector('.stat-drag-target');
+      if(prevTarget && prevTarget !== targetEl) prevTarget.classList.remove('stat-drag-target');
+      if(targetEl && targetEl !== dragState.el) {
+        targetEl.classList.add('stat-drag-target');
+        updateGhostText(dragState.key, targetEl.getAttribute('data-stat-key'));
+      } else {
+        updateGhostText(dragState.key, null);
+      }
+    }
+  }, { passive: false });
+
+  function endDrag(e){
+    if(!dragState || dragState.pointerId !== e.pointerId) return;
+    var wasMoved = dragState.moved;
+    var srcEl = dragState.el, srcKey = dragState.key;
+    clearDragClasses();
+    ghost.style.display = 'none';
+    if(wasMoved) {
+      var under = document.elementFromPoint(e.clientX, e.clientY);
+      var targetEl = under ? under.closest('.stat-drag-input') : null;
+      if(targetEl && targetEl !== srcEl) {
+        swapStatValues(srcKey, targetEl.getAttribute('data-stat-key'));
+        flashSwapped(srcEl);
+        flashSwapped(targetEl);
+      }
+      suppressNextClick(srcEl);
+      if(targetEl) suppressNextClick(targetEl);
+    }
+    dragState = null;
+  }
+
+  tbl.addEventListener('pointerup', endDrag);
+  tbl.addEventListener('pointercancel', endDrag);
+}
+
+// 能力値2項目の数値を入れ替え（ランダム生成値・手入力値どちらも対象）
+function swapStatValues(k1, k2) {
+  if(!k1 || !k2 || k1 === k2) return;
+  var el1 = document.getElementById('statInput_' + k1);
+  var el2 = document.getElementById('statInput_' + k2);
+  if(!el1 || !el2) return;
+  var tmp = el1.value;
+  el1.value = el2.value;
+  el2.value = tmp;
+  onStatInputChange();
 }
 
 // 3D6×5（STR/CON/POW/DEX/APP）または 2D6+6×5（SIZ/INT/EDU）
@@ -6810,6 +7018,187 @@ function onStatInputChange() {
   if(adjSec && !adjSec.classList.contains('hidden')) {
     showAgeResetWarning();
   }
+}
+
+/* ══════════════════════════════════════════
+   探索者の人物像（能力値フレーバーテキスト）
+   ※ ルールブックの文章はそのまま使用せず、
+     各能力値の目安をオリジナルの表現で説明する。
+══════════════════════════════════════════ */
+// 各キー：[上限値, 説明文] の配列を昇順に並べたもの（最後の要素は Infinity で最上位帯）
+var CP_FLAVOR = {
+  STR: [
+    [14,  '自力で体を起こすのもやっとなほど、力がほとんど入らない。'],
+    [24,  'かなり非力で、日常のちょっとした力仕事にも苦労する。'],
+    [34,  '非力で、重い物を持ち上げるのはひと苦労。'],
+    [44,  '平均よりもやや劣る腕力。'],
+    [54,  '人並みに近い、平均的な腕力。'],
+    [64,  '人並みの、これといった特徴のない腕力。'],
+    [74,  '平均よりもやや優れた腕力。'],
+    [84,  '平均よりも頼りになる、しっかりとした腕力。'],
+    [94,  'かなり力に自信がある、周囲でも目立つ怪力。'],
+    [98,  'ずば抜けた怪力の持ち主。'],
+    [99,  '一流のアスリートに並ぶ、人間として到達しうる限界に近い数値。'],
+    [139, '常人の枠を超えた膂力。大型の家畜にも匹敵する。'],
+    [Infinity, 'もはや人間離れした、怪物めいた腕力（200を超えるとさらに常軌を逸する）。']
+  ],
+  CON: [
+    [14,  '生命の兆候がほとんど見られないほど、極めて弱い状態。'],
+    [24,  'かなり病弱で、日常生活にも支障をきたす。'],
+    [34,  '病弱で、誰かの手を借りなければ満足に動けない。'],
+    [44,  '体調を崩しやすく、しばしば不調を訴えがち。'],
+    [54,  '平均に近い、やや控えめな体力。'],
+    [64,  '至って健康な、ごくありふれた体力。'],
+    [74,  '平均よりもやや頑丈な体つき。'],
+    [84,  '寒さにも疲れにも強い、頑丈な体つき。'],
+    [94,  'かなりの頑健さを誇る体。'],
+    [98,  '激しい痛みにも耐えられる、際立った丈夫さ。'],
+    [99,  '人間としてはトップクラスの、驚異的な頑健さ。'],
+    [139, '人並み外れた、常人離れした耐久力。'],
+    [Infinity, '人間の限界を超越したとしか思えない、化物じみた生命力。']
+  ],
+  SIZ: [
+    [14,  '生まれて間もない赤子ほどの小ささ。'],
+    [24,  '非常に小柄な体格。'],
+    [34,  'とても小柄な体格。'],
+    [44,  '小柄で、まだ成長途中の子供のような体つき。'],
+    [54,  '平均よりもやや小柄な体格。'],
+    [64,  '中肉中背に近い、標準よりやや小さめの体格。'],
+    [74,  '中肉中背の、ごくありふれた体格。'],
+    [84,  '平均よりもやや大きめの体格。'],
+    [94,  'がっしりとした恰幅、あるいは大柄な体つき。'],
+    [98,  '見上げるほどの長身、あるいは相当な恰幅の良さ。'],
+    [149, '並外れて大柄、あるいは重量級の体。'],
+    [179, '大型の家畜にも匹敵するほどの巨躯。'],
+    [Infinity, '記録に残るレベルの、桁外れな巨体。']
+  ],
+  DEX: [
+    [14,  '誰かの支えなしにはまともに動けないほどの鈍さ。'],
+    [24,  '動作がかなりぎこちなく、細やかな作業は特に苦手。'],
+    [34,  '動作がぎこちなく、細やかな作業は苦手。'],
+    [44,  '平均よりもやや不器用な部類。'],
+    [54,  '人並みに近い、平均的な身のこなし。'],
+    [64,  '特筆すべき点のない、平均的な身のこなし。'],
+    [74,  '平均よりもやや機敏な身のこなし。'],
+    [84,  'そつのない、機敏な身のこなし。'],
+    [94,  '身軽で機敏、アクロバットや舞踊もこなせる器用さ。'],
+    [98,  '卓越した反射神経の持ち主。'],
+    [99,  '国際大会でも通用するレベルの反射神経。人間として到達しうる頂点。'],
+    [119, '常人離れした反応速度と身のこなし。'],
+    [199, '人間の域を超えた、けもの染みた俊敏さ。'],
+    [Infinity, '目にも留まらぬ、稲妻のごとき速さ。']
+  ],
+  APP: [
+    [14,  '見る者に強い違和感や哀れみを抱かせる容貌。'],
+    [24,  'あまり見栄えがせず、地味な印象を与えやすい外見。'],
+    [34,  'あまり印象に残らない、地味な外見。'],
+    [44,  '特に目を引くところのない、やや平凡寄りの容姿。'],
+    [54,  '特に秀でたところのない、平凡な容姿。'],
+    [64,  'これといった特徴のない、ごく平均的な容姿。'],
+    [74,  '平均よりもやや整った、感じの良い容姿。'],
+    [84,  '人並み以上に整った、感じの良い容姿。'],
+    [94,  '周囲の目を引く、魅力的な容姿。'],
+    [98,  '誰もが振り返るほどの、際立った美貌や魅力。'],
+    [Infinity, '銀幕のスターにも劣らぬ、人間として到達しうる魅力の極み。']
+  ],
+  INT: [
+    [14,  '周囲の状況をほとんど理解できないほどの知的な遅れ。'],
+    [24,  '物覚えが非常に悪く、日常の理解にも苦労する。'],
+    [34,  '物覚えが悪く、簡単な読み書きや計算にも苦労する。'],
+    [44,  '平均よりもやや理解の遅い部類。'],
+    [54,  '平均に近い、標準的な理解力。'],
+    [64,  '特に秀でても劣ってもいない、標準的な知性。'],
+    [74,  '平均よりもやや理解が早い頭脳。'],
+    [84,  '平均より理解が早く、物覚えの良い頭脳。'],
+    [94,  '鋭い理解力を持つ、優秀な頭脳。'],
+    [98,  '複数の言語や高度な理論も難なく飲み込める、鋭敏な頭脳。'],
+    [99,  '歴史に名を残す天才たちに並ぶ、人間として到達しうる知性の極み。'],
+    [139, '人間の理解の枠を超えた、超越的な知性。'],
+    [209, 'もはや人智を超えた、異形の叡智。'],
+    [Infinity, '常識のスケールを外れた、神話的なまでの知性。']
+  ],
+  POW: [
+    [14,  '意志の力がほとんど残っておらず、超常の力とも無縁。'],
+    [24,  '意志がかなり弱く、他人の思惑にすぐ流されてしまう。'],
+    [34,  '意志が弱く、他人の思惑に流されやすい。'],
+    [44,  '平均よりもやや意志の弱い部類。'],
+    [54,  '人並みに近い、平均的な精神力。'],
+    [64,  '取り立てて強くも弱くもない、標準的な精神力。'],
+    [74,  '平均よりもやや強い意志を持つ。'],
+    [84,  '平均よりもいくらか強い意志を持つ。'],
+    [94,  'かなり強靭な意志の持ち主。'],
+    [99,  '強靭な意志を持ち、目に見えぬものと縁を結びやすい素質。'],
+    [139, '鉄のごとき意志と、異界との強い結びつきを持つ。'],
+    [209, '人間の理解を超えた、異形の精神力。'],
+    [Infinity, '常軌を逸した、神話的なまでの精神の力。']
+  ],
+  EDU: [
+    [0,   'まだ何も学んでいない、生まれたばかりの状態。'],
+    [14,  'ほとんど教育を受けておらず、知識は乏しい。'],
+    [59,  '学校教育をあまり受けられなかった程度の学び。'],
+    [69,  '高校を卒業した程度の、一般的な学力。'],
+    [79,  '大学で専門課程を修めた、学士レベルの知識。'],
+    [89,  '大学院まで進み、研究を重ねた修士レベルの知識。'],
+    [95,  '博士号を持つ、あるいは教壇に立つほどの専門家。'],
+    [98,  '自分の専門分野で世界的に名の知れた権威。'],
+    [Infinity, '人間として到達しうる知識と学識の頂点。']
+  ]
+};
+var CP_LABELS = {
+  STR: 'STR（筋力）', CON: 'CON（体力）', SIZ: 'SIZ（体格）',
+  DEX: 'DEX（敏捷性）', APP: 'APP（外見）', INT: 'INT（知性）', POW: 'POW（精神力）',
+  EDU: 'EDU（教育）'
+};
+var CP_ORDER = ['STR','CON','SIZ','DEX','APP','INT','POW','EDU'];
+
+function cpFlavorText(key, val) {
+  var bands = CP_FLAVOR[key];
+  if(!bands) return '';
+  for(var i = 0; i < bands.length; i++) {
+    if(val <= bands[i][0]) return bands[i][1];
+  }
+  return bands[bands.length - 1][1];
+}
+
+// 表示中の現在値（年齢補正済みならその値、未補正なら入力値）を取得。未入力ならnull
+function cpCurrentVal(key) {
+  var curEl = document.getElementById('statCur_' + key);
+  var t = curEl ? curEl.textContent.trim() : '';
+  var v = parseInt(t, 10);
+  if(!isNaN(v) && v > 0) return v;
+  var o = orig[key];
+  return (typeof o === 'number' && o > 0) ? o : null;
+}
+
+function buildCharPortraitBody() {
+  var body = document.getElementById('charPortraitBody');
+  if(!body) return;
+  var html = '<div class="cp-intro">現在の能力値をもとに、探索者のおおまかな人物像の目安を表示します。年齢補正が完了している場合は補正後の値を、未実施の場合は入力値を使用します。</div>';
+  html += '<div class="cp-grid">';
+  CP_ORDER.forEach(function(key) {
+    var v = cpCurrentVal(key);
+    if(v == null) {
+      html += '<div class="cp-card empty"><div class="cp-card-top"><span class="cp-label">' + CP_LABELS[key] + '</span></div>'
+        + '<div class="cp-text">未入力です。</div></div>';
+    } else {
+      var txt = cpFlavorText(key, v);
+      html += '<div class="cp-card"><div class="cp-card-top"><span class="cp-label">' + CP_LABELS[key] + '</span><span class="cp-val">' + v + '</span></div>'
+        + '<div class="cp-text">' + txt + '</div></div>';
+    }
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function openCharPortrait() {
+  buildCharPortraitBody();
+  document.getElementById('charPortraitModal').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCharPortrait() {
+  document.getElementById('charPortraitModal').classList.add('hidden');
+  document.body.style.overflow = '';
 }
 
 // DB・ビルド計算（新版CoC7th 表に基づく）
@@ -11819,7 +12208,26 @@ function slRestoreState(s) {
   if(sideJobEnabled && sideJobOccName) {
     var chk = document.getElementById('unifiedSideJobChk');
     if(chk) chk.checked = true;
-    if(allocDone) showSideJobCardIfEnabled();
+    if(allocDone) {
+      showSideJobCardIfEnabled();
+      // 技能セクションを表示し、復元したsideJobSkills（gain/lastRoll）で再描画
+      var sjSkillSec = document.getElementById('sideJobSkillSec');
+      if(sjSkillSec) sjSkillSec.classList.remove('hidden');
+      renderSideJobTbody();
+      updateSideJobChecksDisplay();
+      // ダイスロール結果ログの復元（アニメーション自体は再現できないためテキストログのみ表示）
+      var sjLogEl = document.getElementById('sideJobDiceLog');
+      if(sjLogEl) {
+        var sjLoggedSkills = sideJobSkills.filter(function(sk){ return sk.lastRoll !== null; });
+        sjLogEl.innerHTML = sjLoggedSkills.map(function(sk) {
+          return '<div style="border-top:1px solid rgba(154,112,80,.25);padding:.5rem 0 .35rem;">'
+            + '<div class="dice-step-label"><strong>' + sk.label + '</strong></div>'
+            + '<div class="dice-result">' + sk.lastRoll + '</div>'
+            + '</div>';
+        }).join('');
+        sjLogEl.scrollTop = sjLogEl.scrollHeight;
+      }
+    }
   }
 
   // 異才の復元
