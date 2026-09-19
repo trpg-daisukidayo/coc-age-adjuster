@@ -1055,26 +1055,6 @@ textarea:focus { outline: none; border-color: var(--accent); }
   background: rgba(184,134,11,.2); color: var(--gold);
   border-radius: 3px; margin-left: .3rem; vertical-align: middle;
 }
-/* ===== 探索者の人物像カード ===== */
-.cp-intro { font-size: .76rem; color: var(--ink-mid); margin-bottom: .8rem; line-height: 1.5; }
-.cp-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: .55rem;
-}
-.cp-card {
-  background: var(--parchment-dark);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 4px;
-  padding: .55rem .7rem;
-}
-.cp-card.empty { border-left-color: var(--ink-light); opacity: .65; }
-.cp-card-top { display: flex; align-items: baseline; gap: .4rem; margin-bottom: .3rem; }
-.cp-key { font-size: .68rem; font-weight: 700; color: var(--ink-light); letter-spacing: .08em; }
-.cp-label { font-size: .78rem; font-weight: 700; color: var(--ink); }
-.cp-val { margin-left: auto; font-size: .95rem; font-weight: 900; color: var(--accent); }
-.cp-text { font-size: .8rem; color: var(--ink-mid); line-height: 1.55; }
 /* 五十音区切り行：スクロールターゲットとして残しつつ視覚的に非表示 */
 .unified-kana-sep { line-height: 0; height: 0; visibility: hidden; }
 .unified-kana-sep td { padding: 0; border: none; font-size: 0; }
@@ -1845,35 +1825,6 @@ textarea:focus { outline: none; border-color: var(--accent); }
 .stat-cell-input::-webkit-outer-spin-button,
 .stat-cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .stat-cell-input { -moz-appearance: textfield; appearance: textfield; }
-/* 能力値ドラッグ入れ替え：ドラッグ中のみ強調表示（通常時の見た目は変更しない） */
-.stat-drag-input { touch-action: none; cursor: grab; }
-.stat-drag-input.stat-drag-source { background: rgba(184,134,11,.28); border-radius: 3px; cursor: grabbing; }
-.stat-drag-input.stat-drag-target { background: rgba(46,139,87,.25); border-radius: 3px; box-shadow: inset 0 0 0 2px #2e8b57; }
-@keyframes statSwapFlash {
-  0%   { background: rgba(46,139,87,.6); }
-  100% { background: transparent; }
-}
-.stat-drag-input.stat-drag-swapped { animation: statSwapFlash .55s ease; border-radius: 3px; }
-/* ドラッグ中に指・カーソルへ追従する案内バッジ */
-.stat-drag-ghost {
-  position: fixed; z-index: 9999; pointer-events: none;
-  left: 0; top: 0; transform: translate(-50%, -135%);
-  background: var(--ink); color: #fff;
-  font-size: .72rem; font-weight: 700; letter-spacing: .02em;
-  padding: .32rem .65rem; border-radius: 999px;
-  box-shadow: 0 3px 10px rgba(0,0,0,.28);
-  white-space: nowrap; display: none;
-  transition: background-color .1s ease;
-}
-.stat-drag-ghost::after {
-  content: ''; position: absolute; left: 50%; top: 100%;
-  transform: translateX(-50%); border: 5px solid transparent;
-  border-top-color: var(--ink);
-}
-.stat-drag-ghost.stat-drag-ghost-active {
-  background: #2e8b57;
-}
-.stat-drag-ghost.stat-drag-ghost-active::after { border-top-color: #2e8b57; }
 
 /* 二次ステータス */
 .secondary-stats {
@@ -2070,6 +2021,7 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
     <div class="hdr-save-row">
       <button class="btn-save" onclick="openSlModal('save')">💾 保存</button>
       <button class="btn-save" onclick="openSlModal('load')">📂 読み込み</button>
+      <button class="btn-save" onclick="downloadCharaSheetText()">📝 キャラシートテキスト</button>
       <button class="btn-save" onclick="newCharacter()" style="border-color:var(--ink-light);color:var(--ink-light);">✦ 新規作成</button>
     </div>
   </div>
@@ -2119,10 +2071,7 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
     <div class="stat-table-wrap">
       <div class="stat-grid-header">
         <span class="stat-grid-title">能力値</span>
-        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
-          <button class="btn-sm" id="btnRollAll" onclick="rollAllStats()">🎲 ランダム生成</button>
-          <button class="btn-sm" id="btnCharPortrait" onclick="openCharPortrait()">🪞 人物像を見る</button>
-        </div>
+        <button class="btn-sm" id="btnRollAll" onclick="rollAllStats()">🎲 ランダム生成</button>
       </div>
       <div id="youngAgeWarn">⚠️ 年齢（7〜14）を入力するとランダム生成できます。STR・CON・SIZ・EDUは年齢によって決まります。</div>
       <div id="youngBandNotice">
@@ -2369,24 +2318,11 @@ const SKILL_DATA = {"intimidate":{"name_ja":"威圧","specializations":[]},"fast
       <div class="skill-sheet-title">完成シート</div>
       <div class="skill-sheet-actions">
         <button class="btn-modal-close" onclick="copySkillSheet()">📋 技能をコピー</button>
+        <button class="btn-modal-close" onclick="downloadCharaSheetText()">📝 キャラシートテキスト形式で保存</button>
         <button class="btn-modal-close" onclick="closeSkillSheet()">✕ 閉じる</button>
       </div>
     </div>
     <div class="skill-sheet-body" id="skillSheetBody"></div>
-  </div>
-</div>
-
-<!-- 探索者の人物像モーダル -->
-<div id="charPortraitModal" class="skill-sheet-modal hidden">
-  <div class="skill-sheet-overlay" onclick="closeCharPortrait()"></div>
-  <div class="skill-sheet-panel">
-    <div class="skill-sheet-header">
-      <div class="skill-sheet-title">探索者の人物像</div>
-      <div class="skill-sheet-actions">
-        <button class="btn-modal-close" onclick="closeCharPortrait()">✕ 閉じる</button>
-      </div>
-    </div>
-    <div class="skill-sheet-body" id="charPortraitBody"></div>
   </div>
 </div>
 
@@ -6602,8 +6538,8 @@ let youngHome = null; /* {roll, cls, credit, allowance, manual} */
 
 function youngHomeFromRoll(r){
   if(r <= 9)  return {roll:r, cls:'貧乏',   credit:r,  allowance:'500円'};
-  if(r <= 49) return {roll:r, cls:'平均',   credit:r,  allowance:(r * 50).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（親の信用×50円）</span>'};
-  if(r <= 89) return {roll:r, cls:'裕福',   credit:r,  allowance:(r * 100).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（親の信用×100円）</span>'};
+  if(r <= 49) return {roll:r, cls:'平均',   credit:r,  allowance:(r * 50).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（信用×50円）</span>'};
+  if(r <= 89) return {roll:r, cls:'裕福',   credit:r,  allowance:(r * 100).toLocaleString() + '円<span style="font-size:.8em;font-weight:400;color:var(--ink-light);">（信用×100円）</span>'};
   if(r <= 98) return {roll:r, cls:'富豪',   credit:r,  allowance:'1〜5万円'};
   return       {roll:r, cls:'大富豪', credit:99, allowance:'望むがまま'};
 }
@@ -6625,25 +6561,19 @@ async function youngHomeRoll(){
   youngHome.manual = false;
   allocCredit = youngHome.credit;
   renderYoungHomeResult();
-  var slider = document.getElementById('youngHomeSlider');
-  var sliderVal = document.getElementById('youngHomeSliderVal');
-  if(slider) slider.value = r;
-  if(sliderVal) sliderVal.textContent = r;
   updateAllocHeader();
   if(btn) btn.disabled = false;
 }
 
-/* 家庭環境：親の信用をスライダーで直接指定（通常探索者の信用スライダーと同仕様） */
-function youngHomeSlide(val){
+/* 家庭環境：信用を直接入力（自由記入） */
+function youngHomeSetManual(val){
   if(!youngMode) return;
   var v = parseInt(val, 10);
-  if(isNaN(v)) return;
+  if(isNaN(v)) { alert('0〜99の数値を入力してください'); return; }
   v = Math.max(0, Math.min(99, v));
   youngHome = youngHomeFromRoll(v);
   youngHome.manual = true;
   allocCredit = youngHome.credit;
-  var valEl = document.getElementById('youngHomeSliderVal');
-  if(valEl) valEl.textContent = v;
   renderYoungHomeResult();
   updateAllocHeader();
 }
@@ -6652,7 +6582,7 @@ function renderYoungHomeResult(){
   var box = document.getElementById('youngHomeResult');
   if(!box) return;
   if(!youngHome){
-    box.innerHTML = '<div style="font-size:.75rem;color:var(--ink-light);margin-top:.35rem;">まだ決定していません。1D100を振るか、スライダーで親の信用を指定してください。</div>';
+    box.innerHTML = '<div style="font-size:.75rem;color:var(--ink-light);margin-top:.35rem;">まだ決定していません。1D100を振るか、信用を直接入力してください。</div>';
     return;
   }
   var h = youngHome;
@@ -6660,29 +6590,22 @@ function renderYoungHomeResult(){
   box.innerHTML = '<div class="young-home-chips" style="margin-top:.4rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;">'
     + '<span class="secondary-chip">' + dispRoll + '</span>'
     + '<span class="secondary-chip">生活水準&thinsp;<strong>' + h.cls + '</strong></span>'
-    + '<span class="secondary-chip">親の信用&thinsp;<strong>' + h.credit + '</strong>%</span>'
+    + '<span class="secondary-chip">信用&thinsp;<strong>' + h.credit + '</strong>%</span>'
     + '<span class="secondary-chip">お小遣い&thinsp;<strong>' + h.allowance + '</strong></span>'
     + '</div>';
 }
 
 function buildYoungHomeSectionHTML(){
   return '<div class="alloc-section" id="allocCreditSection">'
-    + '<div class="alloc-section-label">家庭環境　<span style="font-size:.72rem;color:var(--ink-light);letter-spacing:0;font-weight:400;">1D100で決定 ／ 親の信用にポイントは消費しません</span></div>'
+    + '<div class="alloc-section-label">家庭環境　<span style="font-size:.72rem;color:var(--ink-light);letter-spacing:0;font-weight:400;">1D100で決定 ／ 信用にポイントは消費しません</span></div>'
     + '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.2rem;">'
     + '<button class="btn-sm" id="youngHomeRollBtn" onclick="youngHomeRoll()">🎲 1D100を振る</button>'
     + '<span style="font-size:.7rem;color:var(--ink-light);">1〜9:貧乏／10〜49:平均／50〜89:裕福／90〜98:富豪／99〜00:大富豪（信用99）</span>'
     + '</div>'
-    + '<div style="font-size:.72rem;color:var(--ink-light);margin-top:.4rem;">または親の信用を直接指定：</div>'
-    + '<div class="alloc-credit-row">'
-      + '<span class="alloc-credit-min">0%</span>'
-      + '<div class="alloc-credit-slider-wrap">'
-        + '<input type="range" class="alloc-credit-slider" id="youngHomeSlider" min="0" max="99" value="' + (youngHome ? youngHome.credit : 0) + '" oninput="youngHomeSlide(this.value)">'
-      + '</div>'
-      + '<span class="alloc-credit-max">99%</span>'
-      + '<div class="alloc-credit-val-box">'
-        + '<span id="youngHomeSliderVal" class="alloc-credit-val">' + (youngHome ? youngHome.credit : 0) + '</span>'
-        + '<span class="alloc-credit-pct">%</span>'
-      + '</div>'
+    + '<div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:.4rem;">'
+    + '<span style="font-size:.72rem;color:var(--ink-light);">または信用を直接入力：</span>'
+    + '<input type="number" id="youngHomeManualInput" min="0" max="99" placeholder="0〜99" style="width:4.5em;padding:.2rem .4rem;border:1px solid var(--border);border-radius:4px;">'
+    + '<button class="btn-ghost" style="font-size:.72rem;padding:.2rem .6rem;" onclick="youngHomeSetManual(document.getElementById(\'youngHomeManualInput\').value)">決定</button>'
     + '</div>'
     + '<div id="youngHomeResult"></div>'
     + '</div>';
@@ -6730,10 +6653,7 @@ function initStatGrid() {
   // 能力値入力行
   var baseRow = '<tr class="row-base"><td class="row-label" style="font-size:.68rem;color:var(--ink-mid);font-weight:700;background:var(--parchment-dark);">能力値</td>'
     + allKeys.map(function(k){
-        // 幸運（LUC）以外はドラッグ&ドロップで数値を入れ替え可能にする
-        var cls = (k === 'LUC') ? 'stat-cell-input' : 'stat-cell-input stat-drag-input';
-        var dataAttr = (k === 'LUC') ? '' : ' data-stat-key="' + k + '"';
-        return '<td><input type="number" class="' + cls + '" id="statInput_' + k + '"' + dataAttr
+        return '<td><input type="number" class="stat-cell-input" id="statInput_' + k + '"'
           + ' min="1" max="999" value="" placeholder="—" oninput="onStatInputChange()"></td>';
       }).join('') + '</tr>';
   // 増加分行（年齢補正後に表示、今は空）
@@ -6745,132 +6665,6 @@ function initStatGrid() {
   // フッター行（キー名繰り返し）
   var tfRow = '<tr><th></th>' + allKeys.map(function(k){ return '<th>' + (labels[k]||k) + '</th>'; }).join('') + '</tr>';
   tbl.innerHTML = thRow + baseRow + addRow + curRow + tfRow;
-  initStatDragSwap();
-}
-
-// 能力値（幸運以外）のドラッグ&ドロップ入れ替え
-// マウス・タッチ両対応（Pointer Events）。#statGridへのイベント委譲のため、
-// initStatGridでinnerHTMLが再構築されても再バインド不要（tbl自体は再生成されないため）。
-function initStatDragSwap() {
-  var tbl = document.getElementById('statGrid');
-  if(!tbl || tbl._dragSwapBound) return;
-  tbl._dragSwapBound = true;
-
-  // 指・カーソルに追従する案内バッジ（「移動中」「⇄ 入れ替え」を表示）
-  var ghost = document.getElementById('statDragGhost');
-  if(!ghost) {
-    ghost = document.createElement('div');
-    ghost.id = 'statDragGhost';
-    ghost.className = 'stat-drag-ghost';
-    document.body.appendChild(ghost);
-  }
-
-  var dragState = null; // {key, el, startX, startY, moved, pointerId}
-
-  function clearDragClasses(){
-    var els = tbl.querySelectorAll('.stat-drag-source, .stat-drag-target');
-    for(var i=0;i<els.length;i++){
-      els[i].classList.remove('stat-drag-source');
-      els[i].classList.remove('stat-drag-target');
-    }
-  }
-
-  function moveGhost(x, y){
-    ghost.style.left = x + 'px';
-    ghost.style.top = y + 'px';
-  }
-
-  function updateGhostText(srcKey, targetKey){
-    if(targetKey) {
-      ghost.textContent = srcKey + ' ⇄ ' + targetKey + '　入れ替える';
-      ghost.classList.add('stat-drag-ghost-active');
-    } else {
-      ghost.textContent = srcKey + ' を移動中…';
-      ghost.classList.remove('stat-drag-ghost-active');
-    }
-  }
-
-  // ドラッグ操作直後に発火する余分なclick（フォーカス）を1回だけ抑制
-  function suppressNextClick(el){
-    var handler = function(ev){ ev.preventDefault(); ev.stopPropagation(); el.removeEventListener('click', handler, true); };
-    el.addEventListener('click', handler, true);
-    setTimeout(function(){ el.removeEventListener('click', handler, true); }, 500);
-  }
-
-  // 入れ替え完了を一瞬フラッシュして知らせる
-  function flashSwapped(el){
-    el.classList.remove('stat-drag-swapped');
-    void el.offsetWidth; // reflow（アニメーション再トリガー用）
-    el.classList.add('stat-drag-swapped');
-    setTimeout(function(){ el.classList.remove('stat-drag-swapped'); }, 600);
-  }
-
-  tbl.addEventListener('pointerdown', function(e){
-    var el = e.target.closest('.stat-drag-input');
-    if(!el) return;
-    dragState = { key: el.getAttribute('data-stat-key'), el: el, startX: e.clientX, startY: e.clientY, moved: false, pointerId: e.pointerId };
-  });
-
-  tbl.addEventListener('pointermove', function(e){
-    if(!dragState || dragState.pointerId !== e.pointerId) return;
-    var dx = e.clientX - dragState.startX, dy = e.clientY - dragState.startY;
-    if(!dragState.moved && Math.sqrt(dx*dx + dy*dy) > 10) {
-      dragState.moved = true;
-      dragState.el.classList.add('stat-drag-source');
-      updateGhostText(dragState.key, null);
-      moveGhost(e.clientX, e.clientY);
-      ghost.style.display = 'block';
-    }
-    if(dragState.moved) {
-      e.preventDefault(); // ドラッグ中はテキスト選択・スクロールを抑制
-      moveGhost(e.clientX, e.clientY);
-      var under = document.elementFromPoint(e.clientX, e.clientY);
-      var targetEl = under ? under.closest('.stat-drag-input') : null;
-      var prevTarget = tbl.querySelector('.stat-drag-target');
-      if(prevTarget && prevTarget !== targetEl) prevTarget.classList.remove('stat-drag-target');
-      if(targetEl && targetEl !== dragState.el) {
-        targetEl.classList.add('stat-drag-target');
-        updateGhostText(dragState.key, targetEl.getAttribute('data-stat-key'));
-      } else {
-        updateGhostText(dragState.key, null);
-      }
-    }
-  }, { passive: false });
-
-  function endDrag(e){
-    if(!dragState || dragState.pointerId !== e.pointerId) return;
-    var wasMoved = dragState.moved;
-    var srcEl = dragState.el, srcKey = dragState.key;
-    clearDragClasses();
-    ghost.style.display = 'none';
-    if(wasMoved) {
-      var under = document.elementFromPoint(e.clientX, e.clientY);
-      var targetEl = under ? under.closest('.stat-drag-input') : null;
-      if(targetEl && targetEl !== srcEl) {
-        swapStatValues(srcKey, targetEl.getAttribute('data-stat-key'));
-        flashSwapped(srcEl);
-        flashSwapped(targetEl);
-      }
-      suppressNextClick(srcEl);
-      if(targetEl) suppressNextClick(targetEl);
-    }
-    dragState = null;
-  }
-
-  tbl.addEventListener('pointerup', endDrag);
-  tbl.addEventListener('pointercancel', endDrag);
-}
-
-// 能力値2項目の数値を入れ替え（ランダム生成値・手入力値どちらも対象）
-function swapStatValues(k1, k2) {
-  if(!k1 || !k2 || k1 === k2) return;
-  var el1 = document.getElementById('statInput_' + k1);
-  var el2 = document.getElementById('statInput_' + k2);
-  if(!el1 || !el2) return;
-  var tmp = el1.value;
-  el1.value = el2.value;
-  el2.value = tmp;
-  onStatInputChange();
 }
 
 // 3D6×5（STR/CON/POW/DEX/APP）または 2D6+6×5（SIZ/INT/EDU）
@@ -7018,187 +6812,6 @@ function onStatInputChange() {
   if(adjSec && !adjSec.classList.contains('hidden')) {
     showAgeResetWarning();
   }
-}
-
-/* ══════════════════════════════════════════
-   探索者の人物像（能力値フレーバーテキスト）
-   ※ ルールブックの文章はそのまま使用せず、
-     各能力値の目安をオリジナルの表現で説明する。
-══════════════════════════════════════════ */
-// 各キー：[上限値, 説明文] の配列を昇順に並べたもの（最後の要素は Infinity で最上位帯）
-var CP_FLAVOR = {
-  STR: [
-    [14,  '自力で体を起こすのもやっとなほど、力がほとんど入らない。'],
-    [24,  'かなり非力で、日常のちょっとした力仕事にも苦労する。'],
-    [34,  '非力で、重い物を持ち上げるのはひと苦労。'],
-    [44,  '平均よりもやや劣る腕力。'],
-    [54,  '人並みに近い、平均的な腕力。'],
-    [64,  '人並みの、これといった特徴のない腕力。'],
-    [74,  '平均よりもやや優れた腕力。'],
-    [84,  '平均よりも頼りになる、しっかりとした腕力。'],
-    [94,  'かなり力に自信がある、周囲でも目立つ怪力。'],
-    [98,  'ずば抜けた怪力の持ち主。'],
-    [99,  '一流のアスリートに並ぶ、人間として到達しうる限界に近い数値。'],
-    [139, '常人の枠を超えた膂力。大型の家畜にも匹敵する。'],
-    [Infinity, 'もはや人間離れした、怪物めいた腕力（200を超えるとさらに常軌を逸する）。']
-  ],
-  CON: [
-    [14,  '生命の兆候がほとんど見られないほど、極めて弱い状態。'],
-    [24,  'かなり病弱で、日常生活にも支障をきたす。'],
-    [34,  '病弱で、誰かの手を借りなければ満足に動けない。'],
-    [44,  '体調を崩しやすく、しばしば不調を訴えがち。'],
-    [54,  '平均に近い、やや控えめな体力。'],
-    [64,  '至って健康な、ごくありふれた体力。'],
-    [74,  '平均よりもやや頑丈な体つき。'],
-    [84,  '寒さにも疲れにも強い、頑丈な体つき。'],
-    [94,  'かなりの頑健さを誇る体。'],
-    [98,  '激しい痛みにも耐えられる、際立った丈夫さ。'],
-    [99,  '人間としてはトップクラスの、驚異的な頑健さ。'],
-    [139, '人並み外れた、常人離れした耐久力。'],
-    [Infinity, '人間の限界を超越したとしか思えない、化物じみた生命力。']
-  ],
-  SIZ: [
-    [14,  '生まれて間もない赤子ほどの小ささ。'],
-    [24,  '非常に小柄な体格。'],
-    [34,  'とても小柄な体格。'],
-    [44,  '小柄で、まだ成長途中の子供のような体つき。'],
-    [54,  '平均よりもやや小柄な体格。'],
-    [64,  '中肉中背に近い、標準よりやや小さめの体格。'],
-    [74,  '中肉中背の、ごくありふれた体格。'],
-    [84,  '平均よりもやや大きめの体格。'],
-    [94,  'がっしりとした恰幅、あるいは大柄な体つき。'],
-    [98,  '見上げるほどの長身、あるいは相当な恰幅の良さ。'],
-    [149, '並外れて大柄、あるいは重量級の体。'],
-    [179, '大型の家畜にも匹敵するほどの巨躯。'],
-    [Infinity, '記録に残るレベルの、桁外れな巨体。']
-  ],
-  DEX: [
-    [14,  '誰かの支えなしにはまともに動けないほどの鈍さ。'],
-    [24,  '動作がかなりぎこちなく、細やかな作業は特に苦手。'],
-    [34,  '動作がぎこちなく、細やかな作業は苦手。'],
-    [44,  '平均よりもやや不器用な部類。'],
-    [54,  '人並みに近い、平均的な身のこなし。'],
-    [64,  '特筆すべき点のない、平均的な身のこなし。'],
-    [74,  '平均よりもやや機敏な身のこなし。'],
-    [84,  'そつのない、機敏な身のこなし。'],
-    [94,  '身軽で機敏、アクロバットや舞踊もこなせる器用さ。'],
-    [98,  '卓越した反射神経の持ち主。'],
-    [99,  '国際大会でも通用するレベルの反射神経。人間として到達しうる頂点。'],
-    [119, '常人離れした反応速度と身のこなし。'],
-    [199, '人間の域を超えた、けもの染みた俊敏さ。'],
-    [Infinity, '目にも留まらぬ、稲妻のごとき速さ。']
-  ],
-  APP: [
-    [14,  '見る者に強い違和感や哀れみを抱かせる容貌。'],
-    [24,  'あまり見栄えがせず、地味な印象を与えやすい外見。'],
-    [34,  'あまり印象に残らない、地味な外見。'],
-    [44,  '特に目を引くところのない、やや平凡寄りの容姿。'],
-    [54,  '特に秀でたところのない、平凡な容姿。'],
-    [64,  'これといった特徴のない、ごく平均的な容姿。'],
-    [74,  '平均よりもやや整った、感じの良い容姿。'],
-    [84,  '人並み以上に整った、感じの良い容姿。'],
-    [94,  '周囲の目を引く、魅力的な容姿。'],
-    [98,  '誰もが振り返るほどの、際立った美貌や魅力。'],
-    [Infinity, '銀幕のスターにも劣らぬ、人間として到達しうる魅力の極み。']
-  ],
-  INT: [
-    [14,  '周囲の状況をほとんど理解できないほどの知的な遅れ。'],
-    [24,  '物覚えが非常に悪く、日常の理解にも苦労する。'],
-    [34,  '物覚えが悪く、簡単な読み書きや計算にも苦労する。'],
-    [44,  '平均よりもやや理解の遅い部類。'],
-    [54,  '平均に近い、標準的な理解力。'],
-    [64,  '特に秀でても劣ってもいない、標準的な知性。'],
-    [74,  '平均よりもやや理解が早い頭脳。'],
-    [84,  '平均より理解が早く、物覚えの良い頭脳。'],
-    [94,  '鋭い理解力を持つ、優秀な頭脳。'],
-    [98,  '複数の言語や高度な理論も難なく飲み込める、鋭敏な頭脳。'],
-    [99,  '歴史に名を残す天才たちに並ぶ、人間として到達しうる知性の極み。'],
-    [139, '人間の理解の枠を超えた、超越的な知性。'],
-    [209, 'もはや人智を超えた、異形の叡智。'],
-    [Infinity, '常識のスケールを外れた、神話的なまでの知性。']
-  ],
-  POW: [
-    [14,  '意志の力がほとんど残っておらず、超常の力とも無縁。'],
-    [24,  '意志がかなり弱く、他人の思惑にすぐ流されてしまう。'],
-    [34,  '意志が弱く、他人の思惑に流されやすい。'],
-    [44,  '平均よりもやや意志の弱い部類。'],
-    [54,  '人並みに近い、平均的な精神力。'],
-    [64,  '取り立てて強くも弱くもない、標準的な精神力。'],
-    [74,  '平均よりもやや強い意志を持つ。'],
-    [84,  '平均よりもいくらか強い意志を持つ。'],
-    [94,  'かなり強靭な意志の持ち主。'],
-    [99,  '強靭な意志を持ち、目に見えぬものと縁を結びやすい素質。'],
-    [139, '鉄のごとき意志と、異界との強い結びつきを持つ。'],
-    [209, '人間の理解を超えた、異形の精神力。'],
-    [Infinity, '常軌を逸した、神話的なまでの精神の力。']
-  ],
-  EDU: [
-    [0,   'まだ何も学んでいない、生まれたばかりの状態。'],
-    [14,  'ほとんど教育を受けておらず、知識は乏しい。'],
-    [59,  '学校教育をあまり受けられなかった程度の学び。'],
-    [69,  '高校を卒業した程度の、一般的な学力。'],
-    [79,  '大学で専門課程を修めた、学士レベルの知識。'],
-    [89,  '大学院まで進み、研究を重ねた修士レベルの知識。'],
-    [95,  '博士号を持つ、あるいは教壇に立つほどの専門家。'],
-    [98,  '自分の専門分野で世界的に名の知れた権威。'],
-    [Infinity, '人間として到達しうる知識と学識の頂点。']
-  ]
-};
-var CP_LABELS = {
-  STR: 'STR（筋力）', CON: 'CON（体力）', SIZ: 'SIZ（体格）',
-  DEX: 'DEX（敏捷性）', APP: 'APP（外見）', INT: 'INT（知性）', POW: 'POW（精神力）',
-  EDU: 'EDU（教育）'
-};
-var CP_ORDER = ['STR','CON','SIZ','DEX','APP','INT','POW','EDU'];
-
-function cpFlavorText(key, val) {
-  var bands = CP_FLAVOR[key];
-  if(!bands) return '';
-  for(var i = 0; i < bands.length; i++) {
-    if(val <= bands[i][0]) return bands[i][1];
-  }
-  return bands[bands.length - 1][1];
-}
-
-// 表示中の現在値（年齢補正済みならその値、未補正なら入力値）を取得。未入力ならnull
-function cpCurrentVal(key) {
-  var curEl = document.getElementById('statCur_' + key);
-  var t = curEl ? curEl.textContent.trim() : '';
-  var v = parseInt(t, 10);
-  if(!isNaN(v) && v > 0) return v;
-  var o = orig[key];
-  return (typeof o === 'number' && o > 0) ? o : null;
-}
-
-function buildCharPortraitBody() {
-  var body = document.getElementById('charPortraitBody');
-  if(!body) return;
-  var html = '<div class="cp-intro">現在の能力値をもとに、探索者のおおまかな人物像の目安を表示します。年齢補正が完了している場合は補正後の値を、未実施の場合は入力値を使用します。</div>';
-  html += '<div class="cp-grid">';
-  CP_ORDER.forEach(function(key) {
-    var v = cpCurrentVal(key);
-    if(v == null) {
-      html += '<div class="cp-card empty"><div class="cp-card-top"><span class="cp-label">' + CP_LABELS[key] + '</span></div>'
-        + '<div class="cp-text">未入力です。</div></div>';
-    } else {
-      var txt = cpFlavorText(key, v);
-      html += '<div class="cp-card"><div class="cp-card-top"><span class="cp-label">' + CP_LABELS[key] + '</span><span class="cp-val">' + v + '</span></div>'
-        + '<div class="cp-text">' + txt + '</div></div>';
-    }
-  });
-  html += '</div>';
-  body.innerHTML = html;
-}
-
-function openCharPortrait() {
-  buildCharPortraitBody();
-  document.getElementById('charPortraitModal').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeCharPortrait() {
-  document.getElementById('charPortraitModal').classList.add('hidden');
-  document.body.style.overflow = '';
 }
 
 // DB・ビルド計算（新版CoC7th 表に基づく）
@@ -10956,6 +10569,707 @@ function toggleSsUnchanged(el) {
   el.textContent = el.textContent.replace(open ? '▼' : '▶', open ? '▶' : '▼');
 }
 
+/* =============================================
+   キャラシートテキスト v1 形式エクスポート
+   ============================================= */
+
+var CHARA_SHEET_SKILL_LIST = {
+  '戦闘技能': [
+    {id:'dodge', label:'回避'},
+    {id:'melee:brawl', label:'近接戦闘（格闘）'},
+    {id:'throw', label:'投擲'},
+    {id:'firearms', label:'射撃'},
+    {id:'demolition', label:'爆破'},
+    {id:'artillery', label:'砲'}
+  ],
+  '探索技能': [
+    {id:'first_aid', label:'応急手当'},
+    {id:'locksmith', label:'鍵開け'},
+    {id:'sleight_of_hand', label:'手さばき'},
+    {id:'listen', label:'聞き耳'},
+    {id:'stealth', label:'隠密'},
+    {id:'psychoanalysis', label:'精神分析'},
+    {id:'track', label:'追跡'},
+    {id:'climb', label:'登攀'},
+    {id:'library_use', label:'図書館'},
+    {id:'spot_hidden', label:'目星'},
+    {id:'appraisal', label:'鑑定'},
+    {id:'lip_reading', label:'読唇術'}
+  ],
+  '行動技能': [
+    {id:'drive_auto', label:'運転'},
+    {id:'mech_repair', label:'機械修理'},
+    {id:'heavy_machinery', label:'重機械操作'},
+    {id:'ride', label:'乗馬'},
+    {id:'swim', label:'水泳'},
+    {id:'art_craft', label:'芸術/製作'},
+    {id:'pilot', label:'操縦'},
+    {id:'jump', label:'跳躍'},
+    {id:'elec_repair', label:'電気修理'},
+    {id:'navigate', label:'ナビゲート'},
+    {id:'disguise', label:'変装'},
+    {id:'diving', label:'ダイビング'},
+    {id:'animal_handling', label:'動物使い'}
+  ],
+  '交渉技能': [
+    {id:'fast_talk', label:'言いくるめ'},
+    {id:'credit_rating', label:'信用'},
+    {id:'persuade', label:'説得'},
+    {id:'own_language', label:'母国語'},
+    {id:'other_language', label:'ほかの言語'},
+    {id:'intimidate', label:'威圧'},
+    {id:'charm', label:'魅惑'}
+  ],
+  '知識技能': [
+    {id:'medicine', label:'医学'},
+    {id:'occult', label:'オカルト'},
+    {id:'cthulhu_mythos', label:'クトゥルフ神話'},
+    {id:'accounting', label:'経理'},
+    {id:'archaeology', label:'考古学'},
+    {id:'computer', label:'コンピューター'},
+    {id:'science', label:'科学'},
+    {id:'psychology', label:'心理学'},
+    {id:'anthropology', label:'人類学'},
+    {id:'electronics', label:'電子工学'},
+    {id:'natural_world', label:'自然'},
+    {id:'law', label:'法律'},
+    {id:'history', label:'歴史'},
+    {id:'survival', label:'サバイバル'},
+    {id:'lore', label:'伝承'},
+    {id:'hypnosis', label:'ヒプノーシス'}
+  ]
+};
+
+// 複数の専門分野を持ちうる技能：実際に配分があれば固定行の他に行を追加する
+var CHARA_SHEET_SPEC_EXPANDABLE = ['melee','firearms','science','art_craft','other_language','pilot','survival','lore'];
+
+// baseId → 所属カテゴリの逆引き（副業・経験パッケージの取得技能をその他へ計上する際に使う）
+var CS_BASEID_TO_CATEGORY = {};
+Object.keys(CHARA_SHEET_SKILL_LIST).forEach(function(cat) {
+  CHARA_SHEET_SKILL_LIST[cat].forEach(function(sk) {
+    CS_BASEID_TO_CATEGORY[sk.id.split(':')[0]] = cat;
+  });
+});
+
+function csSumOcc(baseId, childId, specLabel) {
+  var sum = 0;
+  allocRows.forEach(function(r) {
+    var id = r.id || r.selectedId;
+    if(!id) return;
+    var parts = id.split(':');
+    var rBase = parts[0], rChild = parts[1];
+    if(rBase !== baseId) return;
+    if(childId) {
+      if(rChild === childId) sum += (r.add || 0);
+    } else if(specLabel) {
+      if(!rChild || rChild === '任意') {
+        var rSpec = r.spec || r.specFree || null;
+        if(rSpec === specLabel) sum += (r.add || 0);
+      }
+    } else if(!rChild) {
+      if(!r.spec && !r.specFree) sum += (r.add || 0);
+    }
+  });
+  return sum;
+}
+
+function csSkillRow(baseId, childId, specLabel, labelOverride) {
+  var base;
+  if(childId && SPEC_BASE_MAP[childId] !== undefined) {
+    base = SPEC_BASE_MAP[childId];
+  } else if(childId || specLabel) {
+    base = getSkillBase(baseId, true);
+  } else if(baseId === 'firearms') {
+    base = 0; // 種別未選択の「射撃」はテンプレートの標準表記に合わせ0とする
+  } else {
+    base = getSkillBase(baseId);
+  }
+  var occP = csSumOcc(baseId, childId, specLabel);
+  var intP = 0;
+  var uRow = unifiedFindRowBySkillId(baseId + (childId ? ':' + childId : ''), specLabel || null);
+  if(uRow) intP = uRow.intAdd || 0;
+  var other = 0;
+  if(baseId === 'credit_rating') {
+    base = 0; // getSkillBase内の `b || 1` フォールバックにより0が1になる既存の挙動を回避
+    if(!youngMode) occP = allocCredit || 0; // 年少探索者は信用を職業Pに反映しない
+  } else if(baseId === 'cthulhu_mythos' && !childId && !specLabel) {
+    base = 0; // 同上のフォールバック回避
+  } else {
+    var fakeR = { id: childId ? (baseId + ':' + childId) : baseId, spec: specLabel || null };
+    other = getIsaiSkillBonus(fakeR);
+  }
+  var growth = 0;
+  var total = base + occP + intP + growth + other;
+  var label = labelOverride || (function(){
+    var def = SKILL_DATA[baseId];
+    var nm = def ? def.name_ja : baseId;
+    if(childId) {
+      var sp = def && def.specializations ? def.specializations.find(function(s){return s.child_id===childId;}) : null;
+      if(sp) nm += '（' + sp.child_name_ja + '）';
+    } else if(specLabel) {
+      nm += '（' + specLabel + '）';
+    }
+    return nm;
+  })();
+  return { label: label, base: base, occP: occP, intP: intP, growth: growth, other: other, total: total,
+            baseId: baseId, childId: childId || null, specLabel: specLabel || null };
+}
+
+function csExtraSpecRows(baseId, excludeChildIds) {
+  var rows = [];
+  var seen = {};
+  (excludeChildIds || []).forEach(function(c){ seen[c] = true; });
+  allocRows.forEach(function(r) {
+    var id = r.id || r.selectedId;
+    if(!id) return;
+    var parts = id.split(':');
+    if(parts[0] !== baseId) return;
+    var childId = parts[1];
+    if(childId && childId !== '任意' && !seen[childId]) {
+      seen[childId] = true;
+      rows.push(csSkillRow(baseId, childId, null));
+    } else if((!childId || childId === '任意') && (r.spec || r.specFree)) {
+      var sp = r.spec || r.specFree;
+      var key = 'spec:' + sp;
+      if(!seen[key]) { seen[key] = true; rows.push(csSkillRow(baseId, null, sp)); }
+    }
+  });
+  if(typeof unifiedGroups !== 'undefined' && unifiedGroups[baseId]) {
+    unifiedGroups[baseId].specs.forEach(function(s) {
+      if(!s.intAdd) return;
+      var key = s.spec ? s.spec : ('spec:' + s.specLabel);
+      if(seen[key]) return;
+      seen[key] = true;
+      rows.push(csSkillRow(baseId, s.spec, s.spec ? null : s.specLabel));
+    });
+  }
+  return rows;
+}
+
+function csAbilityRows() {
+  var keys = ['STR','CON','POW','DEX','APP','SIZ','INT','EDU'];
+  return keys.map(function(k){
+    var o = orig[k] != null ? orig[k] : 0;
+    var w = work[k] != null ? work[k] : o;
+    if(k === 'STR' && work['_isaiStrBonus']) w += work['_isaiStrBonus'];
+    if(k === 'DEX' && work['_isaiDexBonus']) w += work['_isaiDexBonus'];
+    return { key: k, orig: o, diff: (w - o), total: w };
+  });
+}
+
+function csSeikatsuSuijunLabel(cr) {
+  cr = parseInt(cr) || 0;
+  if(cr <= 9) return '貧乏';
+  if(cr <= 49) return '平均';
+  if(cr <= 89) return '裕福';
+  if(cr <= 98) return '富豪';
+  return '大富豪';
+}
+
+var CS_SOURCE_LABEL = {
+  '2020': 'クトゥルフ2020',
+  '2026': 'クトゥルフ2026',
+  'RB': '新クトゥルフ神話TRPGルールブック',
+  'PG': 'クトゥルフ神話TRPGプレイングガイド'
+};
+function csAdoptedRules() {
+  var set = [];
+  function add(src) {
+    var label = CS_SOURCE_LABEL[src] || src;
+    if(set.indexOf(label) === -1) set.push(label);
+  }
+  var occSrc = (allocOcc && allocOcc.source) ? allocOcc.source : null;
+  if(occSrc === 'YOUNG') occSrc = '2020'; // 年少探索者は内部区分で書籍名ではないため基本ルールブック扱い
+  if(occSrc) add(occSrc);
+  if(_isaiApplied) add('2026'); // 異才なエントリーは2026オプションルール
+  if(!set.length) add('2020');
+  return set.join(', ');
+}
+
+function csRandomId() {
+  var s = '';
+  for(var i = 0; i < 8; i++) s += Math.floor(Math.random() * 16).toString(16);
+  return s;
+}
+
+// 【共通メモ】に載せる3種のメモブロック（年齢補正ログ／異才／経験パッケージ）
+function csAgeCorrectionBlock() {
+  if(typeof logData === 'undefined' || !logData.length) return null;
+  var msgs = logData.map(function(e){ return e.msg; }).filter(Boolean);
+  if(!msgs.length) return null;
+  return { title: msgs[0], lines: msgs.slice(1) };
+}
+
+function csIsaiBlock() {
+  if(!_isaiApplied || !_isaiCurrent) return null;
+  var desc = (typeof isaiGetOfficialEffect === 'function') ? isaiGetOfficialEffect(_isaiApplied) : '';
+  if(!desc && typeof ISAI_DESC !== 'undefined') desc = ISAI_DESC[_isaiApplied] || '';
+  var lines = [_isaiApplied];
+  if(desc) lines.push(desc);
+  return { title: '■異才なエントリー', lines: lines };
+}
+
+function csExpPackageBlock() {
+  if(!expState || !expState.acquired) return null;
+  var pkg = EXP_PACKAGES[expState.pkgId];
+  if(!pkg) return null;
+  var body = [];
+  body.push(pkg.name + (pkg.ranks ? '：' + pkg.ranks[expState.rank].label : ''));
+  if(pkg.desc) body.push(pkg.desc);
+  body.push('');
+  if(pkg.statLoss) body.push('・能力値：' + pkg.statLoss.pool.join('/') + ' から合計 ' + pkg.statLoss.total + ' ポイントを減らす');
+  if(pkg.luckGain) body.push('・幸運：+' + pkg.luckGain.amount + '（上限' + pkg.luckGain.cap + '）');
+  if(pkg.sanLoss)  body.push('・正気度：-' + pkg.sanLoss);
+  if(pkg.cthGain)  body.push('・〈クトゥルフ神話〉：+' + pkg.cthGain.dice + (pkg.cthGain.optional ? '（任意・KP許可）' : ''));
+  if(pkg.backstory) body.push('・バックストーリー：「' + pkg.backstory.options.join('」「') + '」から ' + pkg.backstory.count + ' 個を追記');
+  if(pkg.bonusPts) body.push('・追加技能ポイント：' + pkg.bonusPts + 'pt（対象技能へ配分。職業＆技能タブ）');
+  if(pkg.statLoss || pkg.luckGain) {
+    body.push('※ 能力値の減少' + (pkg.statLoss ? '（合計' + pkg.statLoss.total + '）' : '') + (pkg.luckGain ? 'と幸運の増加' : '') + 'は、取得後にステータス補正タブで実行します。');
+  }
+  body.push('');
+  var sanLossActual = work['_expSanLoss'] || 0;
+  if(sanLossActual) body.push('SAN -' + sanLossActual);
+  if(expState.lucApplied) body.push('幸運 +' + expState.lucApplied);
+  if(expState.statLoss) {
+    Object.keys(expState.statLoss).forEach(function(k){
+      if(expState.statLoss[k] > 0) body.push(k + ' -' + expState.statLoss[k]);
+    });
+  }
+  if(expState.cthRoll) body.push('クトゥルフ神話 +' + expState.cthRoll);
+  return { title: '経験パッケージ', lines: body };
+}
+
+function csStripHtml(s) {
+  return String(s || '').replace(/<[^>]+>/g, '');
+}
+
+// 年少探索者の特性・お手伝い・親の信用・家庭環境・お小遣いをメモに追加
+function csYoungInfoBlock() {
+  if(!youngMode) return null;
+  var parts = [];
+  parts.push('特性：' + (youngTrait || ''));
+  if(typeof youngAgeValid === 'function' && youngAgeValid(charAge)) {
+    parts.push('お手伝い：上限' + youngHelpCount(charAge) + '回');
+  }
+  if(youngHome) {
+    parts.push('親の信用：' + youngHome.credit);
+    parts.push('家庭環境：' + youngHome.cls);
+  }
+  var lines = [parts.join('　／　')];
+  if(youngHome) lines.push('お小遣い：' + csStripHtml(youngHome.allowance));
+  return { title: '年少探索者', lines: lines };
+}
+
+function csMemoBlocks() {
+  var blocks = [];
+  var young = csYoungInfoBlock(); if(young) blocks.push(young);
+  var age = csAgeCorrectionBlock(); if(age) blocks.push(age);
+  var isai = csIsaiBlock(); if(isai) blocks.push(isai);
+  var exp = csExpPackageBlock(); if(exp) blocks.push(exp);
+  return blocks;
+}
+
+function csMovAgePenalty(age) {
+  if(work['_isaiAntiAge']) return 0;
+  var a = age || 21;
+  if(a >= 40 && a < 50) return 1;
+  if(a >= 50 && a < 60) return 2;
+  if(a >= 60 && a < 70) return 3;
+  if(a >= 70 && a < 80) return 4;
+  if(a >= 80) return 5;
+  return 0;
+}
+
+// 【バックストーリー】の各項目をメモブロック形式で構築
+// 表示順は bsRenderGrid() の ORDER と揃える：
+// 容姿の描写／イデオロギー・信念／重要な人々／意味のある場所／秘蔵の品／特徴／恐怖症・マニア
+function csBackstoryBlocks() {
+  var blocks = [];
+  var ORDER = [
+    { type: 'one', idx: 0 },
+    { type: 'one', idx: 1 },
+    { type: 'two', idx: 0 },
+    { type: 'two', idx: 1 },
+    { type: 'two', idx: 2 },
+    { type: 'one', idx: 2 },
+  ];
+  ORDER.forEach(function(o) {
+    if(o.type === 'one') {
+      var f = bsF()[o.idx];
+      var v = charBackstory[f.key];
+      if(!v || !String(v).trim()) return;
+      var title = (charKeyConnection === f.key ? '★ ' : '') + f.label;
+      blocks.push({ title: title, lines: [String(v).trim()] });
+    } else {
+      var f2 = bsTF()[o.idx];
+      var vA = charBackstory[f2.keyA];
+      var vB = charBackstory[f2.keyB];
+      if((!vA || !String(vA).trim()) && (!vB || !String(vB).trim())) return;
+      var title2 = (charKeyConnection === f2.key ? '★ ' : '') + f2.label;
+      var lines2 = [];
+      if(vA && String(vA).trim()) lines2.push(f2.labelA + '：' + String(vA).trim());
+      if(vB && String(vB).trim()) lines2.push(f2.labelB + '：' + String(vB).trim());
+      blocks.push({ title: title2, lines: lines2 });
+    }
+  });
+  // 恐怖症・マニアは別枠であわせて1ブロックにまとめる
+  var pFear = charBackstory['phobia_fear'];
+  var pMania = charBackstory['phobia_mania'];
+  var hasFear = pFear && String(pFear).trim();
+  var hasMania = pMania && String(pMania).trim();
+  if(hasFear || hasMania) {
+    var pLines = [];
+    if(hasFear && hasMania) {
+      pLines.push('恐怖症：' + String(pFear).trim());
+      pLines.push('マニア：' + String(pMania).trim());
+    } else if(hasFear) {
+      pLines.push(String(pFear).trim());
+    } else {
+      pLines.push(String(pMania).trim());
+    }
+    blocks.push({ title: '恐怖症、マニア', lines: pLines });
+  }
+  return blocks;
+}
+
+// キャラッシュ側は「EDU×4」「EDU×2+APP×2」のようにEDU項を先頭に置いた
+// 単一の式しか受け付けないため、順序の入れ替えと候補の一本化を行う
+function csCanonicalFormulaTerm(formula) {
+  var terms = formula.split('+').map(function(t){ return t.trim(); });
+  var eduTerms = terms.filter(function(t){ return t.indexOf('EDU') === 0; });
+  var others = terms.filter(function(t){ return t.indexOf('EDU') !== 0; });
+  return eduTerms.concat(others).join('+');
+}
+
+function csPointFormula() {
+  if(!allocOcc || !allocOcc.point_formula) return 'EDU×4';
+  var raw = allocOcc.point_formula;
+  var alts = raw.split('または').map(function(s){ return s.trim(); });
+  if(alts.length === 1) return csCanonicalFormulaTerm(alts[0]);
+  // 複数候補がある職業は、実際に高い方が採用される（evalFormulaと同じ選び方）ため
+  // その1本だけを出力する
+  var best = alts[0], bestVal = -Infinity;
+  alts.forEach(function(f) {
+    var v = evalSingleFormula(f);
+    if(v > bestVal) { bestVal = v; best = f; }
+  });
+  return csCanonicalFormulaTerm(best);
+}
+
+function csFindRow(allRows, baseId, childId, specLabel) {
+  return allRows.find(function(r) {
+    if(r.baseId !== baseId) return false;
+    if(childId) return r.childId === childId;
+    if(specLabel) return r.specLabel === specLabel;
+    return !r.childId && !r.specLabel;
+  });
+}
+
+// 'baseId' または 'baseId:childId'（childIdは'任意'のこともある）と
+// 自由入力の専門分野名から、対象技能行の識別子を解決する
+function csResolveGainTarget(id, spec, specFree) {
+  var parts = (id || '').split(':');
+  var baseId = parts[0];
+  var childId = parts[1];
+  if(childId && childId !== '任意') return { baseId: baseId, childId: childId, specLabel: null };
+  return { baseId: baseId, childId: null, specLabel: spec || specFree || null };
+}
+
+// 副業の上達チェック・経験パッケージで得た技能ポイントを「その他」列にまとめて計上する
+function csApplyExtraGains(skillTables) {
+  var allRows = [];
+  Object.keys(skillTables).forEach(function(cat){
+    skillTables[cat].forEach(function(r){ allRows.push(r); r._cat = cat; });
+  });
+
+  function addGain(baseId, childId, specLabel, amount, labelHint) {
+    if(!amount) return;
+    var row = csFindRow(allRows, baseId, childId, specLabel);
+    if(!row) {
+      row = csSkillRow(baseId, childId, specLabel, labelHint || null);
+      var cat = CS_BASEID_TO_CATEGORY[baseId] || '知識技能';
+      row._cat = cat;
+      skillTables[cat].push(row);
+      allRows.push(row);
+    }
+    row.other += amount;
+    row.total += amount;
+  }
+
+  // 経験パッケージ（クトゥルフ神話の増加分もexpState.rowsに含まれているためここで一括処理）
+  if(expState && expState.acquired && typeof expSheetRows === 'function') {
+    expSheetRows().forEach(function(er) {
+      if(!er.add) return;
+      var id = er.skillId || er.selId || null;
+      var target;
+      if(id) {
+        target = csResolveGainTarget(id, null, null);
+      } else if(er.specBase) {
+        target = { baseId: er.specBase, childId: null, specLabel: er.specText || null };
+      } else {
+        return;
+      }
+      addGain(target.baseId, target.childId, target.specLabel, er.add, (typeof expRowLabel === 'function') ? expRowLabel(er) : null);
+    });
+  }
+
+  // 副業（上達チェックで増加した分）
+  if(sideJobEnabled && sideJobSkills && sideJobSkills.length) {
+    sideJobSkills.forEach(function(sk) {
+      if(!sk.gain) return;
+      if(sk.isCredit) { addGain('credit_rating', null, null, sk.gain, null); return; }
+      if(!sk.id || sk.id === 'ip_slot') return;
+      var target = csResolveGainTarget(sk.id, sk.spec, sk.specFree);
+      addGain(target.baseId, target.childId, target.specLabel, sk.gain, sk.label);
+    });
+  }
+}
+
+function buildCharaSheetText() {
+  var lines = [];
+  function L(s) { lines.push(s); }
+
+  L('キャラッシュテキスト v1');
+  L('キャラクターID:');
+  L('');
+  L('【共通情報】');
+  L('');
+  L('【基本情報】');
+  L('');
+  L('名前: ' + (charName || ''));
+  L('なまえ（かな）: ');
+  L('職業: ' + (allocName || '') + (sideJobOccName ? '（副業：' + sideJobOccName + '）' : ''));
+  L('年齢: ' + (charAge || ''));
+  L('性別: ' + (charSex || ''));
+  L('出身: ');
+  L('ロスト: いいえ');
+  L('イメージカラー: ');
+  L('年齢の自動算出: いいえ');
+  L('年齢（参照用）: ' + (charAge || ''));
+  L('誕生日: ');
+  L('');
+  L('外見的特徴: ' + (charBackstory['容姿の描写'] || ''));
+  L('性格: ');
+  L('経歴: ');
+  var _who = (charBackstory['重要な人々_誰'] || '');
+  var _why = (charBackstory['重要な人々_理由'] || '');
+  var relations = (_who || _why) ? (_who + (_why ? '（' + _why + '）' : '')) : (charBackstory['重要な人々'] || '');
+  L('関係ある人々: ' + relations);
+  L('好きなもの・嫌いなもの: ');
+  L('');
+  L('身長: ');
+  L('体重: ');
+  L('MBTI: ');
+  L('血液型: ');
+  L('髪の色: ');
+  L('瞳の色: ');
+  L('一人称: ');
+  L('二人称: ');
+  L('口調: ');
+  L('セリフ: ');
+  L('趣味: ');
+  L('イメージソング: ');
+  L('名前の由来: ');
+  L('');
+  L('【タグ】');
+  L('');
+  L('');
+  L('【自由項目】');
+  L('');
+  L('【画像（参照用）】');
+  L('');
+  L('| 番号 | ラベル | URL |');
+  L('');
+  L('【共通メモ】');
+  L('');
+  csMemoBlocks().forEach(function(b) {
+    L('--- ' + csRandomId());
+    L('【' + b.title + '】');
+    b.lines.forEach(function(ln){ L(ln); });
+    L('---');
+    L('');
+  });
+  L('【ネタバレ用メモ】');
+  L('');
+  L('【共通の所持品】');
+  L('');
+  L('| 名前 | 個数 | 備考 |');
+  L('');
+  L('【共通の経験の記録】');
+  L('');
+  L('書物・文献:');
+  L('術・呪文:');
+  L('アーティファクト:');
+  L('負傷・傷痕など:');
+  L('心の傷:');
+  L('遭遇した存在:');
+  L('');
+  L('【セッション記録】');
+  L('');
+  L('［］');
+  L('');
+  L('開始日:');
+  L('終了日:');
+  L('GM:');
+  L('同卓メンバー:');
+  L('システム:');
+  L('URL:');
+  L('URLを公開: はい');
+  L('');
+  L('---');
+  L('【ひとことメモ】');
+  L('');
+  L('---');
+  L('');
+  L('【クトゥルフ7版】');
+  L('');
+  L('【能力値】');
+  L('');
+  L('| 能力 | 元の値 | 補正 | 合計（参照用） |');
+  csAbilityRows().forEach(function(a) {
+    L('| ' + a.key + '  | ' + a.orig + ' | ' + a.diff + ' | ' + a.total + ' |');
+  });
+  L('');
+
+  var _s = {};
+  ['STR','CON','POW','DEX','APP','SIZ','INT','EDU','LUC'].forEach(function(k){
+    _s[k] = (work[k] != null ? work[k] : orig[k]) || 0;
+  });
+  if(work['_isaiStrBonus']) _s['STR'] += work['_isaiStrBonus'];
+  if(work['_isaiDexBonus']) _s['DEX'] += work['_isaiDexBonus'];
+  var hpBonus = work['_isaiHpBonus'] || 0;
+  var hp = Math.floor((_s['CON'] + _s['SIZ']) / 10) + hpBonus;
+  var mp = Math.floor(_s['POW'] / 5);
+  var expSanLoss = work['_expSanLoss'] || 0;
+  var san = Math.max(0, _s['POW'] - expSanLoss);
+  var luck = work['LUC'] != null ? work['LUC'] : (orig['LUC'] != null ? orig['LUC'] : 0);
+  var mov = charMOV || calcMOV(_s['STR'], _s['DEX'], _s['SIZ'], charAge) || 0;
+  var _db = calcDB();
+  var db = work['_isaiDbStep'] ? stepDbUp(_db) : _db;
+
+  // 技能テーブルを先に構築（クトゥルフ神話の合計をSAN最大の計算に使うため）
+  var skillTables = {};
+  Object.keys(CHARA_SHEET_SKILL_LIST).forEach(function(cat) {
+    var rows = CHARA_SHEET_SKILL_LIST[cat].map(function(sk) {
+      var parts = sk.id.split(':');
+      return csSkillRow(parts[0], parts[1] || null, null, sk.label);
+    });
+    CHARA_SHEET_SKILL_LIST[cat].forEach(function(sk){
+      var parts = sk.id.split(':');
+      var baseId = parts[0];
+      if(CHARA_SHEET_SPEC_EXPANDABLE.indexOf(baseId) === -1) return;
+      var already = parts[1] ? [parts[1]] : [];
+      rows = rows.concat(csExtraSpecRows(baseId, already));
+    });
+    skillTables[cat] = rows;
+  });
+  csApplyExtraGains(skillTables);
+
+  var cthTotal = 0;
+  skillTables['知識技能'].forEach(function(r){ if(r.label === 'クトゥルフ神話') cthTotal = r.total; });
+  if(sideJobEnabled) {
+    skillTables['知識技能'].push({ label: '独自技能：副業', base: 0, occP: 0, intP: 50, growth: 0, other: 0, total: 50, manual: true });
+  }
+
+  L('HP: ' + hp + ' @自動');
+  L('MP: ' + mp + ' @自動');
+  L('SAN（参照用）: ' + san);
+  L('SAN最大（参照用）: ' + Math.max(0, 99 - cthTotal));
+  L('SAN補正: ' + (expSanLoss ? '-' + expSanLoss : '0'));
+  L('ダメージボーナス: ' + (db && db.db != null ? (db.db === '0' ? '+0' : db.db) : '') + ' @自動');
+  L('幸運: ' + luck);
+  L('MOV（参照用）: ' + mov);
+  L('MOV補正: ' + (csMovAgePenalty(charAge) ? '-' + csMovAgePenalty(charAge) : '0'));
+  L('ビルド（参照用）: ' + (db && db.bld != null ? db.bld : ''));
+  L('');
+  L('【採用ルールとポイント】');
+  L('');
+  L('採用ルール: ' + csAdoptedRules());
+  L('職業ポイント計算式: ' + csPointFormula());
+  L('職業ポイント補正: 0');
+  L('職業ポイント総量（参照用）: ' + (allocTotal || 0));
+  L('興味ポイント補正: 0');
+  L('興味ポイント総量（参照用）: ' + (interestTotal || 0));
+  L('');
+  L('【技能】');
+  L('');
+  ['戦闘技能','探索技能','行動技能','交渉技能','知識技能'].forEach(function(cat) {
+    L('［' + cat + '］');
+    L('');
+    L('| 技能名           |   初期値 | 職業P | 興味P | 成長分 | その他 | 合計（参照用） |');
+    skillTables[cat].forEach(function(r) {
+      var baseStr = r.manual ? String(r.base) : (r.base + ' @自動');
+      L('| ' + r.label + ' | ' + baseStr + ' | ' + r.occP + ' | ' + r.intP + ' | ' + r.growth + ' | ' + r.other + ' | ' + r.total + ' |');
+    });
+    L('');
+  });
+
+  L('【作成の記録】');
+  L('');
+  L('作成方式: 通常作成');
+  L('作成時年齢: ' + (charAge || ''));
+  L('年齢修正の状態: ' + ((typeof ageCorrectionDone !== 'undefined' && ageCorrectionDone) ? '適用済み' : '未処理'));
+  L('');
+  L('【収入と財産】');
+  L('');
+  var wealth = (allocCredit != null && typeof getCreditWealth === 'function') ? getCreditWealth(allocCredit) : {spend:'',cash:'',asset:''};
+  L('生活水準: ' + csSeikatsuSuijunLabel(allocCredit) + ' @自動');
+  L('現金: ' + (wealth.cash || '') + ' @自動');
+  L('資産: ' + (wealth.asset || '') + ' @自動');
+  L('支出レベル: ' + (wealth.spend || '') + ' @自動');
+  L('');
+  L('【バックストーリー】');
+  L('');
+  csBackstoryBlocks().forEach(function(b) {
+    L('--- ' + csRandomId());
+    L('【' + b.title + '】');
+    b.lines.forEach(function(ln){ L(ln); });
+    L('---');
+    L('');
+  });
+  L('【武器】');
+  L('');
+  L('| 名称 | 個数 | 備考 | ダメージ | 故障NO | 射程 | 攻撃回数 | 装弾数 | 耐久力 |');
+  L('');
+  L('【システム別の所持品】');
+  L('');
+  L('| 名前 | 個数 | 備考 |');
+  L('');
+  L('【システム別の経験の記録】');
+  L('');
+  L('書物・文献:');
+  L('術・呪文:');
+  L('アーティファクト:');
+  L('負傷・傷痕など:');
+  L('心の傷:');
+  L('遭遇した存在:');
+  L('');
+  L('【システム別メモ】');
+  L('');
+  L('---');
+  L('【チャットパレット（編集保存分）】');
+  L('');
+  L('---');
+
+  return lines.join('\n');
+}
+
+function downloadCharaSheetText() {
+  var text = buildCharaSheetText();
+  var fname = (charName ? charName.replace(/[\\/:*?"<>|]/g, '') : 'キャラシート') + '.txt';
+  var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  var btn = document.querySelector('[onclick="downloadCharaSheetText()"]');
+  if(btn){ var o=btn.textContent; btn.textContent='✓ 保存しました'; setTimeout(function(){ btn.textContent=o; }, 2000); }
+}
+
 function copySkillSheet() {
   var lines = [];
   // 基本情報
@@ -12208,26 +12522,7 @@ function slRestoreState(s) {
   if(sideJobEnabled && sideJobOccName) {
     var chk = document.getElementById('unifiedSideJobChk');
     if(chk) chk.checked = true;
-    if(allocDone) {
-      showSideJobCardIfEnabled();
-      // 技能セクションを表示し、復元したsideJobSkills（gain/lastRoll）で再描画
-      var sjSkillSec = document.getElementById('sideJobSkillSec');
-      if(sjSkillSec) sjSkillSec.classList.remove('hidden');
-      renderSideJobTbody();
-      updateSideJobChecksDisplay();
-      // ダイスロール結果ログの復元（アニメーション自体は再現できないためテキストログのみ表示）
-      var sjLogEl = document.getElementById('sideJobDiceLog');
-      if(sjLogEl) {
-        var sjLoggedSkills = sideJobSkills.filter(function(sk){ return sk.lastRoll !== null; });
-        sjLogEl.innerHTML = sjLoggedSkills.map(function(sk) {
-          return '<div style="border-top:1px solid rgba(154,112,80,.25);padding:.5rem 0 .35rem;">'
-            + '<div class="dice-step-label"><strong>' + sk.label + '</strong></div>'
-            + '<div class="dice-result">' + sk.lastRoll + '</div>'
-            + '</div>';
-        }).join('');
-        sjLogEl.scrollTop = sjLogEl.scrollHeight;
-      }
-    }
+    if(allocDone) showSideJobCardIfEnabled();
   }
 
   // 異才の復元
